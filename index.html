@@ -152,16 +152,15 @@
         if (path.includes('diagnosis')) return 'diagnosis';
         if (path.includes('result')) return 'result';
         if (path.includes('consultation')) return 'consultation';
-        
-        if (savedUser) {
-          if (savedView && savedView.startsWith('admin_')) return savedView;
-          return 'admin_dashboard';
-        }
-
         if (path.includes('admin/login')) return 'admin_login';
         if (path.includes('admin/dashboard')) return 'admin_dashboard';
         if (path.includes('admin/leads')) return 'admin_leads';
         if (path.includes('admin/funnel')) return 'admin_funnel';
+        
+        if (savedUser && savedView && savedView.startsWith('admin_') && savedView !== 'admin_detail') {
+          return savedView;
+        }
+
         return 'home';
       };
 
@@ -1130,7 +1129,19 @@
         alert('고객 창업 정보가 저장되었습니다.');
       };
 
-      if (!lead) return null;
+      if (!lead) {
+        return (
+          <div className="bg-slate-50 min-h-screen">
+            <AdminNav setView={setView} adminUser={adminUser} handleLogout={handleLogout} />
+            <div className="max-w-4xl mx-auto px-4 py-16 text-center">
+              <p className="text-slate-600 font-bold mb-4">선택된 고객 정보가 없습니다.</p>
+              <button onClick={() => setView('admin_leads')} className="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-xs">
+                고객 목록으로 돌아가기
+              </button>
+            </div>
+          </div>
+        );
+      }
 
       return (
         <div className="bg-slate-50 min-h-screen">

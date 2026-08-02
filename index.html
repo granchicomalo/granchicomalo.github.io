@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>프랜차이즈 창업 진단센터 | 나에게 맞는 맞춤 창업 조건 무료 진단</title>
+  <meta name="description" content="예산, 희망지역, 창업시기, 운영방식 등을 기준으로 나에게 맞는 창업 조건을 3분 만에 무료로 진단해보세요." />
+  <meta name="keywords" content="창업진단, 프랜차이즈, 소자본창업, 무인창업, 1인창업, 창업지원금, 소상공인24" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://granchicomalo.github.io/" />
+  
+  <!-- SEO & Open Graph -->
+  <meta name="naver-site-verification" content="a2a5c86df673c4c9b70f84bd8f4e151455f0d16c" />
+  <meta property="og:title" content="프랜차이즈 창업 진단센터 | 맞춤 창업 조건 3분 무료 진단" />
+  <meta property="og:description" content="내 자본과 조건에 맞는 창업, 3분 만에 객관적 데이터로 진단해보세요." />
+  <meta property="og:url" content="https://granchicomalo.github.io/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="프랜차이즈 창업 진단센터" />
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- React 18 & Babel & Tailwind CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase JS SDK (v10.8.0) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    window.FirebaseSDK = {
+      initializeApp,
+      getAuth,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut,
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      updateDoc,
+      deleteDoc,
+      doc,
+      onSnapshot,
+      query,
+      orderBy
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .badge-a { background-color: #dcfce7; color: #15803d; }
+    .badge-b { background-color: #fef9c3; color: #a16207; }
+    .badge-c { background-color: #f1f5f9; color: #64748b; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const SITE_CONFIG = {
+      brandName: "프랜차이즈 창업 진단센터",
+      privacyVer: "v1.0 (2026.08.01)",
+      marketingVer: "v1.0 (2026.08.01)",
+      govSupportLink: "https://www.sbiz24.kr/#/combinePbancList"
+    };
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC92WWIaye1nZKW6s3gg6RAf-ODjEJ4Xec",
+      authDomain: "franchise-lead-b1c73.firebaseapp.com",
+      projectId: "franchise-lead-b1c73",
+      storageBucket: "franchise-lead-b1c73.firebasestorage.app",
+      messagingSenderId: "259891790262",
+      appId: "1:259891790262:web:87caa36c126852ae1f4117",
+      measurementId: "G-FNLS5Z087P"
+    };
+
+    let firebaseAuth = null;
+    let firebaseDb = null;
+
+    if (window.FirebaseSDK) {
+      try {
+        const app = window.FirebaseSDK.initializeApp(firebaseConfig);
+        firebaseAuth = window.FirebaseSDK.getAuth(app);
+        firebaseDb = window.FirebaseSDK.getFirestore(app);
+      } catch (e) {
+        console.warn("Firebase status:", e.message);
+      }
+    }
+
+    const INITIAL_LEADS = [
+      {
+        id: 'lead-101',
+        created_at: new Date(Date.now() - 3600000 * 3).toISOString(),
+        name: '김철수',
+        phone: '010-1234-5678',
+        startup_purpose: '본업 유지 부업',
+        budget: '5,000만원',
+        region_province: '',
+        region_city: '서울시 강남구 논현동',
+        region_detail: '',
+        startup_period: '1개월 이내',
+        operation_type: '무인 운영',
+        interest_types: ['소자본창업', '무인창업'],
+        customer_diagnosis_score: 82,
+        preferred_consultation_date: '2026-08-05',
+        preferred_consultation_time_slot: '오후 (14:00~17:00)',
+        preferred_consultation_note: '무인 매장 초기 세팅 비용 및 가맹 조건 문의드립니다.',
+        privacy_consent: true,
+        privacy_consent_at: new Date().toISOString(),
+        privacy_policy_version: SITE_CONFIG.privacyVer,
+        marketing_consent: true,
+        marketing_consent_at: new Date().toISOString(),
+        marketing_policy_version: SITE_CONFIG.marketingVer,
+        lead_score: 85,
+        lead_grade: 'A',
+        status: '신규',
+        assigned_to: '이영업 대리',
+        utm_source: 'naver',
+        utm_medium: 'cpc',
+        first_utm_source: 'naver',
+        first_landing_page: '/',
+        referrer: 'https://search.naver.com'
+      }
+    ];
+
+    const STATUS_OPTIONS = ['신규', '연락완료', '상담예정', '계약진행', '계약완료', '부재/보류'];
+
+    function App() {
+      const [adminUser, setAdminUser] = useState(() => {
+        return localStorage.getItem('fc_admin_user') || sessionStorage.getItem('fc_admin_user') || '';
+      });
+
+      const getInitialView = () => {
+        const savedView = localStorage.getItem('fc_current_view');
+        const path = window.location.pathname;
+        const savedUser = localStorage.getItem('fc_admin_user') || sessionStorage.getItem('fc_admin_user');
+
+        if (path.includes('diagnosis')) return 'diagnosis';
+        if (path.includes('result')) return 'result';
+        if (path.includes('consultation')) return 'consultation';
+        
+        if (savedUser) {
+          if (savedView && savedView.startsWith('admin_')) return savedView;
+          return 'admin_dashboard';
+        }
+
+        if (path.includes('admin/login')) return 'admin_login';
+        if (path.includes('admin/dashboard')) return 'admin_dashboard';
+        if (path.includes('admin/leads')) return 'admin_leads';
+        if (path.includes('admin/funnel')) return 'admin_funnel';
+        return 'home';
+      };
+
+      const [view, setView] = useState(getInitialView);
+
+      const changeView = (newView) => {
+        setView(newView);
+        localStorage.setItem('fc_current_view', newView);
+      };
+
+      const [hasCompletedDiagnosis, setHasCompletedDiagnosis] = useState(false);
+      const [formData, setFormData] = useState({
+        startup_purpose: '',
+        budget: '',
+        region_province: '',
+        region_city: '',
+        region_detail: '',
+        startup_period: '',
+        operation_type: '',
+        interest_types: []
+      });
+
+      const [leads, setLeads] = useState(INITIAL_LEADS);
+      const [selectedLeadId, setSelectedLeadId] = useState(null);
+
+      useEffect(() => {
+        if (firebaseAuth && window.FirebaseSDK) {
+          const unsubscribe = window.FirebaseSDK.onAuthStateChanged(firebaseAuth, (user) => {
+            if (user) {
+              setAdminUser(user.email);
+              localStorage.setItem('fc_admin_user', user.email);
+            }
+          });
+          return () => unsubscribe();
+        }
+      }, []);
+
+      useEffect(() => {
+        if (firebaseDb && window.FirebaseSDK) {
+          const leadsRef = window.FirebaseSDK.collection(firebaseDb, "leads");
+          const unsubscribe = window.FirebaseSDK.onSnapshot(leadsRef, (snapshot) => {
+            const liveData = [];
+            snapshot.forEach((docSnap) => {
+              liveData.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            if (liveData.length > 0) {
+              liveData.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+              setLeads(liveData);
+            }
+          }, (err) => {
+            console.warn("Firestore snapshot listener:", err.message);
+          });
+
+          return () => unsubscribe();
+        }
+      }, []);
+
+      const refreshLeads = async () => {
+        if (firebaseDb && window.FirebaseSDK) {
+          try {
+            const querySnapshot = await window.FirebaseSDK.getDocs(window.FirebaseSDK.collection(firebaseDb, "leads"));
+            const liveData = [];
+            querySnapshot.forEach((docSnap) => {
+              liveData.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            if (liveData.length > 0) {
+              liveData.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+              setLeads(liveData);
+            }
+          } catch (e) {
+            console.error("Refresh error:", e);
+          }
+        }
+      };
+
+      const updateLeadStatus = async (leadId, newStatus) => {
+        const updated = leads.map(l => l.id === leadId ? { ...l, status: newStatus } : l);
+        setLeads(updated);
+
+        if (firebaseDb && window.FirebaseSDK && !leadId.startsWith('lead-10')) {
+          try {
+            const leadDocRef = window.FirebaseSDK.doc(firebaseDb, "leads", leadId);
+            await window.FirebaseSDK.updateDoc(leadDocRef, { status: newStatus });
+          } catch (err) {
+            console.error("Firestore status update failed:", err);
+          }
+        }
+      };
+
+      const updateLeadDetails = async (leadId, updatedFields) => {
+        const updated = leads.map(l => l.id === leadId ? { ...l, ...updatedFields } : l);
+        setLeads(updated);
+
+        if (firebaseDb && window.FirebaseSDK && !leadId.startsWith('lead-10')) {
+          try {
+            const leadDocRef = window.FirebaseSDK.doc(firebaseDb, "leads", leadId);
+            await window.FirebaseSDK.updateDoc(leadDocRef, updatedFields);
+            console.log("🔥 Lead details updated in Firestore:", updatedFields);
+          } catch (err) {
+            console.error("Firestore lead update failed:", err);
+          }
+        }
+      };
+
+      const deleteLead = async (leadId, e) => {
+        if (e) e.stopPropagation();
+        if (!confirm('정말로 이 고객 DB를 삭제하시겠습니까? (삭제 후 복구 불가)')) return;
+
+        const filtered = leads.filter(l => l.id !== leadId);
+        setLeads(filtered);
+
+        if (firebaseDb && window.FirebaseSDK && !leadId.startsWith('lead-10')) {
+          try {
+            const leadDocRef = window.FirebaseSDK.doc(firebaseDb, "leads", leadId);
+            await window.FirebaseSDK.deleteDoc(leadDocRef);
+          } catch (err) {
+            console.error("Firestore delete failed:", err);
+          }
+        }
+      };
+
+      const handleLogout = () => {
+        localStorage.removeItem('fc_admin_user');
+        localStorage.removeItem('fc_current_view');
+        sessionStorage.removeItem('fc_admin_user');
+        setAdminUser('');
+        if (firebaseAuth && window.FirebaseSDK) {
+          window.FirebaseSDK.signOut(firebaseAuth);
+        }
+        changeView('home');
+      };
+
+      useEffect(() => {
+        if (window.lucide) lucide.createIcons();
+      });
+
+      return (
+        <div className="min-h-screen flex flex-col justify-between">
+          {!view.startsWith('admin_') && (
+            <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+              <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div onClick={() => changeView('home')} className="flex items-center gap-2.5 cursor-pointer">
+                  <img src="/logo.png" alt="프랜차이즈 창업 진단센터 로고" className="h-9 sm:h-10 w-auto object-contain" />
+                  <span className="font-extrabold text-xl text-slate-900">{SITE_CONFIG.brandName}</span>
+                  <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded font-semibold">공식센터</span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <button onClick={() => changeView('diagnosis')} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition">
+                    3분 창업진단 시작하기
+                  </button>
+                  <button onClick={() => { setHasCompletedDiagnosis(false); changeView('consultation'); }} className="bg-slate-800 hover:bg-slate-900 text-white font-bold px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition">
+                    상담 바로 예약하기
+                  </button>
+                </div>
+              </div>
+            </header>
+          )}
+
+          <main className="flex-1">
+            {view === 'home' && <HomePage setView={changeView} setHasCompletedDiagnosis={setHasCompletedDiagnosis} />}
+            {view === 'diagnosis' && <DiagnosisPage setView={changeView} formData={formData} setFormData={setFormData} setHasCompletedDiagnosis={setHasCompletedDiagnosis} />}
+            {view === 'result' && <ResultPage setView={changeView} formData={formData} />}
+            {view === 'consultation' && <ConsultationPage setView={changeView} formData={formData} hasCompletedDiagnosis={hasCompletedDiagnosis} leads={leads} setLeads={setLeads} />}
+            
+            {view === 'admin_login' && <AdminLoginPage setView={changeView} setAdminUser={setAdminUser} />}
+            {view === 'admin_dashboard' && <AdminDashboardPage setView={changeView} leads={leads} setSelectedLeadId={setSelectedLeadId} adminUser={adminUser} refreshLeads={refreshLeads} updateLeadStatus={updateLeadStatus} deleteLead={deleteLead} handleLogout={handleLogout} />}
+            {view === 'admin_leads' && <AdminLeadsPage setView={changeView} leads={leads} setSelectedLeadId={setSelectedLeadId} adminUser={adminUser} refreshLeads={refreshLeads} updateLeadStatus={updateLeadStatus} deleteLead={deleteLead} handleLogout={handleLogout} />}
+            {view === 'admin_detail' && <AdminDetailPage setView={changeView} leads={leads} setLeads={setLeads} selectedLeadId={selectedLeadId} adminUser={adminUser} updateLeadStatus={updateLeadStatus} updateLeadDetails={updateLeadDetails} deleteLead={deleteLead} handleLogout={handleLogout} />}
+            {view === 'admin_funnel' && <AdminFunnelPage setView={changeView} leads={leads} adminUser={adminUser} handleLogout={handleLogout} />}
+          </main>
+
+          {!view.startsWith('admin_') && (
+            <footer className="bg-slate-900 text-slate-400 py-8 border-t border-slate-800 text-sm mt-12">
+              <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
+                <div className="flex flex-wrap items-center gap-4">
+                  <span className="text-white font-bold text-sm">{SITE_CONFIG.brandName}</span>
+                  <a href="#" onClick={(e) => { e.preventDefault(); alert(SITE_CONFIG.privacyVer + ' 개인정보 처리방침\n상담 접수 및 고객 관리를 위해 수집합니다.'); }} className="text-blue-400 hover:underline">개인정보 처리방침</a>
+                  <a href={SITE_CONFIG.govSupportLink} target="_blank" rel="noopener noreferrer" className="text-emerald-400 font-bold hover:underline flex items-center gap-1">
+                    🏛️ 소상공인24 정부지원사업 공고 ↗
+                  </a>
+                </div>
+                <div className="flex items-center gap-4">
+                  <a href="#" onClick={(e) => { e.preventDefault(); changeView(adminUser ? 'admin_dashboard' : 'admin_login'); }} className="text-slate-400 hover:text-white">영업자 CRM 로그인 (관리자 전용)</a>
+                </div>
+              </div>
+              <div className="max-w-6xl mx-auto px-4 mt-6 pt-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+                © 2026 {SITE_CONFIG.brandName}. All rights reserved. 본 서비스는 수익 확정 보장 표현을 일체 사용하지 않습니다.
+              </div>
+            </footer>
+          )}
+        </div>
+      );
+    }
+
+    function HomePage({ setView, setHasCompletedDiagnosis }) {
+      return (
+        <div>
+          {/* Hero Section with Consulting Visual */}
+          <section className="bg-slate-900 text-white py-12 md:py-20 px-4">
+            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-7 text-left space-y-6">
+                <a href={SITE_CONFIG.govSupportLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 text-xs sm:text-sm px-4 py-2 rounded-full border border-emerald-400/40 hover:bg-emerald-500/30 transition">
+                  <span>🏛️ [정부 공식] 소상공인24 지원사업 공고 보러가기 ↗</span>
+                </a>
+
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight text-white">
+                  내 자본과 조건에 맞는 창업,<br />
+                  <span className="text-blue-400">3분 만에 진단</span>해보세요.
+                </h1>
+
+                <p className="text-slate-300 text-base md:text-lg leading-relaxed">
+                  예산, 희망지역, 창업시기, 운영방식 등을 기준으로 1:1 맞춤 로드맵을 객관적인 데이터로 안내해 드립니다.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4 pt-2">
+                  <button onClick={() => setView('diagnosis')} className="bg-blue-600 hover:bg-blue-700 text-white text-base md:text-lg font-bold px-8 py-4 rounded-xl shadow-lg transition text-center">
+                    3분 창업진단 시작하기 →
+                  </button>
+                  <button onClick={() => { setHasCompletedDiagnosis(false); setView('consultation'); }} className="bg-slate-800 hover:bg-slate-700 text-white text-base font-semibold px-6 py-4 rounded-xl transition text-center border border-slate-700">
+                    상담 바로 예약하기
+                  </button>
+                </div>
+              </div>
+
+              {/* Hero Image 1 */}
+              <div className="lg:col-span-5 space-y-3">
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-700/60">
+                  <img src="/hero_consulting.png" alt="1:1 맞춤 창업 컨설팅" className="w-full h-auto object-cover transform hover:scale-105 transition duration-500" />
+                </div>
+                <div className="bg-slate-800/90 p-3.5 rounded-xl border border-slate-700 text-xs sm:text-sm text-slate-200 font-semibold flex items-center justify-between shadow-md">
+                  <span>📊 1:1 맞춤 창업 성공 로드맵 제공</span>
+                  <span className="text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">100% 무료</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 2: Data Analysis Visual & Value Proposition */}
+          <section className="py-16 bg-white">
+            <div className="max-w-6xl mx-auto px-4">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center mb-16">
+                <div className="lg:col-span-6 order-2 lg:order-1">
+                  <div className="relative rounded-2xl overflow-hidden shadow-lg border border-slate-200">
+                    <img src="/data_analysis.png" alt="정밀 데이터 분석 팀" className="w-full h-auto object-cover" />
+                    <div className="absolute top-4 left-4 bg-blue-600 text-white text-xs font-extrabold px-3 py-1.5 rounded-lg shadow">
+                      DATA ANALYSIS TEAM
+                    </div>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-6 space-y-4 order-1 lg:order-2">
+                  <span className="text-blue-600 font-extrabold text-xs tracking-wider uppercase bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                    객관적 검증 프로세스
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 leading-snug">
+                    "무조건 많이 버는 창업보다,<br />내 자본과 상권에 맞는 정밀 분석이 우선입니다."
+                  </h2>
+                  <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+                    과장 광고나 맹목적인 가맹 권유가 아닙니다. 시장 경쟁력, 상권 유동 인구, 예상 운영 리스크를 입체적으로 분석하여 가장 안정적인 조건을 도출해 드립니다.
+                  </p>
+                </div>
+              </div>
+
+              {/* Government Support Banner Box */}
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+                <div className="space-y-1 text-left">
+                  <div className="flex items-center gap-2 text-emerald-900 font-extrabold text-base sm:text-lg">
+                    <span>🏛️ 2026 소상공인 창업 지원사업 & 정책자금 안내</span>
+                  </div>
+                  <p className="text-slate-600 text-xs sm:text-sm">
+                    창업 전 신청 가능한 소상공인24 정부 지원금 및 무이자·저리 정책자금 공고를 미리 확인해 보세요.
+                  </p>
+                </div>
+                <a
+                  href={SITE_CONFIG.govSupportLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="whitespace-nowrap bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-sm shadow transition"
+                >
+                  지원사업 공고 조회 ↗
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 3: Verified Store Success Visual */}
+          <section className="py-16 bg-slate-50 border-t border-slate-200">
+            <div className="max-w-6xl mx-auto px-4">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                <div className="lg:col-span-6 space-y-4">
+                  <span className="text-emerald-700 font-extrabold text-xs tracking-wider uppercase bg-emerald-100 px-3 py-1 rounded-full">
+                    CERTIFIED SUCCESSFUL LAUNCH
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 leading-snug">
+                    검증된 프랜차이즈 맞춤 연결로<br />안정적인 매장 오픈을 지원합니다.
+                  </h2>
+                  <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+                    본인의 자본금과 운영방식(무인/1인/부업/직원운영)에 가장 알맞은 우수 브랜드 파트너십을 찾아드리며 초기 준비부터 오픈까지 정직하게 동행합니다.
+                  </p>
+                  <div className="pt-2">
+                    <button onClick={() => setView('diagnosis')} className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition shadow-md">
+                      내 맞춤 브랜드 3분 진단하기 →
+                    </button>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-6">
+                  <div className="relative rounded-2xl overflow-hidden shadow-xl border border-slate-200">
+                    <img src="/store_success.png" alt="성공적인 창업 매장 오픈" className="w-full h-auto object-cover" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      );
+    }
+
+    function DiagnosisPage({ setView, formData, setFormData, setHasCompletedDiagnosis }) {
+      const [step, setStep] = useState(1);
+
+      const [customBudgetValue, setCustomBudgetValue] = useState('');
+      const [customBudgetUnit, setCustomBudgetUnit] = useState('만원');
+      const [isUncertainBudget, setIsUncertainBudget] = useState(false);
+
+      const handleNext = () => {
+        if (step === 2) {
+          if (isUncertainBudget) {
+            setFormData({ ...formData, budget: '아직 정하지 않았어요' });
+          } else if (customBudgetValue.trim()) {
+            const formatted = `${customBudgetValue.trim()}${customBudgetUnit}`;
+            setFormData({ ...formData, budget: formatted });
+          } else {
+            alert('예상 투자금을 직접 입력하시거나 "아직 정하지 않았어요"를 선택해주세요.');
+            return;
+          }
+        }
+
+        if (step === 3) {
+          if (!formData.region_city.trim()) {
+            alert('희망하는 창업 지역을 입력해주세요.');
+            return;
+          }
+        }
+
+        if (step < 6) {
+          setStep(step + 1);
+        } else {
+          setHasCompletedDiagnosis(true);
+          setView('result');
+        }
+      };
+
+      return (
+        <div className="max-w-xl mx-auto px-4 py-10">
+          <div className="mb-6 flex justify-between items-center text-sm font-bold text-slate-600">
+            <button onClick={() => step > 1 ? setStep(step - 1) : setView('home')}>← 이전</button>
+            <span className="text-blue-600">STEP {step} / 6</span>
+          </div>
+          <div className="w-full bg-slate-200 h-2 rounded-full mb-8">
+            <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{ width: `${(step / 6) * 100}%` }}></div>
+          </div>
+
+          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+            {step === 1 && (
+              <div>
+                <h2 className="text-xl font-bold mb-6">창업을 생각하는 가장 큰 이유는 무엇인가요?</h2>
+                <div className="space-y-3">
+                  {['본업을 유지하면서 부업을 하고 싶어요', '새로운 사업을 시작하고 싶어요', '은퇴 후 창업을 준비하고 있어요', '기존 사업을 전환하고 싶어요', '아직 정확한 목적은 정하지 않았어요'].map((opt) => (
+                    <button key={opt} onClick={() => setFormData({...formData, startup_purpose: opt})} className={`w-full text-left p-4 rounded-xl border text-base font-semibold transition ${formData.startup_purpose === opt ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 hover:border-slate-300'}`}>
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div>
+                <h2 className="text-xl font-bold mb-2">창업에 사용할 수 있는 예상 투자금은 어느 정도인가요?</h2>
+                <p className="text-xs text-slate-500 mb-6">예상 금액을 직접 입력 후 단위를 선택하시거나 '아직 정하지 않았어요'를 선택하세요.</p>
+                
+                <div className="space-y-4">
+                  <div className={`p-4 rounded-xl border transition ${!isUncertainBudget && customBudgetValue ? 'border-blue-600 bg-blue-50/50' : 'border-slate-200'}`}>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">직접 금액 입력</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        value={customBudgetValue}
+                        onChange={(e) => {
+                          setCustomBudgetValue(e.target.value);
+                          setIsUncertainBudget(false);
+                        }}
+                        placeholder="예: 5000 또는 1.5"
+                        className="flex-1 p-3 border border-slate-300 rounded-xl text-base font-bold text-slate-900 bg-white"
+                      />
+                      <select
+                        value={customBudgetUnit}
+                        onChange={(e) => setCustomBudgetUnit(e.target.value)}
+                        className="p-3 border border-slate-300 rounded-xl text-base font-bold text-slate-800 bg-white cursor-pointer"
+                      >
+                        <option value="만원">만원</option>
+                        <option value="억원">억원</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setIsUncertainBudget(true);
+                      setCustomBudgetValue('');
+                    }}
+                    className={`w-full text-left p-4 rounded-xl border text-base font-semibold transition ${isUncertainBudget ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 hover:border-slate-300'}`}
+                  >
+                    아직 정하지 않았어요 {isUncertainBudget ? '✓' : ''}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div>
+                <h2 className="text-xl font-bold mb-2">희망하는 창업 지역은 어디인가요?</h2>
+                <p className="text-xs text-slate-500 mb-6">희망하는 상권 또는 지역을 직접 작성해주세요.</p>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">희망 창업 지역 전체 입력</label>
+                    <input
+                      type="text"
+                      value={formData.region_city}
+                      onChange={(e) => setFormData({...formData, region_city: e.target.value, region_province: ''})}
+                      className="w-full p-4 border border-slate-300 rounded-xl text-base font-semibold text-slate-900"
+                      placeholder="서울시 강남구 논현동"
+                    />
+                  </div>
+
+                  <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl text-xs text-blue-800 leading-relaxed font-medium">
+                    💡 <strong>TIP:</strong> 희망하는 시/도, 시/군/구 및 동 단위 상권까지 <strong>자세하게 적어주실수록</strong> 고객님의 조건에 최적화된 정밀한 창업 조건 및 입지 분석이 가능합니다.
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {step === 4 && (
+              <div>
+                <h2 className="text-xl font-bold mb-6">언제쯤 창업을 시작하고 싶으신가요?</h2>
+                <div className="space-y-3">
+                  {['1개월 이내', '3개월 이내', '6개월 이내', '1년 이내', '아직 미정'].map((opt) => (
+                    <button key={opt} onClick={() => setFormData({...formData, startup_period: opt})} className={`w-full text-left p-4 rounded-xl border text-base font-semibold transition ${formData.startup_period === opt ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 hover:border-slate-300'}`}>
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {step === 5 && (
+              <div>
+                <h2 className="text-xl font-bold mb-6">어떤 방식으로 운영하고 싶으신가요?</h2>
+                <div className="space-y-3">
+                  {['직접 운영', '1인 운영', '무인 운영', '직원 운영', '아직 모르겠어요'].map((opt) => (
+                    <button key={opt} onClick={() => setFormData({...formData, operation_type: opt})} className={`w-full text-left p-4 rounded-xl border text-base font-semibold transition ${formData.operation_type === opt ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 hover:border-slate-300'}`}>
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {step === 6 && (
+              <div>
+                <h2 className="text-xl font-bold mb-2">관심 있는 창업 유형은 무엇인가요?</h2>
+                <p className="text-xs text-slate-500 mb-6">(복수 선택이 가능합니다)</p>
+                <div className="space-y-3">
+                  {['소자본창업', '무인창업', '1인창업', '부업', '프랜차이즈', '업종을 아직 정하지 않았어요'].map((opt) => {
+                    const selected = (formData.interest_types || []).includes(opt);
+                    return (
+                      <button key={opt} onClick={() => {
+                        const current = formData.interest_types || [];
+                        const next = selected ? current.filter(v => v !== opt) : [...current, opt];
+                        setFormData({...formData, interest_types: next.length ? next : [opt]});
+                      }} className={`w-full text-left p-4 rounded-xl border text-base font-semibold transition ${selected ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 hover:border-slate-300'}`}>
+                        {opt} {selected ? '✓' : ''}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <button onClick={handleNext} className="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold p-4 rounded-xl">
+              {step === 6 ? '진단 결과 확인하기' : '다음 단계 →'}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // --- RESULT PAGE (정부 지원사업 안내 링크 카드 포함) ---
+    function ResultPage({ setView, formData }) {
+      const score = 78;
+
+      return (
+        <div className="max-w-xl mx-auto px-4 py-10">
+          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm text-center mb-6">
+            <span className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">창업 준비도 체크</span>
+            <h2 className="text-xl font-extrabold mt-3 mb-6">당신의 창업 준비도 점수</h2>
+
+            <div className="w-36 h-36 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex flex-col items-center justify-center mx-auto mb-6 shadow-md">
+              <span className="text-4xl font-black">{score}</span>
+              <span className="text-xs text-blue-200">점 / 100점</span>
+            </div>
+
+            <div className="bg-emerald-50 text-emerald-700 font-bold p-3 rounded-xl text-sm mb-6">
+              🟢 현재 조건에서 창업 검토를 시작하기 좋은 단계입니다.
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-left text-xs bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+              <div><span className="text-slate-400 block">예산:</span> <strong className="text-slate-800">{formData.budget || '미입력'}</strong></div>
+              <div><span className="text-slate-400 block">시기:</span> <strong className="text-slate-800">{formData.startup_period || '미입력'}</strong></div>
+              <div><span className="text-slate-400 block">운영:</span> <strong className="text-slate-800">{formData.operation_type || '미입력'}</strong></div>
+              <div><span className="text-slate-400 block">지역:</span> <strong className="text-slate-800">{formData.region_province || ''} {formData.region_city || '미입력'}</strong></div>
+            </div>
+
+            {/* 정부 지원사업 연동 배너 */}
+            <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-4 rounded-xl text-left mb-6 shadow-sm flex items-center justify-between gap-3">
+              <div>
+                <span className="text-[11px] font-bold bg-white/20 px-2 py-0.5 rounded text-emerald-100">정부 지원혜택 안내</span>
+                <p className="text-xs font-bold mt-1">소상공인 창업 지원금 & 정책자금 지원사업 확인하기</p>
+              </div>
+              <a
+                href={SITE_CONFIG.govSupportLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="whitespace-nowrap bg-white text-emerald-700 font-extrabold px-3 py-1.5 rounded-lg text-xs hover:bg-emerald-50 transition"
+              >
+                소상공인24 ↗
+              </a>
+            </div>
+
+            <p className="text-xs text-slate-500 leading-relaxed bg-slate-100 p-3 rounded-lg text-left mb-6">
+              ※ 본 진단 결과는 입력하신 정보를 기반으로 한 참고용 분석이며 실제 창업 가능 여부는 희망지역 상권 및 임대 조건에 따라 달라질 수 있습니다.
+            </p>
+
+            <button onClick={() => setView('consultation')} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-4 rounded-xl shadow-lg mb-3">
+              내 조건에 맞는 창업 1:1 상담받기 →
+            </button>
+            <button onClick={() => setView('home')} className="text-xs text-slate-500 underline">
+              상담 없이 홈으로 이동
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    function ConsultationPage({ setView, formData, hasCompletedDiagnosis, leads, setLeads }) {
+      const [name, setName] = useState('');
+      const [phone, setPhone] = useState('');
+      const [prefDate, setPrefDate] = useState('2026-08-05');
+      const [prefSlot, setPrefSlot] = useState('오후 (14:00~17:00)');
+      const [privacy, setPrivacy] = useState(false);
+      const [marketing, setMarketing] = useState(false);
+      const [done, setDone] = useState(false);
+      const [submitting, setSubmitting] = useState(false);
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!name || !phone || !privacy) {
+          alert('필수 정보 및 개인정보 수집 동의에 체크해주세요.');
+          return;
+        }
+
+        setSubmitting(true);
+
+        const finalStartupPurpose = hasCompletedDiagnosis ? (formData.startup_purpose || '미입력') : '미입력 (바로 상담 예약)';
+        const finalBudget = hasCompletedDiagnosis ? (formData.budget || '미입력') : '미입력';
+        const finalRegionProvince = hasCompletedDiagnosis ? (formData.region_province || '') : '';
+        const finalRegionCity = hasCompletedDiagnosis ? (formData.region_city || '미입력') : '미입력';
+        const finalStartupPeriod = hasCompletedDiagnosis ? (formData.startup_period || '미입력') : '미입력';
+        const finalOperationType = hasCompletedDiagnosis ? (formData.operation_type || '미입력') : '미입력';
+
+        const newLead = {
+          created_at: new Date().toISOString(),
+          name,
+          phone,
+          startup_purpose: finalStartupPurpose,
+          budget: finalBudget,
+          region_province: finalRegionProvince,
+          region_city: finalRegionCity,
+          startup_period: finalStartupPeriod,
+          operation_type: finalOperationType,
+          interest_types: formData.interest_types || [],
+          customer_diagnosis_score: hasCompletedDiagnosis ? 78 : 0,
+          preferred_consultation_date: prefDate,
+          preferred_consultation_time_slot: prefSlot,
+          privacy_consent: true,
+          privacy_consent_at: new Date().toISOString(),
+          privacy_policy_version: SITE_CONFIG.privacyVer,
+          marketing_consent: marketing,
+          lead_score: hasCompletedDiagnosis ? 80 : 60,
+          lead_grade: hasCompletedDiagnosis ? 'A' : 'B',
+          status: '신규',
+          first_utm_source: 'direct',
+          referrer: document.referrer || '직접 방문'
+        };
+
+        if (firebaseDb && window.FirebaseSDK) {
+          try {
+            const docRef = await window.FirebaseSDK.addDoc(
+              window.FirebaseSDK.collection(firebaseDb, "leads"),
+              newLead
+            );
+            console.log("🔥 Firestore real doc added ID:", docRef.id);
+            setLeads([{ id: docRef.id, ...newLead }, ...leads]);
+          } catch (err) {
+            console.error("Firestore save error:", err);
+            setLeads([{ id: 'lead-' + Date.now(), ...newLead }, ...leads]);
+          }
+        } else {
+          setLeads([{ id: 'lead-' + Date.now(), ...newLead }, ...leads]);
+        }
+
+        setSubmitting(false);
+        setDone(true);
+      };
+
+      if (done) {
+        return (
+          <div className="max-w-md mx-auto px-4 py-16 text-center">
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 font-black text-2xl">✓</div>
+              <h2 className="text-2xl font-bold mb-2">상담 예약 완료!</h2>
+              <p className="text-slate-600 text-sm mb-6">전문 담당자가 지정하신 희망시간({prefDate} {prefSlot})에 맞춰 1:1 안내 연락을 드리겠습니다.</p>
+              <button onClick={() => setView('home')} className="w-full bg-blue-600 text-white font-bold p-3.5 rounded-xl">홈으로 돌아가기</button>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="max-w-xl mx-auto px-4 py-10">
+          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+            <h2 className="text-xl font-extrabold mb-1">무료 창업 상담 예약하기</h2>
+            <p className="text-xs text-slate-500 mb-6">전문 컨설턴트가 1:1 맞춤 창업 상담을 도와드립니다.</p>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">성함 *</label>
+                <input type="text" placeholder="홍길동" value={name} onChange={(e) => setName(e.target.value)} className="w-full p-3 border border-slate-300 rounded-xl" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">휴대폰 번호 *</label>
+                <input type="tel" placeholder="010-0000-0000" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full p-3 border border-slate-300 rounded-xl" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">상담 희망일</label>
+                  <input type="date" value={prefDate} onChange={(e) => setPrefDate(e.target.value)} className="w-full p-3 border border-slate-300 rounded-xl text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">상담 희망시간대</label>
+                  <select value={prefSlot} onChange={(e) => setPrefSlot(e.target.value)} className="w-full p-3 border border-slate-300 rounded-xl text-sm">
+                    <option value="오전 (10:00~12:00)">오전 (10:00~12:00)</option>
+                    <option value="오후 (14:00~17:00)">오후 (14:00~17:00)</option>
+                    <option value="저녁 (17:00~19:00)">저녁 (17:00~19:00)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200">
+                <label className="flex items-center gap-2 text-xs font-bold cursor-pointer">
+                  <input type="checkbox" checked={privacy} onChange={(e) => setPrivacy(e.target.checked)} className="w-4 h-4" />
+                  <span>[필수] 개인정보 수집 및 이용 동의 ({SITE_CONFIG.privacyVer})</span>
+                </label>
+                <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+                  <input type="checkbox" checked={marketing} onChange={(e) => setMarketing(e.target.checked)} className="w-4 h-4" />
+                  <span>[선택] 마케팅 활용 및 안내 수신 동의 ({SITE_CONFIG.marketingVer})</span>
+                </label>
+              </div>
+
+              <button type="submit" disabled={submitting} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-4 rounded-xl shadow-md">
+                {submitting ? '제출 중...' : '상담 예약 제출하기'}
+              </button>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    // --- ADMIN LOGIN PAGE ---
+    function AdminLoginPage({ setView, setAdminUser }) {
+      const [email, setEmail] = useState('');
+      const [password, setPassword] = useState('');
+      const [loading, setLoading] = useState(false);
+      const [errorMsg, setErrorMsg] = useState('');
+
+      const handleLogin = async (e) => {
+        e.preventDefault();
+        setErrorMsg('');
+
+        if (!email.trim() || !password.trim()) {
+          setErrorMsg('이메일과 비밀번호를 입력해주세요.');
+          return;
+        }
+
+        setLoading(true);
+
+        if (firebaseAuth && window.FirebaseSDK) {
+          try {
+            const userCred = await window.FirebaseSDK.signInWithEmailAndPassword(firebaseAuth, email, password);
+            localStorage.setItem('fc_admin_user', userCred.user.email);
+            localStorage.setItem('fc_current_view', 'admin_dashboard');
+            setAdminUser(userCred.user.email);
+            setView('admin_dashboard');
+            return;
+          } catch (err) {
+            console.error("Firebase Auth Error:", err);
+            setErrorMsg('Firebase 로그인 실패: 이메일 또는 비밀번호가 올바르지 않습니다.');
+            setLoading(false);
+            return;
+          }
+        }
+
+        localStorage.setItem('fc_admin_user', email);
+        localStorage.setItem('fc_current_view', 'admin_dashboard');
+        setAdminUser(email);
+        setView('admin_dashboard');
+      };
+
+      return (
+        <div className="max-w-md mx-auto px-4 py-20">
+          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-md">
+            <h2 className="text-xl font-extrabold text-center mb-2">영업자 CRM 로그인 (관리자 전용)</h2>
+            <p className="text-xs text-slate-500 text-center mb-6">Firebase 콘솔에서 직접 생성하신 관리자 계정으로 로그인하세요.</p>
+
+            {errorMsg && (
+              <div className="bg-rose-50 text-rose-600 border border-rose-100 p-3 rounded-xl text-xs mb-4 font-semibold">
+                ⚠️ {errorMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">이메일 계정</label>
+                <input type="email" placeholder="admin@domain.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-3 border border-slate-300 rounded-xl text-sm" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">비밀번호</label>
+                <input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-3 border border-slate-300 rounded-xl text-sm" />
+              </div>
+              <button type="submit" disabled={loading} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold p-3.5 rounded-xl shadow-md">
+                {loading ? '인증 처리 중...' : 'CRM 접속하기'}
+              </button>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    function AdminNav({ setView, adminUser, refreshLeads, handleLogout }) {
+      return (
+        <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50">
+          <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <span className="font-extrabold text-lg">영업자 CRM</span>
+              <nav className="flex gap-2 text-xs font-bold">
+                <button onClick={() => setView('admin_dashboard')} className="px-3 py-1.5 rounded hover:bg-slate-800">대시보드</button>
+                <button onClick={() => setView('admin_leads')} className="px-3 py-1.5 rounded hover:bg-slate-800">고객 DB 관리</button>
+                <button onClick={() => setView('admin_funnel')} className="px-3 py-1.5 rounded hover:bg-slate-800">퍼널 분석</button>
+              </nav>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              {refreshLeads && (
+                <button onClick={refreshLeads} className="bg-blue-600 hover:bg-blue-700 px-2.5 py-1.5 rounded text-white font-bold flex items-center gap-1 transition">
+                  🔄 DB 새로고침
+                </button>
+              )}
+              <span className="text-slate-400 hidden sm:inline">{adminUser} 님</span>
+              <button onClick={handleLogout} className="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300">로그아웃</button>
+            </div>
+          </div>
+        </header>
+      );
+    }
+
+    function AdminDashboardPage({ setView, leads, setSelectedLeadId, adminUser, refreshLeads, updateLeadStatus, deleteLead, handleLogout }) {
+      const countA = leads.filter(l => (l.lead_grade || 'A') === 'A').length;
+
+      return (
+        <div className="bg-slate-50 min-h-screen">
+          <AdminNav setView={setView} adminUser={adminUser} refreshLeads={refreshLeads} handleLogout={handleLogout} />
+          <div className="max-w-6xl mx-auto px-4 py-8">
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl font-black">영업 현황 종합 대시보드</h1>
+              <span className="text-xs text-emerald-600 font-bold bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+                🟢 실시간 DB 수신 중
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <span className="text-xs font-bold text-slate-400 block mb-1">오늘 신규 DB</span>
+                <span className="text-3xl font-black text-slate-900">{leads.length} 건</span>
+              </div>
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <span className="text-xs font-bold text-slate-400 block mb-1">A급 Hot Lead</span>
+                <span className="text-3xl font-black text-emerald-600">{countA} 명</span>
+              </div>
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <span className="text-xs font-bold text-slate-400 block mb-1">총 누적 DB</span>
+                <span className="text-3xl font-black text-blue-600">{leads.length} 명</span>
+              </div>
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <span className="text-xs font-bold text-slate-400 block mb-1">상담 진행률</span>
+                <span className="text-3xl font-black text-slate-900">100%</span>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+              <h2 className="font-bold text-base mb-4">최근 접수 리드 목록 (실시간 반영)</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-50 text-slate-500 border-b">
+                    <tr>
+                      <th className="p-3">이름</th>
+                      <th className="p-3">연락처</th>
+                      <th className="p-3">지역</th>
+                      <th className="p-3">예산</th>
+                      <th className="p-3">리드등급</th>
+                      <th className="p-3">진행단계 변경</th>
+                      <th className="p-3 text-center">관리</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leads.map(l => (
+                      <tr key={l.id} className="border-b hover:bg-slate-50">
+                        <td className="p-3 font-bold cursor-pointer text-blue-600 hover:underline" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.name}</td>
+                        <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.phone}</td>
+                        <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.region_province || ''} {l.region_city || '미입력'}</td>
+                        <td className="p-3 cursor-pointer font-bold" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>
+                          {l.budget === '미입력' ? <span className="text-rose-500 bg-rose-50 px-2 py-0.5 rounded text-xs">미입력 (직접수정)</span> : l.budget}
+                        </td>
+                        <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}><span className={`px-2 py-0.5 rounded text-xs font-bold badge-${l.lead_grade ? l.lead_grade.toLowerCase() : 'a'}`}>{l.lead_grade || 'A'}급 ({l.lead_score || 80}점)</span></td>
+                        <td className="p-3">
+                          <select value={l.status || '신규'} onChange={(e) => updateLeadStatus(l.id, e.target.value)} className="p-1.5 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 bg-white">
+                            {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                          </select>
+                        </td>
+                        <td className="p-3 text-center">
+                          <button onClick={(e) => deleteLead(l.id, e)} className="bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold px-2.5 py-1 rounded text-xs">
+                            🗑️ 삭제
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function AdminLeadsPage({ setView, leads, setSelectedLeadId, adminUser, refreshLeads, updateLeadStatus, deleteLead, handleLogout }) {
+      return (
+        <div className="bg-slate-50 min-h-screen">
+          <AdminNav setView={setView} adminUser={adminUser} refreshLeads={refreshLeads} handleLogout={handleLogout} />
+          <div className="max-w-6xl mx-auto px-4 py-8">
+            <h1 className="text-2xl font-black mb-6">고객 DB 통합 관리</h1>
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-slate-50 text-slate-500 border-b">
+                  <tr>
+                    <th className="p-3">이름</th>
+                    <th className="p-3">전화번호</th>
+                    <th className="p-3">지역</th>
+                    <th className="p-3">예산</th>
+                    <th className="p-3">리드등급</th>
+                    <th className="p-3">진행단계 변경</th>
+                    <th className="p-3 text-center">삭제</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leads.map(l => (
+                    <tr key={l.id} className="border-b hover:bg-slate-50">
+                      <td className="p-3 font-bold cursor-pointer text-blue-600 hover:underline" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.name}</td>
+                      <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.phone}</td>
+                      <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.region_province || ''} {l.region_city || '미입력'}</td>
+                      <td className="p-3 cursor-pointer font-bold" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>
+                        {l.budget === '미입력' ? <span className="text-rose-500 bg-rose-50 px-2 py-0.5 rounded text-xs">미입력 (직접수정)</span> : l.budget}
+                      </td>
+                      <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}><span className={`px-2 py-0.5 rounded text-xs font-bold badge-${l.lead_grade ? l.lead_grade.toLowerCase() : 'a'}`}>{l.lead_grade || 'A'}급 ({l.lead_score || 80}점)</span></td>
+                      <td className="p-3">
+                        <select value={l.status || '신규'} onChange={(e) => updateLeadStatus(l.id, e.target.value)} className="p-1.5 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 bg-white">
+                          {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
+                      </td>
+                      <td className="p-3 text-center">
+                        <button onClick={(e) => deleteLead(l.id, e)} className="bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold px-2.5 py-1 rounded text-xs">
+                          🗑️ 삭제
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function AdminDetailPage({ setView, leads, setLeads, selectedLeadId, adminUser, updateLeadStatus, updateLeadDetails, deleteLead, handleLogout }) {
+      const lead = leads.find(l => l.id === selectedLeadId) || leads[0];
+      const [isEditing, setIsEditing] = useState(false);
+      
+      const [editBudget, setEditBudget] = useState('');
+      const [editPurpose, setEditPurpose] = useState('');
+      const [editPeriod, setEditPeriod] = useState('');
+      const [editOpType, setEditOpType] = useState('');
+      const [editCity, setEditCity] = useState('');
+
+      useEffect(() => {
+        if (lead) {
+          const rawBudget = lead.budget || '미입력';
+          setEditBudget(rawBudget.replace('만원', '').trim());
+          setEditPurpose(lead.startup_purpose || '미입력');
+          setEditPeriod(lead.startup_period || '미입력');
+          setEditOpType(lead.operation_type || '미입력');
+          setEditCity(lead.region_city || '미입력');
+        }
+      }, [lead]);
+
+      const [history, setHistory] = useState([
+        { id: 1, author: '이영업 대리', content: '1차 전화 완료. 은평구 무인 매장 창업 관심도 높음.', date: '2026-08-02 11:30' }
+      ]);
+      const [note, setNote] = useState('');
+
+      const addNote = (e) => {
+        e.preventDefault();
+        if (!note) return;
+        setHistory([{ id: Date.now(), author: adminUser || '영업자', content: note, date: new Date().toISOString().slice(0, 16).replace('T', ' ') }, ...history]);
+        setNote('');
+      };
+
+      const handleSaveDetails = (e) => {
+        e.preventDefault();
+
+        let formattedBudget = editBudget.trim();
+        if (formattedBudget && formattedBudget !== '미입력' && !formattedBudget.includes('만원') && !formattedBudget.includes('억원')) {
+          formattedBudget = `${formattedBudget}만원`;
+        }
+
+        updateLeadDetails(lead.id, {
+          budget: formattedBudget || '미입력',
+          startup_purpose: editPurpose,
+          startup_period: editPeriod,
+          operation_type: editOpType,
+          region_city: editCity
+        });
+        setIsEditing(false);
+        alert('고객 창업 정보가 저장되었습니다.');
+      };
+
+      if (!lead) return null;
+
+      return (
+        <div className="bg-slate-50 min-h-screen">
+          <AdminNav setView={setView} adminUser={adminUser} handleLogout={handleLogout} />
+          <div className="max-w-4xl mx-auto px-4 py-8">
+            <div className="flex justify-between items-center mb-4">
+              <button onClick={() => setView('admin_leads')} className="text-xs font-bold text-slate-500">← 고객 목록으로</button>
+              <button onClick={() => { deleteLead(lead.id); setView('admin_leads'); }} className="bg-rose-600 text-white font-bold text-xs px-3 py-1.5 rounded-lg hover:bg-rose-700">
+                🗑️ 이 고객 DB 삭제
+              </button>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h1 className="text-2xl font-black flex items-center gap-3">
+                  {lead.name}
+                  <span className={`text-xs px-2.5 py-1 rounded-full badge-${lead.lead_grade ? lead.lead_grade.toLowerCase() : 'a'}`}>
+                    {lead.lead_grade || 'A'}급 ({lead.lead_score || 80}점)
+                  </span>
+                </h1>
+                <p className="text-slate-500 text-sm mt-1">연락처: {lead.phone} | 지역: {lead.region_province || ''} {lead.region_city || '미입력'}</p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-400 mb-0.5">진행단계 변경</label>
+                  <select value={lead.status || '신규'} onChange={(e) => updateLeadStatus(lead.id, e.target.value)} className="p-2 border border-slate-300 rounded-lg text-xs font-bold text-blue-700 bg-blue-50">
+                    {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                </div>
+                <div className="flex gap-1.5 mt-4">
+                  <a href={`tel:${lead.phone ? lead.phone.replace(/-/g,'') : ''}`} className="bg-blue-600 text-white text-xs font-bold px-3 py-2 rounded-lg">전화</a>
+                  <a href={`sms:${lead.phone ? lead.phone.replace(/-/g,'') : ''}`} className="bg-slate-700 text-white text-xs font-bold px-3 py-2 rounded-lg">문자</a>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 text-sm">
+                <div className="flex justify-between items-center border-b pb-2">
+                  <h3 className="font-bold text-base">진단 및 예약 정보</h3>
+                  <button onClick={() => setIsEditing(!isEditing)} className="text-xs text-blue-600 font-bold bg-blue-50 px-2.5 py-1 rounded-lg hover:bg-blue-100">
+                    {isEditing ? '취소' : '✏️ 영업자 직접 입력/수정'}
+                  </button>
+                </div>
+
+                {!isEditing ? (
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-slate-400 block text-xs">예상 투자금 (예산):</span>
+                      <strong className={lead.budget === '미입력' ? 'text-rose-500 font-bold' : 'text-slate-800'}>
+                        {lead.budget || '미입력'}
+                      </strong>
+                    </div>
+                    <div><span className="text-slate-400 block text-xs">창업 목적:</span> <strong className="text-slate-800">{lead.startup_purpose || '미입력'}</strong></div>
+                    <div><span className="text-slate-400 block text-xs">창업 희망시기:</span> <strong className="text-slate-800">{lead.startup_period || '미입력'}</strong></div>
+                    <div><span className="text-slate-400 block text-xs">희망 운영방식:</span> <strong className="text-slate-800">{lead.operation_type || '미입력'}</strong></div>
+                    <div><span className="text-slate-400 block text-xs">희망 상담일:</span> <strong className="text-blue-600">{lead.preferred_consultation_date} {lead.preferred_consultation_time_slot}</strong></div>
+                    <div><span className="text-slate-400 block text-xs">유입 경로:</span> <strong>{lead.first_utm_source || '직접 방문'}</strong></div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSaveDetails} className="space-y-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        예상 투자금 (예산) <span className="text-blue-600 font-semibold">(단위: 만원 또는 억원)</span>
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={editBudget}
+                          onChange={(e) => setEditBudget(e.target.value)}
+                          className="flex-1 p-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-900"
+                          placeholder="예: 5000 또는 1.5"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">창업 목적</label>
+                      <input type="text" value={editPurpose} onChange={(e) => setEditPurpose(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="예: 은퇴 후 창업, 부업 등" />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">창업 시기</label>
+                      <input type="text" value={editPeriod} onChange={(e) => setEditPeriod(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="예: 1개월 이내, 3개월 이내" />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">운영 방식</label>
+                      <input type="text" value={editOpType} onChange={(e) => setEditOpType(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="예: 무인 운영, 직접 운영" />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">희망 세부 지역</label>
+                      <input type="text" value={editCity} onChange={(e) => setEditCity(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="예: 서울시 강남구 논현동" />
+                    </div>
+
+                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-xs shadow-md">
+                      💾 수정 정보 저장하기
+                    </button>
+                  </form>
+                )}
+              </div>
+
+              <div className="bg-white p-6 rounded-2xl border border-slate-200">
+                <h3 className="font-bold text-base border-b pb-2 mb-4">상담 이력 타임라인</h3>
+                <form onSubmit={addNote} className="mb-4">
+                  <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="상담 내용을 작성하세요..." className="w-full p-2.5 border text-xs rounded-xl mb-2"></textarea>
+                  <button type="submit" className="w-full bg-blue-600 text-white text-xs font-bold p-2.5 rounded-xl">상담 기록 작성</button>
+                </form>
+                <div className="space-y-3">
+                  {history.map(h => (
+                    <div key={h.id} className="border-l-2 border-blue-600 pl-3 text-xs">
+                      <div className="font-bold text-slate-800">{h.author} <span className="text-slate-400 font-normal">{h.date}</span></div>
+                      <p className="text-slate-600 mt-0.5">{h.content}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function AdminFunnelPage({ setView, leads, adminUser, handleLogout }) {
+      return (
+        <div className="bg-slate-50 min-h-screen">
+          <AdminNav setView={setView} adminUser={adminUser} handleLogout={handleLogout} />
+          <div className="max-w-4xl mx-auto px-4 py-8">
+            <h1 className="text-2xl font-black mb-6">마케팅 유입 & 퍼널 분석</h1>
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
+              <h2 className="font-bold">리드 퍼널 전환율</h2>
+              <div className="p-4 bg-slate-100 rounded-xl flex justify-between font-bold text-sm">
+                <span>1. 총 방문자</span>
+                <span>1,200명 (100%)</span>
+              </div>
+              <div className="p-4 bg-slate-100 rounded-xl flex justify-between font-bold text-sm">
+                <span>2. 창업 진단 완료</span>
+                <span>420명 (35%)</span>
+              </div>
+              <div className="p-4 bg-blue-50 text-blue-800 rounded-xl flex justify-between font-bold text-sm border border-blue-200">
+                <span>3. 상담 예약 완료 (고객 DB)</span>
+                <span>{leads.length}명 ({Math.round((leads.length / 420) * 100)}%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

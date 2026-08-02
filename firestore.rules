@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. 고객 창업 상담 접수 데이터 (leads)
+    match /leads/{leadId} {
+      // 누구나(방문자) 상담 신청(create) 가능 (단, 필수 개인정보 동의 privacy_consent == true 인 경우에만)
+      allow create: if request.resource.data.privacy_consent == true;
+      
+      // 상담 DB 조회 및 수정/삭제는 인증받은 영업 관리자(request.auth != null)만 가능
+      allow read, update, delete: if request.auth != null;
+    }
+
+    // 2. 상담 이력 타임라인 (consultation_histories)
+    match /consultation_histories/{historyId} {
+      // 인증된 영업 관리자만 조회 및 기록 작성 가능
+      allow read, write: if request.auth != null;
+    }
+  }
+}

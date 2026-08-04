@@ -1629,37 +1629,22 @@
     }
 
     function AdminSeoulCmrclPage({ setView, adminUser, handleLogout, refreshLeads }) {
-      const [selectedSpot, setSelectedSpot] = useState('광화문·덕수궁');
       const mapContainerRef = useRef(null);
       const mapObjRef = useRef(null);
-      const markersRef = useRef([]);
-
-      const popularSpots = [
-        { name: '광화문·덕수궁', lat: 37.5665, lng: 126.9780, desc: '중구 · 종로 핵심 상권' },
-        { name: '강남역', lat: 37.4979, lng: 127.0276, desc: '강남구 유동인구 1위 상권' },
-        { name: '홍대입구역', lat: 37.5563, lng: 126.9226, desc: '마포구 청년층 집결 상권' },
-        { name: '명동', lat: 37.5636, lng: 126.9830, desc: '중구 관광 및 쇼핑 상권' },
-        { name: '성수카페거리', lat: 37.5445, lng: 127.0560, desc: '성동구 핫플레이스 상권' },
-        { name: '여의도', lat: 37.5215, lng: 126.9242, desc: '영등포구 오피스 밀집 상권' },
-        { name: '신촌·이대', lat: 37.5598, lng: 126.9426, desc: '서대문구 대학가 상권' },
-        { name: '가로수길', lat: 37.5204, lng: 127.0230, desc: '강남구 트렌디 패션 상권' },
-        { name: '잠실·송파', lat: 37.5133, lng: 127.1001, desc: '송파구 대규모 복합 상권' },
-        { name: '인사동·익선동', lat: 37.5746, lng: 126.9874, desc: '종로구 전통 문화 상권' }
-      ];
 
       useEffect(() => {
         const initMap = () => {
           if (!window.kakao || !window.kakao.maps || !mapContainerRef.current) return;
 
           window.kakao.maps.load(() => {
-            if (!mapContainerRef.current) return;
+            const container = mapContainerRef.current;
+            if (!container) return;
 
-            const selectedSpotInfo = popularSpots.find(s => s.name === selectedSpot) || popularSpots[0];
-            const centerPos = new window.kakao.maps.LatLng(selectedSpotInfo.lat, selectedSpotInfo.lng);
+            const centerPos = new window.kakao.maps.LatLng(37.5665, 126.9780);
 
             if (!mapObjRef.current) {
               const options = { center: centerPos, level: 7 };
-              mapObjRef.current = new window.kakao.maps.Map(mapContainerRef.current, options);
+              mapObjRef.current = new window.kakao.maps.Map(container, options);
             } else {
               mapObjRef.current.relayout();
               mapObjRef.current.setCenter(centerPos);
@@ -1683,33 +1668,6 @@
             }
 
             window.addEventListener('resize', triggerRelayout);
-
-            // 기존 마커 제거
-            markersRef.current.forEach(m => m.setMap(null));
-            markersRef.current = [];
-
-            // 마커 및 오버레이 표시
-            popularSpots.forEach(spot => {
-              const pos = new window.kakao.maps.LatLng(spot.lat, spot.lng);
-              const isSelected = spot.name === selectedSpot;
-
-              const overlayContent = document.createElement('div');
-              overlayContent.className = `cursor-pointer px-3.5 py-2 rounded-xl shadow-2xl border text-xs font-bold transition transform hover:scale-110 flex items-center gap-1.5 ${isSelected ? 'bg-blue-600 text-white border-blue-400 ring-4 ring-blue-300 font-black scale-105' : 'bg-slate-900 text-slate-100 border-slate-700 opacity-90'}`;
-              overlayContent.innerHTML = `📍 <span>${spot.name}</span>`;
-
-              overlayContent.onclick = () => {
-                setSelectedSpot(spot.name);
-              };
-
-              const customOverlay = new window.kakao.maps.CustomOverlay({
-                position: pos,
-                content: overlayContent,
-                yAnchor: 1.2
-              });
-
-              customOverlay.setMap(mapObjRef.current);
-              markersRef.current.push(customOverlay);
-            });
           });
         };
 
@@ -1724,7 +1682,7 @@
           }, 300);
           return () => clearInterval(timer);
         }
-      }, [selectedSpot]);
+      }, []);
 
       return (
         <div className="bg-slate-900 text-white min-h-screen flex flex-col">

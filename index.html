@@ -106,43 +106,64 @@
       }
     }
 
-    const INITIAL_LEADS = [
-      {
-        id: 'lead-101',
-        created_at: new Date(Date.now() - 3600000 * 3).toISOString(),
-        name: '김철수',
-        phone: '010-1234-5678',
-        startup_purpose: '본업 유지 부업',
-        budget: '5,000만원',
-        region_province: '',
-        region_city: '서울시 강남구 논현동',
-        region_detail: '',
-        startup_period: '1개월 이내',
-        operation_type: '무인 운영',
-        interest_types: ['소자본창업', '무인창업'],
-        customer_diagnosis_score: 82,
-        preferred_consultation_date: '2026-08-05',
-        preferred_consultation_time_slot: '오후 (14:00~17:00)',
-        preferred_consultation_note: '무인 매장 초기 세팅 비용 및 가맹 조건 문의드립니다.',
-        privacy_consent: true,
-        privacy_consent_at: new Date().toISOString(),
-        privacy_policy_version: SITE_CONFIG.privacyVer,
-        marketing_consent: true,
-        marketing_consent_at: new Date().toISOString(),
-        marketing_policy_version: SITE_CONFIG.marketingVer,
-        lead_score: 85,
-        lead_grade: 'A',
-        status: '신규',
-        assigned_to: '이영업 대리',
-        utm_source: 'naver',
-        utm_medium: 'cpc',
-        first_utm_source: 'naver',
-        first_landing_page: '/',
-        referrer: 'https://search.naver.com'
-      }
+    const INITIAL_LEADS = [];
+
+    const STATUS_OPTIONS = [
+      '신규',
+      '상담예정',
+      '상담완료',
+      '미팅예정',
+      '미팅완료',
+      '계약진행',
+      '계약완료',
+      '비가망',
+      '유예/보류',
+      '이탈/거절'
     ];
 
-    const STATUS_OPTIONS = ['신규', '연락완료', '상담예정', '계약진행', '계약완료', '부재/보류'];
+    function StatusSelect({ value, onChange, className = "" }) {
+      const currentVal = value || '신규';
+
+      let dynamicStyle = "bg-white text-slate-800 border-slate-300 font-semibold";
+      if (currentVal === '신규') {
+        dynamicStyle = "bg-blue-600 text-white border-blue-500 font-black shadow ring-2 ring-blue-300";
+      } else if (currentVal === '계약완료') {
+        dynamicStyle = "bg-emerald-100 text-emerald-900 border-emerald-400 font-extrabold";
+      } else if (currentVal === '이탈/거절') {
+        dynamicStyle = "bg-rose-100 text-rose-900 border-rose-400 font-extrabold";
+      } else if (currentVal === '상담예정' || currentVal === '상담완료') {
+        dynamicStyle = "bg-indigo-50 text-indigo-900 border-indigo-300 font-bold";
+      } else if (currentVal === '미팅예정' || currentVal === '미팅완료') {
+        dynamicStyle = "bg-purple-50 text-purple-900 border-purple-300 font-bold";
+      } else if (currentVal === '계약진행') {
+        dynamicStyle = "bg-amber-50 text-amber-900 border-amber-300 font-bold";
+      } else if (currentVal === '비가망' || currentVal === '유예/보류') {
+        dynamicStyle = "bg-slate-100 text-slate-700 border-slate-300 font-medium";
+      }
+
+      return (
+        <select
+          value={currentVal}
+          onChange={onChange}
+          className={`p-1.5 border rounded-lg text-xs cursor-pointer focus:outline-none transition ${dynamicStyle} ${className}`}
+        >
+          <option value="신규" className="bg-white text-blue-600 font-bold">✨ 신규</option>
+          <option disabled className="font-extrabold text-slate-400 bg-slate-100">[통화]</option>
+          <option value="상담예정" className="bg-white text-slate-800">&nbsp;&nbsp;상담예정</option>
+          <option value="상담완료" className="bg-white text-slate-800">&nbsp;&nbsp;상담완료</option>
+          <option disabled className="font-extrabold text-slate-400 bg-slate-100">[대면]</option>
+          <option value="미팅예정" className="bg-white text-slate-800">&nbsp;&nbsp;미팅예정</option>
+          <option value="미팅완료" className="bg-white text-slate-800">&nbsp;&nbsp;미팅완료</option>
+          <option disabled className="font-extrabold text-slate-400 bg-slate-100">[계약]</option>
+          <option value="계약진행" className="bg-white text-slate-800">&nbsp;&nbsp;계약진행</option>
+          <option value="계약완료" className="bg-white text-emerald-700 font-bold">&nbsp;&nbsp;계약완료</option>
+          <option disabled className="font-extrabold text-slate-400 bg-slate-100">[비대상]</option>
+          <option value="비가망" className="bg-white text-slate-800">&nbsp;&nbsp;비가망</option>
+          <option value="유예/보류" className="bg-white text-slate-800">&nbsp;&nbsp;유예/보류</option>
+          <option value="이탈/거절" className="bg-white text-rose-600 font-bold">&nbsp;&nbsp;이탈/거절</option>
+        </select>
+      );
+    }
 
     function App() {
       const [adminUser, setAdminUser] = useState(() => {
@@ -1255,6 +1276,13 @@
       );
     }
 
+    const getRowBgClass = (status) => {
+      if (status === '계약완료') return 'bg-emerald-50/90 hover:bg-emerald-100/90 border-emerald-200';
+      if (status === '이탈/거절') return 'bg-rose-50/90 hover:bg-rose-100/90 border-rose-200';
+      if (!status || status === '신규') return 'bg-blue-50/60 hover:bg-blue-100/60 font-semibold border-blue-200';
+      return 'border-b hover:bg-slate-50';
+    };
+
     function AdminDashboardPage({ setView, leads, setSelectedLeadId, adminUser, refreshLeads, updateLeadStatus, deleteLead, handleLogout }) {
       const countA = leads.filter(l => (l.lead_grade || 'A') === 'A').length;
 
@@ -1299,13 +1327,13 @@
                       <th className="p-3">지역</th>
                       <th className="p-3">예산</th>
                       <th className="p-3">리드등급</th>
-                      <th className="p-3">진행단계 변경</th>
+                      <th className="p-3">진행단계</th>
                       <th className="p-3 text-center">관리</th>
                     </tr>
                   </thead>
                   <tbody>
                     {leads.map(l => (
-                      <tr key={l.id} className="border-b hover:bg-slate-50">
+                      <tr key={l.id} className={`border-b transition ${getRowBgClass(l.status)}`}>
                         <td className="p-3 font-bold cursor-pointer text-blue-600 hover:underline" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.name}</td>
                         <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.phone}</td>
                         <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.region_province || ''} {l.region_city || '미입력'}</td>
@@ -1314,9 +1342,7 @@
                         </td>
                         <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}><span className={`px-2 py-0.5 rounded text-xs font-bold badge-${l.lead_grade ? l.lead_grade.toLowerCase() : 'a'}`}>{l.lead_grade || 'A'}급 ({l.lead_score || 80}점)</span></td>
                         <td className="p-3">
-                          <select value={l.status || '신규'} onChange={(e) => updateLeadStatus(l.id, e.target.value)} className="p-1.5 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 bg-white">
-                            {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                          </select>
+                          <StatusSelect value={l.status} onChange={(e) => updateLeadStatus(l.id, e.target.value)} />
                         </td>
                         <td className="p-3 text-center">
                           <button onClick={(e) => deleteLead(l.id, e)} className="bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold px-2.5 py-1 rounded text-xs">
@@ -1349,13 +1375,13 @@
                     <th className="p-3">지역</th>
                     <th className="p-3">예산</th>
                     <th className="p-3">리드등급</th>
-                    <th className="p-3">진행단계 변경</th>
+                    <th className="p-3">진행단계</th>
                     <th className="p-3 text-center">삭제</th>
                   </tr>
                 </thead>
                 <tbody>
                   {leads.map(l => (
-                    <tr key={l.id} className="border-b hover:bg-slate-50">
+                    <tr key={l.id} className={`border-b transition ${getRowBgClass(l.status)}`}>
                       <td className="p-3 font-bold cursor-pointer text-blue-600 hover:underline" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.name}</td>
                       <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.phone}</td>
                       <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.region_province || ''} {l.region_city || '미입력'}</td>
@@ -1364,9 +1390,7 @@
                       </td>
                       <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}><span className={`px-2 py-0.5 rounded text-xs font-bold badge-${l.lead_grade ? l.lead_grade.toLowerCase() : 'a'}`}>{l.lead_grade || 'A'}급 ({l.lead_score || 80}점)</span></td>
                       <td className="p-3">
-                        <select value={l.status || '신규'} onChange={(e) => updateLeadStatus(l.id, e.target.value)} className="p-1.5 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 bg-white">
-                          {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                        </select>
+                        <StatusSelect value={l.status} onChange={(e) => updateLeadStatus(l.id, e.target.value)} />
                       </td>
                       <td className="p-3 text-center">
                         <button onClick={(e) => deleteLead(l.id, e)} className="bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold px-2.5 py-1 rounded text-xs">
@@ -1473,10 +1497,8 @@
 
               <div className="flex items-center gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-400 mb-0.5">진행단계 변경</label>
-                  <select value={lead.status || '신규'} onChange={(e) => updateLeadStatus(lead.id, e.target.value)} className="p-2 border border-slate-300 rounded-lg text-xs font-bold text-blue-700 bg-blue-50">
-                    {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                  </select>
+                  <label className="block text-[11px] font-bold text-slate-400 mb-0.5">진행단계</label>
+                  <StatusSelect value={lead.status} onChange={(e) => updateLeadStatus(lead.id, e.target.value)} />
                 </div>
                 <div className="flex gap-1.5 mt-4">
                   <a href={`tel:${lead.phone ? lead.phone.replace(/-/g,'') : ''}`} className="bg-blue-600 text-white text-xs font-bold px-3 py-2 rounded-lg">전화</a>
@@ -1574,24 +1596,54 @@
     }
 
     function AdminFunnelPage({ setView, leads, adminUser, handleLogout }) {
+      const totalLeads = leads.length;
+      const consultationLeads = leads.filter(l => ['상담예정', '상담완료', '미팅예정', '미팅완료', '계약진행', '계약완료'].includes(l.status)).length;
+      const meetingLeads = leads.filter(l => ['미팅예정', '미팅완료', '계약진행', '계약완료'].includes(l.status)).length;
+      const contractLeads = leads.filter(l => ['계약진행', '계약완료'].includes(l.status)).length;
+      const completedLeads = leads.filter(l => l.status === '계약완료').length;
+      const droppedLeads = leads.filter(l => ['비가망', '유예/보류', '이탈/거절'].includes(l.status)).length;
+
+      const getRatio = (count) => (totalLeads > 0 ? Math.round((count / totalLeads) * 100) : 0);
+
       return (
         <div className="bg-slate-50 min-h-screen">
           <AdminNav setView={setView} adminUser={adminUser} handleLogout={handleLogout} />
           <div className="max-w-4xl mx-auto px-4 py-8">
-            <h1 className="text-2xl font-black mb-6">마케팅 유입 & 퍼널 분석</h1>
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
-              <h2 className="font-bold">리드 퍼널 전환율</h2>
-              <div className="p-4 bg-slate-100 rounded-xl flex justify-between font-bold text-sm">
-                <span>1. 총 방문자</span>
-                <span>1,200명 (100%)</span>
+            <h1 className="text-2xl font-black mb-6">마케팅 유입 & 실시간 영업 퍼널 분석</h1>
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
+              <div className="flex justify-between items-center border-b pb-3 mb-2">
+                <h2 className="font-bold text-slate-800">실시간 고객 진행 퍼널 (총 DB: {totalLeads}명)</h2>
+                <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">🟢 실시간 자동집계 중</span>
               </div>
-              <div className="p-4 bg-slate-100 rounded-xl flex justify-between font-bold text-sm">
-                <span>2. 창업 진단 완료</span>
-                <span>420명 (35%)</span>
+
+              <div className="p-4 bg-blue-50 text-blue-900 rounded-xl flex justify-between items-center font-bold text-sm border border-blue-100">
+                <span>1. 전체 접수 고객 DB (신규 포함)</span>
+                <span className="text-blue-600 font-black">{totalLeads}명 (100%)</span>
               </div>
-              <div className="p-4 bg-blue-50 text-blue-800 rounded-xl flex justify-between font-bold text-sm border border-blue-200">
-                <span>3. 상담 예약 완료 (고객 DB)</span>
-                <span>{leads.length}명 ({Math.round((leads.length / 420) * 100)}%)</span>
+
+              <div className="p-4 bg-indigo-50 text-indigo-900 rounded-xl flex justify-between items-center font-bold text-sm border border-indigo-100">
+                <span>2. [통화 단계] 전화 상담 진행/완료</span>
+                <span>{consultationLeads}명 ({getRatio(consultationLeads)}%)</span>
+              </div>
+
+              <div className="p-4 bg-purple-50 text-purple-900 rounded-xl flex justify-between items-center font-bold text-sm border border-purple-100">
+                <span>3. [대면 단계] 대면 미팅 진행/완료</span>
+                <span>{meetingLeads}명 ({getRatio(meetingLeads)}%)</span>
+              </div>
+
+              <div className="p-4 bg-amber-50 text-amber-900 rounded-xl flex justify-between items-center font-bold text-sm border border-amber-100">
+                <span>4. [계약 단계] 계약 검토/진행</span>
+                <span>{contractLeads}명 ({getRatio(contractLeads)}%)</span>
+              </div>
+
+              <div className="p-4 bg-emerald-600 text-white rounded-xl flex justify-between items-center font-black text-sm shadow-md">
+                <span>5. 🎯 최종 창업 계약 성공 (계약완료)</span>
+                <span className="text-base">{completedLeads}명 ({getRatio(completedLeads)}%)</span>
+              </div>
+
+              <div className="p-4 bg-rose-50 text-rose-800 rounded-xl flex justify-between items-center font-bold text-sm border border-rose-200">
+                <span>6. [비대상] 비가망 / 유예 / 이탈 및 거절</span>
+                <span>{droppedLeads}명 ({getRatio(droppedLeads)}%)</span>
               </div>
             </div>
           </div>

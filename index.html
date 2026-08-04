@@ -369,7 +369,14 @@
       const [analysisResult, setAnalysisResult] = React.useState({
         floatingPop: '17,605 명',
         households: '7,973 세대',
-        ageRatioText: '10대 11% | 20대 13% | 30대 14% | 40대 13% | 50대 18% | 60대이상 32%',
+        ageRatios: [
+          { label: '10대', ratio: 11 },
+          { label: '20대', ratio: 13 },
+          { label: '30대', ratio: 14 },
+          { label: '40대', ratio: 13 },
+          { label: '50대', ratio: 18 },
+          { label: '60대이상', ratio: 31 }
+        ],
         recommendedTypes: ['소자본 카페', '무인 세탁/스튜디오', '프랜차이즈 식음료']
       });
 
@@ -417,12 +424,17 @@
               const r50 = Math.round((p50 / totPop) * 100) || 18;
               const r60 = Math.round((p60 / totPop) * 100) || 31;
 
-              const ageText = `10대 ${r10}% | 20대 ${r20}% | 30대 ${r30}% | 40대 ${r40}% | 50대 ${r50}% | 60대이상 ${r60}%`;
-
               setAnalysisResult({
                 floatingPop: `${totPop.toLocaleString()} 명`,
                 households: `${households.toLocaleString()} 세대`,
-                ageRatioText: ageText,
+                ageRatios: [
+                  { label: '10대', ratio: r10 },
+                  { label: '20대', ratio: r20 },
+                  { label: '30대', ratio: r30 },
+                  { label: '40대', ratio: r40 },
+                  { label: '50대', ratio: r50 },
+                  { label: '60대이상', ratio: r60 }
+                ],
                 recommendedTypes: ['1인/무인 창업', '소자본 카페', '밀키트/배달전문']
               });
               setIsLoadingApi(false);
@@ -438,7 +450,14 @@
         setAnalysisResult({
           floatingPop: `${totPopSim.toLocaleString()} 명`,
           households: `${houseSim.toLocaleString()} 세대`,
-          ageRatioText: '10대 12% | 20대 15% | 30대 16% | 40대 14% | 50대 17% | 60대이상 26%',
+          ageRatios: [
+            { label: '10대', ratio: 12 },
+            { label: '20대', ratio: 15 },
+            { label: '30대', ratio: 16 },
+            { label: '40대', ratio: 14 },
+            { label: '50대', ratio: 17 },
+            { label: '60대이상', ratio: 26 }
+          ],
           recommendedTypes: ['소자본창업', '무인운영 매장', '프랜차이즈 카페']
         });
         setIsLoadingApi(false);
@@ -510,11 +529,11 @@
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-emerald-400 font-extrabold text-xs tracking-wider uppercase bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                  카카오 맵 × 서울시 상권분석 API 실시간 연동
+                  카카오맵 × 공공데이터 API 실시간 연동
                 </span>
               </div>
               <h3 className="text-xl sm:text-2xl font-black">
-                🗺️ 위치 클릭 시 서울시 상주인구·배후지 통계가 실시간 분석됩니다!
+                지도를 클릭하면 서울시 상권 배후지 데이터가 즉시 계산됩니다.
               </h3>
             </div>
 
@@ -536,9 +555,6 @@
             {/* 카카오 지도 영역 */}
             <div className="lg:col-span-7 rounded-2xl overflow-hidden shadow-lg border border-slate-700/80 min-h-[340px] relative">
               <div ref={mapContainerRef} className="w-full h-full min-h-[340px]" />
-              <div className="absolute top-3 left-3 bg-slate-900/90 backdrop-blur text-xs font-bold text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 z-10">
-                📍 지도를 클릭하면 서울시 상권 배후지 데이터가 즉시 계산됩니다
-              </div>
             </div>
 
             {/* 클릭 위치 실시간 상권 분석 결과 카드 */}
@@ -565,9 +581,16 @@
                     <span className="text-slate-400">🏠 총 가구/세대 수</span>
                     <span className="font-bold text-white">{analysisResult.households}</span>
                   </div>
-                  <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60 space-y-1.5">
-                    <span className="text-slate-400 block text-xs">📊 연령대별 인구 비율 분석</span>
-                    <span className="font-extrabold text-emerald-300 text-xs sm:text-sm block leading-relaxed">{analysisResult.ageRatioText}</span>
+                  <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-700/60 space-y-2">
+                    <span className="text-slate-400 block text-xs font-semibold">📊 연령대별 인구 비율 분석</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      {analysisResult.ageRatios.map((item, idx) => (
+                        <div key={idx} className="bg-slate-800/80 border border-slate-700/80 rounded-lg p-1.5 text-center">
+                          <span className="text-[11px] text-slate-400 block mb-0.5">{item.label}</span>
+                          <span className="text-xs sm:text-sm font-black text-emerald-400">{item.ratio}%</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60 space-y-1">
                     <span className="text-slate-400 block text-xs">💡 입지 추천 맞춤 업종</span>

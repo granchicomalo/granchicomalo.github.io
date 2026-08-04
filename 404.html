@@ -485,6 +485,39 @@
         setIsLoadingApi(false);
       };
 
+      const circleRef = useRef(null);
+      const markerRef = useRef(null);
+
+      const drawCircleAndMarker = (latlng, mapObj) => {
+        if (!mapObj || !window.kakao) return;
+
+        if (circleRef.current) {
+          circleRef.current.setMap(null);
+        }
+        if (markerRef.current) {
+          markerRef.current.setMap(null);
+        }
+
+        // 1. 선택 위치 핀 마커 생성
+        markerRef.current = new window.kakao.maps.Marker({
+          position: latlng
+        });
+        markerRef.current.setMap(mapObj);
+
+        // 2. 선택된 상권 반경 500m 배후지 반투명 영역 시각화
+        circleRef.current = new window.kakao.maps.Circle({
+          center: latlng,
+          radius: 500, // 500m 배후지 표준 영역
+          strokeWeight: 2,
+          strokeColor: '#3b82f6',
+          strokeOpacity: 0.9,
+          strokeStyle: 'dashed',
+          fillColor: '#60a5fa',
+          fillOpacity: 0.28
+        });
+        circleRef.current.setMap(mapObj);
+      };
+
       React.useEffect(() => {
         if (!window.kakao || !window.kakao.maps) return;
 
@@ -492,8 +525,9 @@
           const container = mapContainerRef.current;
           if (!container) return;
 
+          const initialCenter = new window.kakao.maps.LatLng(37.5872, 126.9463);
           const options = {
-            center: new window.kakao.maps.LatLng(37.5872, 126.9463),
+            center: initialCenter,
             level: 4
           };
 
@@ -520,14 +554,11 @@
           window.addEventListener('resize', triggerRelayout);
 
           const geocoder = new window.kakao.maps.services.Geocoder();
-          let marker = new window.kakao.maps.Marker({
-            position: map.getCenter()
-          });
-          marker.setMap(map);
+          drawCircleAndMarker(initialCenter, map);
 
           window.kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
             const latlng = mouseEvent.latLng;
-            marker.setPosition(latlng);
+            drawCircleAndMarker(latlng, map);
 
             geocoder.coord2Address(latlng.getLng(), latlng.getLat(), (result, status) => {
               if (status === window.kakao.maps.services.Status.OK) {
@@ -547,9 +578,9 @@
         const ps = new window.kakao.maps.services.Places();
         ps.keywordSearch(searchKeyword, (data, status) => {
           if (status === window.kakao.maps.services.Status.OK) {
-            const bounds = new window.kakao.maps.LatLngBounds();
-            bounds.extend(new window.kakao.maps.LatLng(data[0].y, data[0].x));
-            mapInstance.setBounds(bounds);
+            const targetPos = new window.kakao.maps.LatLng(data[0].y, data[0].x);
+            mapInstance.setCenter(targetPos);
+            drawCircleAndMarker(targetPos, mapInstance);
             const targetAddr = data[0].address_name || data[0].place_name;
             setSelectedAddress(targetAddr);
             fetchSeoulRepopData(targetAddr);
@@ -1778,6 +1809,39 @@
         }
       };
 
+      const circleRef = useRef(null);
+      const markerRef = useRef(null);
+
+      const drawCircleAndMarker = (latlng, mapObj) => {
+        if (!mapObj || !window.kakao) return;
+
+        if (circleRef.current) {
+          circleRef.current.setMap(null);
+        }
+        if (markerRef.current) {
+          markerRef.current.setMap(null);
+        }
+
+        // 1. 선택 위치 핀 마커
+        markerRef.current = new window.kakao.maps.Marker({
+          position: latlng
+        });
+        markerRef.current.setMap(mapObj);
+
+        // 2. 선택 상권 반경 500m 배후지 영역 (반투명 파란 원)
+        circleRef.current = new window.kakao.maps.Circle({
+          center: latlng,
+          radius: 500, // 500m 배후지 영역
+          strokeWeight: 2,
+          strokeColor: '#3b82f6',
+          strokeOpacity: 0.9,
+          strokeStyle: 'dashed',
+          fillColor: '#60a5fa',
+          fillOpacity: 0.28
+        });
+        circleRef.current.setMap(mapObj);
+      };
+
       useEffect(() => {
         const initMap = () => {
           if (!window.kakao || !window.kakao.maps || !mapContainerRef.current) return;
@@ -1795,6 +1859,8 @@
               mapObjRef.current.relayout();
               mapObjRef.current.setCenter(centerPos);
             }
+
+            drawCircleAndMarker(centerPos, mapObjRef.current);
 
             const triggerRelayout = () => {
               if (mapObjRef.current) {
@@ -1818,6 +1884,9 @@
             // 지도 클릭 이벤트 연동
             window.kakao.maps.event.addListener(mapObjRef.current, 'click', (mouseEvent) => {
               const latlng = mouseEvent.latLng;
+              mapObjRef.current.panTo(latlng);
+              drawCircleAndMarker(latlng, mapObjRef.current);
+
               const geocoder = new window.kakao.maps.services.Geocoder();
               geocoder.coord2Address(latlng.getLng(), latlng.getLat(), (result, status) => {
                 if (status === window.kakao.maps.services.Status.OK) {
@@ -1851,9 +1920,9 @@
         const ps = new window.kakao.maps.services.Places();
         ps.keywordSearch(searchKeyword, (data, status) => {
           if (status === window.kakao.maps.services.Status.OK) {
-            const bounds = new window.kakao.maps.LatLngBounds();
-            bounds.extend(new window.kakao.maps.LatLng(data[0].y, data[0].x));
-            mapObjRef.current.setBounds(bounds);
+            const targetPos = new window.kakao.maps.LatLng(data[0].y, data[0].x);
+            mapObjRef.current.setCenter(targetPos);
+            drawCircleAndMarker(targetPos, mapObjRef.current);
             const targetName = data[0].place_name || data[0].address_name;
             fetchCmrclAndRepop(targetName);
           } else {

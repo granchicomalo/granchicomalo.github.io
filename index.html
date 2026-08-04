@@ -1707,7 +1707,11 @@
         fmlFlpopRatio: 54,
         lunchFlpop: '251,175 명',
         dinnerFlpop: '352,949 명',
-        flpopMainAge: '30대~40대 (유동층 핵심)'
+        flpopMainAge: '30대~40대 (유동층 핵심)',
+        adstrdSelngNm: '잠실7동',
+        adstrdIndutyNm: '한식음식점',
+        adstrdSelngAmtWan: '약 8,899 만원',
+        adstrdSelngCo: '29,650 건'
       });
 
       const SEOUL_API_KEY = '4a5a6847726368693930764b467365';
@@ -1715,38 +1719,35 @@
       const fetchCmrclAndRepop = async (targetName = '') => {
         setIsLoading(true);
         try {
-          // 1. 추정매출 API (VwsmTrdhlSelngQq)
-          const selngUrl = `https://corsproxy.io/?${encodeURIComponent(`http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/xml/VwsmTrdhlSelngQq/1/100/`)}`;
-          // 2. 상주인구/배후지 API (VwsmTrdhlRepopQq)
-          const repopUrl = `https://corsproxy.io/?${encodeURIComponent(`http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/xml/VwsmTrdhlRepopQq/1/100/`)}`;
-          // 3. 길단위 유동인구 API (VwsmAdstrdFlpopW)
-          const flpopUrl = `https://corsproxy.io/?${encodeURIComponent(`http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/xml/VwsmAdstrdFlpopW/1/100/`)}`;
+          // 공공데이터 명세서 기준 json 타입 포맷으로 요청하여 초고속 파싱 및 성능 최적화
+          const selngUrl = `https://corsproxy.io/?${encodeURIComponent(`http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/VwsmTrdhlSelngQq/1/100/`)}`;
+          const repopUrl = `https://corsproxy.io/?${encodeURIComponent(`http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/VwsmTrdhlRepopQq/1/100/`)}`;
+          const flpopUrl = `https://corsproxy.io/?${encodeURIComponent(`http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/VwsmAdstrdFlpopW/1/100/`)}`;
+          const adstrdSelngUrl = `https://corsproxy.io/?${encodeURIComponent(`http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/VwsmAdstrdSelngW/1/100/`)}`;
 
-          const [selngRes, repopRes, flpopRes] = await Promise.all([
-            fetch(selngUrl).catch(() => null),
-            fetch(repopUrl).catch(() => null),
-            fetch(flpopUrl).catch(() => null)
+          const [selngRes, repopRes, flpopRes, adstrdSelngRes] = await Promise.all([
+            fetch(selngUrl).then(r => r.json()).catch(() => null),
+            fetch(repopUrl).then(r => r.json()).catch(() => null),
+            fetch(flpopUrl).then(r => r.json()).catch(() => null),
+            fetch(adstrdSelngUrl).then(r => r.json()).catch(() => null)
           ]);
 
           let selngData = null;
           let repopData = null;
           let flpopData = null;
+          let adstrdSelngData = null;
 
-          if (selngRes && selngRes.ok) {
-            const xmlText = await selngRes.text();
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-            const rows = xmlDoc.getElementsByTagName('row');
+          if (selngRes && selngRes.VwsmTrdhlSelngQq && selngRes.VwsmTrdhlSelngQq.row) {
+            const rows = selngRes.VwsmTrdhlSelngQq.row;
             if (rows.length > 0) {
-              const idx = Math.floor(Math.random() * rows.length);
-              const r = rows[idx];
-              const amt = parseInt(r.getElementsByTagName('THSMON_SELNG_AMT')[0]?.textContent || '54981507', 10);
-              const co = parseInt(r.getElementsByTagName('THSMON_SELNG_CO')[0]?.textContent || '30', 10);
-              const mdwk = parseInt(r.getElementsByTagName('MDWK_SELNG_AMT')[0]?.textContent || '39648636', 10);
-              const wkend = parseInt(r.getElementsByTagName('WKEND_SELNG_AMT')[0]?.textContent || '15332871', 10);
-              const ml = parseInt(r.getElementsByTagName('ML_SELNG_AMT')[0]?.textContent || '54981507', 10);
-              const trdar = r.getElementsByTagName('TRDAR_CD_NM')[0]?.textContent || targetName || '서울 주요 상권';
-              const induty = r.getElementsByTagName('SVC_INDUTY_CD_NM')[0]?.textContent || '종합 업종';
+              const r = rows[Math.floor(Math.random() * rows.length)];
+              const amt = parseInt(r.THSMON_SELNG_AMT || '54981507', 10);
+              const co = parseInt(r.THSMON_SELNG_CO || '30', 10);
+              const mdwk = parseInt(r.MDWK_SELNG_AMT || '39648636', 10);
+              const wkend = parseInt(r.WKEND_SELNG_AMT || '15332871', 10);
+              const ml = parseInt(r.ML_SELNG_AMT || '54981507', 10);
+              const trdar = r.TRDAR_CD_NM || targetName || '서울 주요 상권';
+              const induty = r.SVC_INDUTY_CD_NM || '종합 업종';
 
               const mlRatio = amt > 0 ? Math.round((ml / amt) * 100) : 60;
               const fmlRatio = 100 - mlRatio;
@@ -1766,15 +1767,12 @@
             }
           }
 
-          if (repopRes && repopRes.ok) {
-            const xmlText = await repopRes.text();
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-            const rows = xmlDoc.getElementsByTagName('row');
+          if (repopRes && repopRes.VwsmTrdhlRepopQq && repopRes.VwsmTrdhlRepopQq.row) {
+            const rows = repopRes.VwsmTrdhlRepopQq.row;
             if (rows.length > 0) {
               const r = rows[Math.floor(Math.random() * rows.length)];
-              const totPop = parseInt(r.getElementsByTagName('TOT_REPOP_CO')[0]?.textContent || '17605', 10);
-              const totHshld = parseInt(r.getElementsByTagName('TOT_HSHLD_CO')[0]?.textContent || '7973', 10);
+              const totPop = parseInt(r.TOT_REPOP_CO || '17605', 10);
+              const totHshld = parseInt(r.TOT_HSHLD_CO || '7973', 10);
               repopData = {
                 totRepop: `${totPop.toLocaleString()} 명`,
                 totHshld: `${totHshld.toLocaleString()} 세대`,
@@ -1783,18 +1781,35 @@
             }
           }
 
-          if (flpopRes && flpopRes.ok) {
-            const xmlText = await flpopRes.text();
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-            const rows = xmlDoc.getElementsByTagName('row');
+          if (flpopRes && flpopRes.VwsmAdstrdFlpopW && flpopRes.VwsmAdstrdFlpopW.row) {
+            const rows = flpopRes.VwsmAdstrdFlpopW.row;
             if (rows.length > 0) {
               const r = rows[Math.floor(Math.random() * rows.length)];
-              const adstrdNm = r.getElementsByTagName('ADSTRD_CD_NM')[0]?.textContent || '행정동';
-              const totFlpop = parseInt(r.getElementsByTagName('TOT_FLPOP_CO')[0]?.textContent || '2113025', 10);
-              const mlFlpop = parseInt(r.getElementsByTagName('ML_FLPOP_CO')[0]?.textContent || '964253', 10);
-              const tm11_14 = parseInt(r.getElementsByTagName('TMZON_11_14_FLPOP_CO')[0]?.textContent || '251175', 10);
-              const tm17_21 = parseInt(r.getElementsByTagName('TMZON_17_21_FLPOP_CO')[0]?.textContent || '352949', 10);
+              const adstrdNm = r.ADSTRD_CD_NM || '행정동';
+              const totFlpop = parseInt(r.TOT_FLPOP_CO || '2113025', 10);
+              const mlFlpop = parseInt(r.ML_FLPOP_CO || '964253', 10);
+              const tm11_14 = parseInt(r.TMZON_11_14_FLPOP_CO || '251175', 10);
+              const tm17_21 = parseInt(r.TMZON_17_21_FLPOP_CO || '352949', 10);
+
+              const mon = parseInt(r.MON_FLPOP_CO || '0', 10);
+              const tues = parseInt(r.TUES_FLPOP_CO || '0', 10);
+              const wed = parseInt(r.WED_FLPOP_CO || '0', 10);
+              const thur = parseInt(r.THUR_FLPOP_CO || '0', 10);
+              const fri = parseInt(r.FRI_FLPOP_CO || '0', 10);
+              const sat = parseInt(r.SAT_FLPOP_CO || '0', 10);
+              const sun = parseInt(r.SUN_FLPOP_CO || '0', 10);
+
+              const dayArr = [
+                { name: '월요일', count: mon },
+                { name: '화요일', count: tues },
+                { name: '수요일', count: wed },
+                { name: '목요일', count: thur },
+                { name: '금요일', count: fri },
+                { name: '토요일', count: sat },
+                { name: '일요일', count: sun }
+              ];
+              dayArr.sort((a, b) => b.count - a.count);
+              const peakDayStr = dayArr[0].count > 0 ? `${dayArr[0].name}` : '금요일';
 
               const mlRatio = totFlpop > 0 ? Math.round((mlFlpop / totFlpop) * 100) : 46;
               const fmlRatio = 100 - mlRatio;
@@ -1806,17 +1821,37 @@
                 fmlFlpopRatio: fmlRatio,
                 lunchFlpop: `${tm11_14.toLocaleString()} 명`,
                 dinnerFlpop: `${tm17_21.toLocaleString()} 명`,
+                peakDay: peakDayStr,
                 flpopMainAge: '30대~40대 (유동층 핵심)'
               };
             }
           }
 
-          if (selngData || repopData || flpopData) {
+          if (adstrdSelngRes && adstrdSelngRes.VwsmAdstrdSelngW && adstrdSelngRes.VwsmAdstrdSelngW.row) {
+            const rows = adstrdSelngRes.VwsmAdstrdSelngW.row;
+            if (rows.length > 0) {
+              const r = rows[Math.floor(Math.random() * rows.length)];
+              const adstrdNm = r.ADSTRD_CD_NM || '잠실7동';
+              const indutyNm = r.SVC_INDUTY_CD_NM || '한식음식점';
+              const amt = parseInt(r.THSMON_SELNG_AMT || '23947025', 10);
+              const co = parseInt(r.THSMON_SELNG_CO || '1574', 10);
+
+              adstrdSelngData = {
+                adstrdSelngNm: adstrdNm,
+                adstrdIndutyNm: indutyNm,
+                adstrdSelngAmtWan: `약 ${Math.round(amt / 10000).toLocaleString()} 만원`,
+                adstrdSelngCo: `${co.toLocaleString()} 건`
+              };
+            }
+          }
+
+          if (selngData || repopData || flpopData || adstrdSelngData) {
             setSelectedCmrcl(prev => ({
               ...prev,
               ...(selngData || {}),
               ...(repopData || {}),
-              ...(flpopData || {})
+              ...(flpopData || {}),
+              ...(adstrdSelngData || {})
             }));
           }
         } catch (err) {
@@ -1956,17 +1991,17 @@
             {/* Kakao Map 지도 영역 */}
             <div ref={mapContainerRef} className="w-full h-[calc(100vh-64px)] z-0" />
 
-            {/* 지도 좌측 상단 실시간 상권 3대 API 통합 관제 패널 */}
+            {/* 지도 좌측 상단 실시간 상권 4대 API 통합 관제 패널 */}
             <div className="absolute top-4 left-4 z-10 w-80 sm:w-96 bg-slate-900/95 border border-slate-700/80 backdrop-blur-xl rounded-2xl shadow-2xl p-5 text-white space-y-3 max-h-[calc(100vh-100px)] overflow-y-auto custom-scrollbar">
               <div className="flex justify-between items-center border-b border-slate-800 pb-2.5">
                 <div>
-                  <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block mb-0.5">SEOUL BIGDATA 3-API ANALYTICS</span>
+                  <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block mb-0.5">SEOUL BIGDATA 4-API ANALYTICS</span>
                   <h2 className="text-base font-black flex items-center gap-1.5">
-                    📊 서울시 상권 3대 데이터 관제
+                    📊 서울시 상권 4대 데이터 관제
                   </h2>
                 </div>
                 <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
-                  🔴 3대 API 연동
+                  🔴 4대 API 연동
                 </span>
               </div>
 
@@ -1988,7 +2023,7 @@
                 </button>
               </form>
 
-              {/* 실시간 수신 3대 API 종합 리포트 */}
+              {/* 실시간 수신 4대 API 종합 리포트 */}
               <div className="space-y-2.5 text-xs">
                 <div className="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60">
                   <span className="text-[10px] font-bold text-slate-400 block mb-0.5">📍 선택 상권 및 행정동</span>
@@ -1999,10 +2034,28 @@
                   </div>
                 </div>
 
-                {/* 1. 상권 추정 매출 API (VwsmTrdhlSelngQq) */}
+                {/* 1. 행정동 업종 추정매출 API (VwsmAdstrdSelngW) */}
+                <div className="bg-blue-950/40 p-3 rounded-xl border border-blue-500/30 space-y-1.5">
+                  <div className="flex justify-between items-center border-b border-blue-800/50 pb-1">
+                    <span className="font-extrabold text-blue-300 text-xs">🏪 1. 행정동 업종매출 (VwsmAdstrdSelngW)</span>
+                    <span className="text-[10px] text-blue-400 font-bold">{selectedCmrcl.adstrdSelngNm}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div>
+                      <span className="text-slate-400 block">업종: <strong className="text-slate-100">{selectedCmrcl.adstrdIndutyNm}</strong></span>
+                      <strong className="text-blue-300 text-xs font-black">{selectedCmrcl.adstrdSelngAmtWan}</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block">결제 건수:</span>
+                      <strong className="text-slate-100 font-bold">{selectedCmrcl.adstrdSelngCo}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. 상권 추정 매출 API (VwsmTrdhlSelngQq) */}
                 <div className="bg-indigo-950/40 p-3 rounded-xl border border-indigo-500/30 space-y-1.5">
                   <div className="flex justify-between items-center border-b border-indigo-800/50 pb-1">
-                    <span className="font-extrabold text-indigo-300 text-xs">💵 1. 추정 매출 (VwsmTrdhlSelngQq)</span>
+                    <span className="font-extrabold text-indigo-300 text-xs">💵 2. 상권 추정매출 (VwsmTrdhlSelngQq)</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-[11px]">
                     <div>
@@ -2020,11 +2073,11 @@
                   </div>
                 </div>
 
-                {/* 2. 길단위 유동인구 API (VwsmAdstrdFlpopW) */}
+                {/* 3. 길단위 유동인구 API (VwsmAdstrdFlpopW) */}
                 <div className="bg-emerald-950/40 p-3 rounded-xl border border-emerald-500/30 space-y-1.5">
                   <div className="flex justify-between items-center border-b border-emerald-800/50 pb-1">
-                    <span className="font-extrabold text-emerald-300 text-xs">🚶 2. 길단위 유동인구 (VwsmAdstrdFlpopW)</span>
-                    <span className="text-[10px] text-emerald-400 font-bold">{selectedCmrcl.adstrdNm}</span>
+                    <span className="font-extrabold text-emerald-300 text-xs">🚶 3. 길단위 유동인구 (VwsmAdstrdFlpopW)</span>
+                    <span className="text-[10px] text-amber-300 font-extrabold">🔥 피크: {selectedCmrcl.peakDay || '금요일'}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-[11px]">
                     <div>
@@ -2036,18 +2089,16 @@
                       <strong className="text-amber-300 font-bold">{selectedCmrcl.dinnerFlpop}</strong>
                     </div>
                   </div>
-                  <div className="pt-1 text-[10px] space-y-1">
-                    <div className="flex justify-between text-slate-400">
-                      <span>점심(11-14시): <strong className="text-slate-200">{selectedCmrcl.lunchFlpop}</strong></span>
-                      <span>성별: <strong className="text-blue-300">남{selectedCmrcl.mlFlpopRatio}%</strong> / <strong className="text-rose-300">여{selectedCmrcl.fmlFlpopRatio}%</strong></span>
-                    </div>
+                  <div className="grid grid-cols-2 gap-2 text-[10px] pt-1 border-t border-emerald-900/40">
+                    <div><span className="text-slate-400">점심(11-14시):</span> <span className="text-slate-200 font-semibold">{selectedCmrcl.lunchFlpop}</span></div>
+                    <div><span className="text-slate-400">성별:</span> <span className="text-blue-300 font-semibold">남{selectedCmrcl.mlFlpopRatio}%</span>/<span className="text-rose-300 font-semibold">여{selectedCmrcl.fmlFlpopRatio}%</span></div>
                   </div>
                 </div>
 
-                {/* 3. 상권 배후지 상주인구 API (VwsmTrdhlRepopQq) */}
+                {/* 4. 상권 배후지 상주인구 API (VwsmTrdhlRepopQq) */}
                 <div className="bg-purple-950/40 p-3 rounded-xl border border-purple-500/30 space-y-1.5">
                   <div className="flex justify-between items-center border-b border-purple-800/50 pb-1">
-                    <span className="font-extrabold text-purple-300 text-xs">👥 3. 배후지 상주인구 (VwsmTrdhlRepopQq)</span>
+                    <span className="font-extrabold text-purple-300 text-xs">👥 4. 배후지 상주인구 (VwsmTrdhlRepopQq)</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-[11px]">
                     <div>
@@ -2063,7 +2114,7 @@
               </div>
 
               <p className="text-[9px] text-slate-500 text-center pt-0.5 font-semibold">
-                💡 지도를 조작하거나 클릭 시 500m 배후지와 3대 데이터가 실시간 갱신됩니다.
+                💡 지도를 조작하거나 클릭 시 500m 배후지와 4대 데이터가 실시간 갱신됩니다.
               </p>
             </div>
           </div>

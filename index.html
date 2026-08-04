@@ -367,12 +367,10 @@
       const [searchKeyword, setSearchKeyword] = React.useState('');
       const [isLoadingApi, setIsLoadingApi] = React.useState(false);
       const [analysisResult, setAnalysisResult] = React.useState({
-        regionName: '홍제3동주민센터 배후상권 (서울시 공공데이터)',
-        floatingPop: '17,605 명 (총 상주인구)',
+        floatingPop: '17,605 명',
         households: '7,973 세대',
-        mainAgeGroup: '여성 비율 52% / 30·60대 이상 주거층 밀집',
-        recommendedTypes: ['소자본 카페', '무인 세탁/스튜디오', '프랜차이즈 식음료'],
-        competitionGrade: '서울시 열린데이터 공식 검증'
+        ageRatioText: '10대 11% | 20대 13% | 30대 14% | 40대 13% | 50대 18% | 60대이상 32%',
+        recommendedTypes: ['소자본 카페', '무인 세탁/스튜디오', '프랜차이즈 식음료']
       });
 
       const SEOUL_API_KEY = '4a5a6847726368693930764b467365';
@@ -380,7 +378,6 @@
       const fetchSeoulRepopData = async (targetAddress) => {
         setIsLoadingApi(true);
         try {
-          // CORS 프록시 및 서울시 공공데이터 API 동시 호환 호출
           const apiUrl = `https://corsproxy.io/?${encodeURIComponent('http://openapi.seoul.go.kr:8088/' + SEOUL_API_KEY + '/xml/VwsmTrdhlRepopQq/1/1000/')}`;
           const res = await fetch(apiUrl);
           if (res.ok) {
@@ -403,21 +400,30 @@
             }
 
             if (matchedRow) {
-              const trdarNm = matchedRow.getElementsByTagName('TRDAR_CD_NM')[0]?.textContent || '주요';
               const totPop = parseInt(matchedRow.getElementsByTagName('TOT_REPOP_CO')[0]?.textContent || '15000', 10);
-              const femalePop = parseInt(matchedRow.getElementsByTagName('FML_REPOP_CO')[0]?.textContent || '7500', 10);
-              const malePop = parseInt(matchedRow.getElementsByTagName('ML_REPOP_CO')[0]?.textContent || '7500', 10);
               const households = parseInt(matchedRow.getElementsByTagName('TOT_HSHLD_CO')[0]?.textContent || '6500', 10);
 
-              const femaleRatio = Math.round((femalePop / totPop) * 100) || 51;
+              const p10 = parseInt(matchedRow.getElementsByTagName('AGRDE_10_REPOP_CO')[0]?.textContent || '0', 10);
+              const p20 = parseInt(matchedRow.getElementsByTagName('AGRDE_20_REPOP_CO')[0]?.textContent || '0', 10);
+              const p30 = parseInt(matchedRow.getElementsByTagName('AGRDE_30_REPOP_CO')[0]?.textContent || '0', 10);
+              const p40 = parseInt(matchedRow.getElementsByTagName('AGRDE_40_REPOP_CO')[0]?.textContent || '0', 10);
+              const p50 = parseInt(matchedRow.getElementsByTagName('AGRDE_50_REPOP_CO')[0]?.textContent || '0', 10);
+              const p60 = parseInt(matchedRow.getElementsByTagName('AGRDE_60_ABOVE_REPOP_CO')[0]?.textContent || '0', 10);
+
+              const r10 = Math.round((p10 / totPop) * 100) || 11;
+              const r20 = Math.round((p20 / totPop) * 100) || 13;
+              const r30 = Math.round((p30 / totPop) * 100) || 14;
+              const r40 = Math.round((p40 / totPop) * 100) || 13;
+              const r50 = Math.round((p50 / totPop) * 100) || 18;
+              const r60 = Math.round((p60 / totPop) * 100) || 31;
+
+              const ageText = `10대 ${r10}% | 20대 ${r20}% | 30대 ${r30}% | 40대 ${r40}% | 50대 ${r50}% | 60대이상 ${r60}%`;
 
               setAnalysisResult({
-                regionName: `${trdarNm} 배후상권 (서울시 공공데이터)`,
-                floatingPop: `${totPop.toLocaleString()} 명 (총 상주인구)`,
+                floatingPop: `${totPop.toLocaleString()} 명`,
                 households: `${households.toLocaleString()} 세대`,
-                mainAgeGroup: `여성비율 ${femaleRatio}% / 주거 실거주층 우수 (상권지수 A급)`,
-                recommendedTypes: ['1인/무인 창업', '소자본 카페', '밀키트/배달전문'],
-                competitionGrade: '서울시 상권분석 실시간 연동'
+                ageRatioText: ageText,
+                recommendedTypes: ['1인/무인 창업', '소자본 카페', '밀키트/배달전문']
               });
               setIsLoadingApi(false);
               return;
@@ -427,14 +433,13 @@
           console.warn("Seoul API fetch fallback:", err.message);
         }
 
-        // Fallback 시뮬레이션
+        const totPopSim = Math.floor(Math.random() * 15000) + 10000;
+        const houseSim = Math.floor(Math.random() * 7000) + 3000;
         setAnalysisResult({
-          regionName: targetAddress + ' 배후상권',
-          floatingPop: (Math.floor(Math.random() * 20000) + 12000).toLocaleString() + ' 명 (상주인구)',
-          households: (Math.floor(Math.random() * 8000) + 4000).toLocaleString() + ' 세대',
-          mainAgeGroup: '2030·40대 실거주 밀집 (상권지수 88점)',
-          recommendedTypes: ['소자본창업', '무인운영 매장', '프랜차이즈 카페'],
-          competitionGrade: '상권 성장 가능성 우수 지역'
+          floatingPop: `${totPopSim.toLocaleString()} 명`,
+          households: `${houseSim.toLocaleString()} 세대`,
+          ageRatioText: '10대 12% | 20대 15% | 30대 16% | 40대 14% | 50대 17% | 60대이상 26%',
+          recommendedTypes: ['소자본창업', '무인운영 매장', '프랜차이즈 카페']
         });
         setIsLoadingApi(false);
       };
@@ -447,7 +452,7 @@
           if (!container) return;
 
           const options = {
-            center: new window.kakao.maps.LatLng(37.5872, 126.9463), // 홍제동 인근
+            center: new window.kakao.maps.LatLng(37.5872, 126.9463),
             level: 4
           };
 
@@ -541,7 +546,7 @@
               <div>
                 <div className="border-b border-slate-700 pb-3 mb-3 flex items-center justify-between">
                   <div>
-                    <span className="text-slate-400 text-xs font-semibold block">선택한 위치 / 상권명</span>
+                    <span className="text-slate-400 text-xs font-semibold block">선택한 위치 / 주소</span>
                     <h4 className="text-base sm:text-lg font-black text-emerald-400 mt-0.5">{selectedAddress}</h4>
                   </div>
                   {isLoadingApi && (
@@ -553,10 +558,6 @@
 
                 <div className="space-y-3 text-xs sm:text-sm">
                   <div className="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60">
-                    <span className="text-slate-400">🏛️ 상권명 데이터</span>
-                    <span className="font-bold text-emerald-300">{analysisResult.regionName}</span>
-                  </div>
-                  <div className="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60">
                     <span className="text-slate-400">👥 상권 배후지 총 상주인구</span>
                     <span className="font-bold text-white">{analysisResult.floatingPop}</span>
                   </div>
@@ -564,9 +565,9 @@
                     <span className="text-slate-400">🏠 총 가구/세대 수</span>
                     <span className="font-bold text-white">{analysisResult.households}</span>
                   </div>
-                  <div className="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60">
-                    <span className="text-slate-400">📊 인구 비율 분석</span>
-                    <span className="font-bold text-slate-200">{analysisResult.mainAgeGroup}</span>
+                  <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60 space-y-1.5">
+                    <span className="text-slate-400 block text-xs">📊 연령대별 인구 비율 분석</span>
+                    <span className="font-extrabold text-emerald-300 text-xs sm:text-sm block leading-relaxed">{analysisResult.ageRatioText}</span>
                   </div>
                   <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60 space-y-1">
                     <span className="text-slate-400 block text-xs">💡 입지 추천 맞춤 업종</span>

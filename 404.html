@@ -601,11 +601,11 @@
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-emerald-400 font-extrabold text-xs tracking-wider uppercase bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                  카카오맵 × 공공데이터 API 실시간 연동
+                  카카오 지도 상권 분석
                 </span>
               </div>
               <h3 className="text-xl sm:text-2xl font-black">
-                📍지도를 클릭하면 해당 상권 배후지 데이터가 즉시 계산됩니다.
+                📍 지도에서 원하는 위치를 클릭하고 상권을 자유롭게 확인해보세요.
               </h3>
             </div>
 
@@ -623,68 +623,9 @@
             </form>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-            {/* 카카오 지도 영역 */}
-            <div className="lg:col-span-7 rounded-2xl overflow-hidden shadow-lg border border-slate-700/80 min-h-[340px] relative">
-              <div ref={mapContainerRef} className="w-full h-full min-h-[340px]" />
-            </div>
-
-            {/* 클릭 위치 실시간 상권 분석 결과 카드 */}
-            <div className="lg:col-span-5 bg-slate-800/90 rounded-2xl p-5 border border-slate-700 flex flex-col justify-between space-y-4">
-              <div>
-                <div className="border-b border-slate-700 pb-3 mb-3 flex items-center justify-between">
-                  <div>
-                    <span className="text-slate-400 text-xs font-semibold block">선택한 위치 / 주소</span>
-                    <h4 className="text-base sm:text-lg font-black text-emerald-400 mt-0.5">{selectedAddress}</h4>
-                  </div>
-                  {isLoadingApi && (
-                    <span className="text-xs text-emerald-400 animate-pulse font-bold bg-emerald-500/10 px-2 py-1 rounded">
-                      ⚡ API 수신 중...
-                    </span>
-                  )}
-                </div>
-
-                <div className="space-y-3 text-xs sm:text-sm">
-                  <div className="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60">
-                    <span className="text-slate-400">👥 상권 배후지 총 상주인구</span>
-                    <span className="font-bold text-white">{analysisResult.floatingPop}</span>
-                  </div>
-                  <div className="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60">
-                    <span className="text-slate-400">🏠 총 가구/세대 수</span>
-                    <span className="font-bold text-white">{analysisResult.households}</span>
-                  </div>
-                  <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-700/60 space-y-2">
-                    <span className="text-slate-400 block text-xs font-semibold">📊 연령대별 인구 비율 분석</span>
-                    <div className="grid grid-cols-3 gap-2">
-                      {analysisResult.ageRatios.map((item, idx) => (
-                        <div key={idx} className="bg-slate-800/80 border border-slate-700/80 rounded-lg p-1.5 text-center">
-                          <span className="text-[11px] text-slate-400 block mb-0.5">{item.label}</span>
-                          <span className="text-xs sm:text-sm font-black text-emerald-400">{item.ratio}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60 space-y-1">
-                    <span className="text-slate-400 block text-xs">💡 입지 추천 맞춤 업종</span>
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {analysisResult.recommendedTypes.map((t, idx) => (
-                        <span key={idx} className="bg-emerald-500/20 text-emerald-300 font-extrabold text-xs px-2 py-0.5 rounded border border-emerald-500/30">
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={startDiagnosisWithLocation}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-1.5"
-              >
-                <span>이 상권 위치로 맞춤 창업진단 받기</span>
-                <span>→</span>
-              </button>
-            </div>
+          <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-slate-700/80 h-[480px] relative">
+            {/* 카카오 지도만 100% 깔끔하게 렌더링 */}
+            <div ref={mapContainerRef} className="w-full h-full" />
           </div>
         </div>
       );
@@ -1737,186 +1678,6 @@
         adstrdSelngCo: '29,650 건'
       });
 
-      const SEOUL_API_KEY = '4a5a6847726368693930764b467365';
-
-      const fetchCmrclAndRepop = async (targetName = '') => {
-        setIsLoading(true);
-        try {
-          // 공공데이터 명세서 기준 json 타입 포맷으로 요청하여 초고속 파싱 및 성능 최적화
-          const selngUrl = `https://corsproxy.io/?${encodeURIComponent(`http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/VwsmTrdhlSelngQq/1/100/`)}`;
-          const repopUrl = `https://corsproxy.io/?${encodeURIComponent(`http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/VwsmTrdhlRepopQq/1/100/`)}`;
-          const flpopUrl = `https://corsproxy.io/?${encodeURIComponent(`http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/VwsmAdstrdFlpopW/1/100/`)}`;
-          const adstrdSelngUrl = `https://corsproxy.io/?${encodeURIComponent(`http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/VwsmAdstrdSelngW/1/100/`)}`;
-
-          const [selngRes, repopRes, flpopRes, adstrdSelngRes] = await Promise.all([
-            fetch(selngUrl).then(r => r.json()).catch(() => null),
-            fetch(repopUrl).then(r => r.json()).catch(() => null),
-            fetch(flpopUrl).then(r => r.json()).catch(() => null),
-            fetch(adstrdSelngUrl).then(r => r.json()).catch(() => null)
-          ]);
-
-          let selngData = null;
-          let repopData = null;
-          let flpopData = null;
-          let adstrdSelngData = null;
-
-          if (selngRes && selngRes.VwsmTrdhlSelngQq && selngRes.VwsmTrdhlSelngQq.row) {
-            const rows = selngRes.VwsmTrdhlSelngQq.row;
-            if (rows.length > 0) {
-              const r = rows[Math.floor(Math.random() * rows.length)];
-              const amt = parseInt(r.THSMON_SELNG_AMT || '54981507', 10);
-              const co = parseInt(r.THSMON_SELNG_CO || '30', 10);
-              const mdwk = parseInt(r.MDWK_SELNG_AMT || '39648636', 10);
-              const wkend = parseInt(r.WKEND_SELNG_AMT || '15332871', 10);
-              const ml = parseInt(r.ML_SELNG_AMT || '54981507', 10);
-              const trdar = r.TRDAR_CD_NM || targetName || '서울 주요 상권';
-              const induty = r.SVC_INDUTY_CD_NM || '종합 업종';
-
-              const mlRatio = amt > 0 ? Math.round((ml / amt) * 100) : 60;
-              const fmlRatio = 100 - mlRatio;
-
-              selngData = {
-                trdarNm: targetName ? `${targetName} (${trdar})` : trdar,
-                indutyNm: induty,
-                selngAmt: `${amt.toLocaleString()} 원`,
-                selngAmtWan: `약 ${Math.round(amt / 10000).toLocaleString()} 만원`,
-                selngCo: `${co.toLocaleString()} 건`,
-                mdwkAmt: `${mdwk.toLocaleString()} 원`,
-                wkendAmt: `${wkend.toLocaleString()} 원`,
-                mlAmtRatio: mlRatio,
-                fmlAmtRatio: fmlRatio,
-                mainAge: '30대~40대 (핵심 매출층)'
-              };
-            }
-          }
-
-          if (repopRes && repopRes.VwsmTrdhlRepopQq && repopRes.VwsmTrdhlRepopQq.row) {
-            const rows = repopRes.VwsmTrdhlRepopQq.row;
-            if (rows.length > 0) {
-              const r = rows[Math.floor(Math.random() * rows.length)];
-              const totPop = parseInt(r.TOT_REPOP_CO || '17605', 10);
-              const totHshld = parseInt(r.TOT_HSHLD_CO || '7973', 10);
-              repopData = {
-                totRepop: `${totPop.toLocaleString()} 명`,
-                totHshld: `${totHshld.toLocaleString()} 세대`,
-                repopMainAge: '30대~50대 (주요 거주층)'
-              };
-            }
-          }
-
-          if (flpopRes && flpopRes.VwsmAdstrdFlpopW && flpopRes.VwsmAdstrdFlpopW.row) {
-            const rows = flpopRes.VwsmAdstrdFlpopW.row;
-            if (rows.length > 0) {
-              const r = rows[Math.floor(Math.random() * rows.length)];
-              const adstrdNm = r.ADSTRD_CD_NM || '행정동';
-              const totFlpop = parseInt(r.TOT_FLPOP_CO || '2113025', 10);
-              const mlFlpop = parseInt(r.ML_FLPOP_CO || '964253', 10);
-              const tm11_14 = parseInt(r.TMZON_11_14_FLPOP_CO || '251175', 10);
-              const tm17_21 = parseInt(r.TMZON_17_21_FLPOP_CO || '352949', 10);
-
-              const mon = parseInt(r.MON_FLPOP_CO || '0', 10);
-              const tues = parseInt(r.TUES_FLPOP_CO || '0', 10);
-              const wed = parseInt(r.WED_FLPOP_CO || '0', 10);
-              const thur = parseInt(r.THUR_FLPOP_CO || '0', 10);
-              const fri = parseInt(r.FRI_FLPOP_CO || '0', 10);
-              const sat = parseInt(r.SAT_FLPOP_CO || '0', 10);
-              const sun = parseInt(r.SUN_FLPOP_CO || '0', 10);
-
-              const dayArr = [
-                { name: '월요일', count: mon },
-                { name: '화요일', count: tues },
-                { name: '수요일', count: wed },
-                { name: '목요일', count: thur },
-                { name: '금요일', count: fri },
-                { name: '토요일', count: sat },
-                { name: '일요일', count: sun }
-              ];
-              dayArr.sort((a, b) => b.count - a.count);
-              const peakDayStr = dayArr[0].count > 0 ? `${dayArr[0].name}` : '금요일';
-
-              const mlRatio = totFlpop > 0 ? Math.round((mlFlpop / totFlpop) * 100) : 46;
-              const fmlRatio = 100 - mlRatio;
-
-              flpopData = {
-                adstrdNm: adstrdNm,
-                totFlpop: `${totFlpop.toLocaleString()} 명`,
-                mlFlpopRatio: mlRatio,
-                fmlFlpopRatio: fmlRatio,
-                lunchFlpop: `${tm11_14.toLocaleString()} 명`,
-                dinnerFlpop: `${tm17_21.toLocaleString()} 명`,
-                peakDay: peakDayStr,
-                flpopMainAge: '30대~40대 (유동층 핵심)'
-              };
-            }
-          }
-
-          if (adstrdSelngRes && adstrdSelngRes.VwsmAdstrdSelngW && adstrdSelngRes.VwsmAdstrdSelngW.row) {
-            const rows = adstrdSelngRes.VwsmAdstrdSelngW.row;
-            if (rows.length > 0) {
-              const r = rows[Math.floor(Math.random() * rows.length)];
-              const adstrdNm = r.ADSTRD_CD_NM || '잠실7동';
-              const indutyNm = r.SVC_INDUTY_CD_NM || '한식음식점';
-              const amt = parseInt(r.THSMON_SELNG_AMT || '23947025', 10);
-              const co = parseInt(r.THSMON_SELNG_CO || '1574', 10);
-
-              adstrdSelngData = {
-                adstrdSelngNm: adstrdNm,
-                adstrdIndutyNm: indutyNm,
-                adstrdSelngAmtWan: `약 ${Math.round(amt / 10000).toLocaleString()} 만원`,
-                adstrdSelngCo: `${co.toLocaleString()} 건`
-              };
-            }
-          }
-
-          if (selngData || repopData || flpopData || adstrdSelngData) {
-            setSelectedCmrcl(prev => ({
-              ...prev,
-              ...(selngData || {}),
-              ...(repopData || {}),
-              ...(flpopData || {}),
-              ...(adstrdSelngData || {})
-            }));
-          }
-        } catch (err) {
-          console.warn("Seoul Cmrcl API Load fallback:", err.message);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      const circleRef = useRef(null);
-      const markerRef = useRef(null);
-
-      const drawCircleAndMarker = (latlng, mapObj) => {
-        if (!mapObj || !window.kakao) return;
-
-        if (circleRef.current) {
-          circleRef.current.setMap(null);
-        }
-        if (markerRef.current) {
-          markerRef.current.setMap(null);
-        }
-
-        // 1. 선택 위치 핀 마커
-        markerRef.current = new window.kakao.maps.Marker({
-          position: latlng
-        });
-        markerRef.current.setMap(mapObj);
-
-        // 2. 선택 상권 반경 500m 배후지 영역 (반투명 파란 원)
-        circleRef.current = new window.kakao.maps.Circle({
-          center: latlng,
-          radius: 500, // 500m 배후지 영역
-          strokeWeight: 2,
-          strokeColor: '#3b82f6',
-          strokeOpacity: 0.9,
-          strokeStyle: 'dashed',
-          fillColor: '#60a5fa',
-          fillOpacity: 0.28
-        });
-        circleRef.current.setMap(mapObj);
-      };
-
       useEffect(() => {
         const initMap = () => {
           if (!window.kakao || !window.kakao.maps || !mapContainerRef.current) return;
@@ -1934,8 +1695,6 @@
               mapObjRef.current.relayout();
               mapObjRef.current.setCenter(centerPos);
             }
-
-            drawCircleAndMarker(centerPos, mapObjRef.current);
 
             const triggerRelayout = () => {
               if (mapObjRef.current) {
@@ -1956,19 +1715,10 @@
 
             window.addEventListener('resize', triggerRelayout);
 
-            // 지도 클릭 이벤트 연동
+            // 지도 클릭 시 중심 이동
             window.kakao.maps.event.addListener(mapObjRef.current, 'click', (mouseEvent) => {
               const latlng = mouseEvent.latLng;
               mapObjRef.current.panTo(latlng);
-              drawCircleAndMarker(latlng, mapObjRef.current);
-
-              const geocoder = new window.kakao.maps.services.Geocoder();
-              geocoder.coord2Address(latlng.getLng(), latlng.getLat(), (result, status) => {
-                if (status === window.kakao.maps.services.Status.OK) {
-                  const addr = result[0].address ? result[0].address.address_name : '선택 상권';
-                  fetchCmrclAndRepop(addr);
-                }
-              });
             });
           });
         };
@@ -1984,8 +1734,6 @@
           }, 300);
           return () => clearInterval(timer);
         }
-
-        fetchCmrclAndRepop();
       }, []);
 
       const handleSearchSubmit = (e) => {
@@ -1997,11 +1745,8 @@
           if (status === window.kakao.maps.services.Status.OK) {
             const targetPos = new window.kakao.maps.LatLng(data[0].y, data[0].x);
             mapObjRef.current.setCenter(targetPos);
-            drawCircleAndMarker(targetPos, mapObjRef.current);
-            const targetName = data[0].place_name || data[0].address_name;
-            fetchCmrclAndRepop(targetName);
           } else {
-            alert('검색한 상권 위치를 찾을 수 없습니다.');
+            alert('검색한 위치를 찾을 수 없습니다.');
           }
         });
       };
@@ -2011,135 +1756,27 @@
           <AdminNav setView={setView} currentView="admin_seoul_cmrcl" adminUser={adminUser} refreshLeads={refreshLeads} handleLogout={handleLogout} />
           
           <div className="flex-1 w-full relative">
-            {/* Kakao Map 지도 영역 */}
-            <div ref={mapContainerRef} className="w-full h-[calc(100vh-64px)] z-0" />
-
-            {/* 지도 좌측 상단 실시간 상권 4대 API 통합 관제 패널 */}
-            <div className="absolute top-4 left-4 z-10 w-80 sm:w-96 bg-slate-900/95 border border-slate-700/80 backdrop-blur-xl rounded-2xl shadow-2xl p-5 text-white space-y-3 max-h-[calc(100vh-100px)] overflow-y-auto custom-scrollbar">
-              <div className="flex justify-between items-center border-b border-slate-800 pb-2.5">
-                <div>
-                  <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block mb-0.5">SEOUL BIGDATA 4-API ANALYTICS</span>
-                  <h2 className="text-base font-black flex items-center gap-1.5">
-                    📊 서울시 상권 4대 데이터 관제
-                  </h2>
-                </div>
-                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
-                  🔴 4대 API 연동
-                </span>
-              </div>
-
-              {/* 상권 검색 폼 */}
+            {/* 상단 검색바 */}
+            <div className="absolute top-4 left-4 z-10 w-72 sm:w-80 bg-slate-900/90 border border-slate-700/80 backdrop-blur-md rounded-2xl shadow-xl p-3 text-white">
               <form onSubmit={handleSearchSubmit} className="flex gap-2">
                 <input
                   type="text"
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
-                  placeholder="상권명 또는 위치 검색 (예: 강남역, 명동)"
-                  className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-medium text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                  placeholder="위치 또는 지역 검색 (예: 강남역, 명동)"
+                  className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-medium text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
                 />
                 <button
                   type="submit"
-                  disabled={isLoading}
-                  className="bg-blue-600 hover:bg-blue-500 font-extrabold text-xs px-3 py-1.5 rounded-xl transition flex items-center gap-1 shadow-md"
+                  className="bg-blue-600 hover:bg-blue-500 font-extrabold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-md"
                 >
                   🔍 검색
                 </button>
               </form>
-
-              {/* 실시간 수신 4대 API 종합 리포트 */}
-              <div className="space-y-2.5 text-xs">
-                <div className="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60">
-                  <span className="text-[10px] font-bold text-slate-400 block mb-0.5">📍 선택 상권 및 행정동</span>
-                  <strong className="text-sm font-black text-blue-300">{selectedCmrcl.trdarNm}</strong>
-                  <div className="flex justify-between text-[11px] text-slate-300 mt-1 pt-1 border-t border-slate-700/40">
-                    <span>주요 업종: <strong className="text-slate-100">{selectedCmrcl.indutyNm}</strong></span>
-                    <span>행정동: <strong className="text-emerald-400">{selectedCmrcl.adstrdNm}</strong></span>
-                  </div>
-                </div>
-
-                {/* 1. 행정동 업종 추정매출 API (VwsmAdstrdSelngW) */}
-                <div className="bg-blue-950/40 p-3 rounded-xl border border-blue-500/30 space-y-1.5">
-                  <div className="flex justify-between items-center border-b border-blue-800/50 pb-1">
-                    <span className="font-extrabold text-blue-300 text-xs">🏪 1. 행정동 업종매출 (VwsmAdstrdSelngW)</span>
-                    <span className="text-[10px] text-blue-400 font-bold">{selectedCmrcl.adstrdSelngNm}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
-                    <div>
-                      <span className="text-slate-400 block">업종: <strong className="text-slate-100">{selectedCmrcl.adstrdIndutyNm}</strong></span>
-                      <strong className="text-blue-300 text-xs font-black">{selectedCmrcl.adstrdSelngAmtWan}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block">결제 건수:</span>
-                      <strong className="text-slate-100 font-bold">{selectedCmrcl.adstrdSelngCo}</strong>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. 상권 추정 매출 API (VwsmTrdhlSelngQq) */}
-                <div className="bg-indigo-950/40 p-3 rounded-xl border border-indigo-500/30 space-y-1.5">
-                  <div className="flex justify-between items-center border-b border-indigo-800/50 pb-1">
-                    <span className="font-extrabold text-indigo-300 text-xs">💵 2. 상권 추정매출 (VwsmTrdhlSelngQq)</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
-                    <div>
-                      <span className="text-slate-400 block">당월 추정 매출액:</span>
-                      <strong className="text-emerald-400 text-xs font-black">{selectedCmrcl.selngAmtWan}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block">추정 결제건수:</span>
-                      <strong className="text-slate-100 font-bold">{selectedCmrcl.selngCo}</strong>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-[10px] pt-1 border-t border-indigo-900/40">
-                    <div><span className="text-slate-400">주중:</span> <span className="text-slate-200 font-semibold">{selectedCmrcl.mdwkAmt}</span></div>
-                    <div><span className="text-slate-400">주말:</span> <span className="text-slate-200 font-semibold">{selectedCmrcl.wkendAmt}</span></div>
-                  </div>
-                </div>
-
-                {/* 3. 길단위 유동인구 API (VwsmAdstrdFlpopW) */}
-                <div className="bg-emerald-950/40 p-3 rounded-xl border border-emerald-500/30 space-y-1.5">
-                  <div className="flex justify-between items-center border-b border-emerald-800/50 pb-1">
-                    <span className="font-extrabold text-emerald-300 text-xs">🚶 3. 길단위 유동인구 (VwsmAdstrdFlpopW)</span>
-                    <span className="text-[10px] text-amber-300 font-extrabold">🔥 피크: {selectedCmrcl.peakDay || '금요일'}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
-                    <div>
-                      <span className="text-slate-400 block">총 유동인구 수:</span>
-                      <strong className="text-emerald-300 text-xs font-black">{selectedCmrcl.totFlpop}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block">피크타임 (17-21시):</span>
-                      <strong className="text-amber-300 font-bold">{selectedCmrcl.dinnerFlpop}</strong>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-[10px] pt-1 border-t border-emerald-900/40">
-                    <div><span className="text-slate-400">점심(11-14시):</span> <span className="text-slate-200 font-semibold">{selectedCmrcl.lunchFlpop}</span></div>
-                    <div><span className="text-slate-400">성별:</span> <span className="text-blue-300 font-semibold">남{selectedCmrcl.mlFlpopRatio}%</span>/<span className="text-rose-300 font-semibold">여{selectedCmrcl.fmlFlpopRatio}%</span></div>
-                  </div>
-                </div>
-
-                {/* 4. 상권 배후지 상주인구 API (VwsmTrdhlRepopQq) */}
-                <div className="bg-purple-950/40 p-3 rounded-xl border border-purple-500/30 space-y-1.5">
-                  <div className="flex justify-between items-center border-b border-purple-800/50 pb-1">
-                    <span className="font-extrabold text-purple-300 text-xs">👥 4. 배후지 상주인구 (VwsmTrdhlRepopQq)</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
-                    <div>
-                      <span className="text-slate-400 block">총 상주인구:</span>
-                      <strong className="text-purple-300 text-xs font-black">{selectedCmrcl.totRepop}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block">총 가구 수:</span>
-                      <strong className="text-slate-100 font-bold">{selectedCmrcl.totHshld}</strong>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <p className="text-[9px] text-slate-500 text-center pt-0.5 font-semibold">
-                💡 지도를 조작하거나 클릭 시 500m 배후지와 4대 데이터가 실시간 갱신됩니다.
-              </p>
             </div>
+
+            {/* Kakao Map 지도 영역 100% */}
+            <div ref={mapContainerRef} className="w-full h-[calc(100vh-64px)] z-0" />
           </div>
         </div>
       );

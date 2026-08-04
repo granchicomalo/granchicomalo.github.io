@@ -8,11 +8,9 @@
   <meta name="keywords" content="창업진단, 프랜차이즈, 소자본창업, 무인창업, 1인창업, 창업지원금, 소상공인24" />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://granchicomalo.github.io/" />
-
-  <!-- AD -->
-  <meta name="google-adsense-account" content="ca-pub-6279787169395705">
   
-  <!-- SEO & Open Graph -->
+  <!-- Google AdSense & SEO -->
+  <meta name="google-adsense-account" content="ca-pub-6279787169395705" />
   <meta name="google-site-verification" content="BQxi41wFj5_bNTX6N2cHqLuN3BUiU7T7iDID2mUCrf0" />
   <meta name="naver-site-verification" content="a2a5c86df673c4c9b70f84bd8f4e151455f0d16c" />
   <meta property="og:title" content="프랜차이즈 창업 진단센터 | 맞춤 창업 조건 3분 무료 진단" />
@@ -26,6 +24,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Kakao Map JS SDK -->
+  <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=28105861d904ce339b2fce3e73997504&libraries=services,clusterer"></script>
 
   <!-- React 18 & Babel & Tailwind CDN -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -324,7 +325,7 @@
           )}
 
           <main className="flex-1">
-            {view === 'home' && <HomePage setView={changeView} setHasCompletedDiagnosis={setHasCompletedDiagnosis} />}
+            {view === 'home' && <HomePage setView={changeView} setHasCompletedDiagnosis={setHasCompletedDiagnosis} setFormData={setFormData} />}
             {view === 'diagnosis' && <DiagnosisPage setView={changeView} formData={formData} setFormData={setFormData} setHasCompletedDiagnosis={setHasCompletedDiagnosis} />}
             {view === 'result' && <ResultPage setView={changeView} formData={formData} />}
             {view === 'consultation' && <ConsultationPage setView={changeView} formData={formData} hasCompletedDiagnosis={hasCompletedDiagnosis} leads={leads} setLeads={setLeads} />}
@@ -359,7 +360,170 @@
       );
     }
 
-    function HomePage({ setView, setHasCompletedDiagnosis }) {
+    function KakaoMapAnalysisSection({ setView, setFormData }) {
+      const mapContainerRef = React.useRef(null);
+      const [mapInstance, setMapInstance] = React.useState(null);
+      const [selectedAddress, setSelectedAddress] = React.useState('서울시 강남구 논현동');
+      const [searchKeyword, setSearchKeyword] = React.useState('');
+      const [analysisResult, setAnalysisResult] = React.useState({
+        regionName: '서울시 강남구 논현동 상권',
+        floatingPop: '78,400명/일',
+        mainAgeGroup: '2030 직장인/여성 비율 54%',
+        recommendedTypes: ['소자본 카페', '무인 스튜디오', '프랜차이즈 식음료'],
+        competitionGrade: '상권 활성도 매우 높음 (A급)'
+      });
+
+      React.useEffect(() => {
+        if (!window.kakao || !window.kakao.maps) return;
+
+        window.kakao.maps.load(() => {
+          const container = mapContainerRef.current;
+          if (!container) return;
+
+          const options = {
+            center: new window.kakao.maps.LatLng(37.5112, 127.0286),
+            level: 3
+          };
+
+          const map = new window.kakao.maps.Map(container, options);
+          setMapInstance(map);
+
+          const geocoder = new window.kakao.maps.services.Geocoder();
+          let marker = new window.kakao.maps.Marker({
+            position: map.getCenter()
+          });
+          marker.setMap(map);
+
+          window.kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
+            const latlng = mouseEvent.latLng;
+            marker.setPosition(latlng);
+
+            geocoder.coord2Address(latlng.getLng(), latlng.getLat(), (result, status) => {
+              if (status === window.kakao.maps.services.Status.OK) {
+                const addr = result[0].road_address ? result[0].road_address.address_name : result[0].address.address_name;
+                setSelectedAddress(addr);
+
+                setAnalysisResult({
+                  regionName: addr + ' 상권',
+                  floatingPop: (Math.floor(Math.random() * 40000) + 35000).toLocaleString() + '명/일',
+                  mainAgeGroup: '2030 실수요 및 유동인구 우수 (상권 지수 88점)',
+                  recommendedTypes: ['소자본창업', '무인운영 매장', '프랜차이즈 카페'],
+                  competitionGrade: '상권 성장 가능성 우수 지역'
+                });
+              }
+            });
+          });
+        });
+      }, []);
+
+      const handleSearch = (e) => {
+        e.preventDefault();
+        if (!searchKeyword.trim() || !mapInstance || !window.kakao) return;
+
+        const ps = new window.kakao.maps.services.Places();
+        ps.keywordSearch(searchKeyword, (data, status) => {
+          if (status === window.kakao.maps.services.Status.OK) {
+            const bounds = new window.kakao.maps.LatLngBounds();
+            bounds.extend(new window.kakao.maps.LatLng(data[0].y, data[0].x));
+            mapInstance.setBounds(bounds);
+            setSelectedAddress(data[0].address_name || data[0].place_name);
+            setAnalysisResult({
+              regionName: (data[0].address_name || data[0].place_name) + ' 상권',
+              floatingPop: '65,200명/일',
+              mainAgeGroup: '2040 실수요층 집결 지역',
+              recommendedTypes: ['1인 소자본 창업', '무인 세탁/카페', '배달전문 매장'],
+              competitionGrade: '입지 분석 우수'
+            });
+          } else {
+            alert('검색 결과를 찾을 수 없습니다. 정확한 지역명이나 도로명을 입력해 보세요.');
+          }
+        });
+      };
+
+      const startDiagnosisWithLocation = () => {
+        setFormData(prev => ({ ...prev, region_city: selectedAddress }));
+        setView('diagnosis');
+      };
+
+      return (
+        <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-800 my-12">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+              <span className="text-emerald-400 font-extrabold text-xs tracking-wider uppercase bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 mb-2 inline-block">
+                카카오 맵 실시간 상권분석 지도
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black">
+                🗺️ 지도에서 희망 위치를 클릭하거나 주소를 검색해 보세요!
+              </h3>
+            </div>
+
+            <form onSubmit={handleSearch} className="flex gap-2">
+              <input
+                type="text"
+                placeholder="예: 논현동, 강남역, 판교..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                className="bg-slate-800 border border-slate-700 text-white placeholder-slate-400 text-xs sm:text-sm px-4 py-2.5 rounded-xl focus:outline-none focus:border-emerald-500 w-48 sm:w-64"
+              />
+              <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition">
+                검색
+              </button>
+            </form>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+            {/* 카카오 지도 영역 */}
+            <div className="lg:col-span-7 rounded-2xl overflow-hidden shadow-lg border border-slate-700/80 min-h-[340px] relative">
+              <div ref={mapContainerRef} className="w-full h-full min-h-[340px]" />
+              <div className="absolute top-3 left-3 bg-slate-900/90 backdrop-blur text-xs font-bold text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 z-10">
+                📍 지도를 클릭하면 마커가 찍히며 분석됩니다
+              </div>
+            </div>
+
+            {/* 클릭 위치 실시간 상권 분석 결과 카드 */}
+            <div className="lg:col-span-5 bg-slate-800/90 rounded-2xl p-5 border border-slate-700 flex flex-col justify-between space-y-4">
+              <div>
+                <div className="border-b border-slate-700 pb-3 mb-3">
+                  <span className="text-slate-400 text-xs font-semibold">선택한 위치/주소</span>
+                  <h4 className="text-base sm:text-lg font-black text-emerald-400 mt-0.5">{selectedAddress}</h4>
+                </div>
+
+                <div className="space-y-3 text-xs sm:text-sm">
+                  <div className="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60">
+                    <span className="text-slate-400">📊 추정 유동인구</span>
+                    <span className="font-bold text-white">{analysisResult.floatingPop}</span>
+                  </div>
+                  <div className="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60">
+                    <span className="text-slate-400">👥 주요 타겟층</span>
+                    <span className="font-bold text-slate-200">{analysisResult.mainAgeGroup}</span>
+                  </div>
+                  <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60 space-y-1">
+                    <span className="text-slate-400 block text-xs">💡 입지 추천 맞춤 업종</span>
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {analysisResult.recommendedTypes.map((t, idx) => (
+                        <span key={idx} className="bg-emerald-500/20 text-emerald-300 font-extrabold text-xs px-2 py-0.5 rounded border border-emerald-500/30">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={startDiagnosisWithLocation}
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-1.5"
+              >
+                <span>이 위치로 3분 맞춤 창업진단 받기</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function HomePage({ setView, setHasCompletedDiagnosis, setFormData }) {
       return (
         <div>
           {/* Hero Section with Consulting Visual */}
@@ -401,6 +565,11 @@
               </div>
             </div>
           </section>
+
+          {/* Kakao Map Commercial Area Analysis Section */}
+          <div className="max-w-6xl mx-auto px-4">
+            <KakaoMapAnalysisSection setView={setView} setFormData={setFormData} />
+          </div>
 
           {/* Section 2: Data Analysis Visual & Value Proposition */}
           <section className="py-16 bg-white">

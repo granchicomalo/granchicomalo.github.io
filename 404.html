@@ -1629,59 +1629,78 @@
 
       // 지도를 렌더링하고 시각화 모드(vizMode)에 따른 마커/오버레이 업데이트
       useEffect(() => {
-        if (!window.kakao || !window.kakao.maps || !mapContainerRef.current) return;
+        const initMap = () => {
+          if (!window.kakao || !window.kakao.maps || !mapContainerRef.current) return;
 
-        const selectedSpotInfo = popularSpots.find(s => s.name === selectedSpot) || popularSpots[0];
-        const centerPos = new window.kakao.maps.LatLng(selectedSpotInfo.lat, selectedSpotInfo.lng);
+          window.kakao.maps.load(() => {
+            if (!mapContainerRef.current) return;
 
-        if (!mapObjRef.current) {
-          const options = { center: centerPos, level: 7 };
-          mapObjRef.current = new window.kakao.maps.Map(mapContainerRef.current, options);
-        } else {
-          mapObjRef.current.panTo(centerPos);
-        }
+            const selectedSpotInfo = popularSpots.find(s => s.name === selectedSpot) || popularSpots[0];
+            const centerPos = new window.kakao.maps.LatLng(selectedSpotInfo.lat, selectedSpotInfo.lng);
 
-        // 기존 마커 및 오버레이 제거
-        markersRef.current.forEach(m => m.setMap(null));
-        markersRef.current = [];
+            if (!mapObjRef.current) {
+              const options = { center: centerPos, level: 7 };
+              mapObjRef.current = new window.kakao.maps.Map(mapContainerRef.current, options);
+            } else {
+              mapObjRef.current.relayout();
+              mapObjRef.current.setCenter(centerPos);
+            }
 
-        // 10개 핫스팟 시각화 마커/오버레이 추가
-        popularSpots.forEach(spot => {
-          const pos = new window.kakao.maps.LatLng(spot.lat, spot.lng);
-          const isSelected = spot.name === selectedSpot;
+            // 기존 마커 및 오버레이 제거
+            markersRef.current.forEach(m => m.setMap(null));
+            markersRef.current = [];
 
-          let badgeBg = 'bg-slate-800 text-white border-slate-600';
-          let badgeContent = '';
+            // 10개 핫스팟 시각화 마커/오버레이 추가
+            popularSpots.forEach(spot => {
+              const pos = new window.kakao.maps.LatLng(spot.lat, spot.lng);
+              const isSelected = spot.name === selectedSpot;
 
-          if (vizMode === 'congest') {
-            const isBusy = spot.congest.includes('붐빔');
-            badgeBg = isBusy ? 'bg-rose-600 text-white border-rose-400' : 'bg-emerald-600 text-white border-emerald-400';
-            badgeContent = `🚨 ${spot.name}: ${spot.congest}`;
-          } else if (vizMode === 'traffic') {
-            badgeBg = 'bg-blue-600 text-white border-blue-400';
-            badgeContent = `🚗 ${spot.name}: ${spot.speed}`;
-          } else if (vizMode === 'weather') {
-            badgeBg = 'bg-purple-600 text-white border-purple-400';
-            badgeContent = `🌤️ ${spot.name}: ${spot.temp}`;
-          }
+              let badgeBg = 'bg-slate-800 text-white border-slate-600';
+              let badgeContent = '';
 
-          const overlayContent = document.createElement('div');
-          overlayContent.className = `cursor-pointer px-3 py-1.5 rounded-full shadow-2xl border text-xs font-bold transition transform hover:scale-110 flex items-center gap-1 ${badgeBg} ${isSelected ? 'ring-4 ring-emerald-400 font-black scale-105' : 'opacity-90'}`;
-          overlayContent.innerHTML = badgeContent;
+              if (vizMode === 'congest') {
+                const isBusy = spot.congest.includes('붐빔');
+                badgeBg = isBusy ? 'bg-rose-600 text-white border-rose-400' : 'bg-emerald-600 text-white border-emerald-400';
+                badgeContent = `🚨 ${spot.name}: ${spot.congest}`;
+              } else if (vizMode === 'traffic') {
+                badgeBg = 'bg-blue-600 text-white border-blue-400';
+                badgeContent = `🚗 ${spot.name}: ${spot.speed}`;
+              } else if (vizMode === 'weather') {
+                badgeBg = 'bg-purple-600 text-white border-purple-400';
+                badgeContent = `🌤️ ${spot.name}: ${spot.temp}`;
+              }
 
-          overlayContent.onclick = () => {
-            setSelectedSpot(spot.name);
-          };
+              const overlayContent = document.createElement('div');
+              overlayContent.className = `cursor-pointer px-3 py-1.5 rounded-full shadow-2xl border text-xs font-bold transition transform hover:scale-110 flex items-center gap-1 ${badgeBg} ${isSelected ? 'ring-4 ring-emerald-400 font-black scale-105' : 'opacity-90'}`;
+              overlayContent.innerHTML = badgeContent;
 
-          const customOverlay = new window.kakao.maps.CustomOverlay({
-            position: pos,
-            content: overlayContent,
-            yAnchor: 1.2
+              overlayContent.onclick = () => {
+                setSelectedSpot(spot.name);
+              };
+
+              const customOverlay = new window.kakao.maps.CustomOverlay({
+                position: pos,
+                content: overlayContent,
+                yAnchor: 1.2
+              });
+
+              customOverlay.setMap(mapObjRef.current);
+              markersRef.current.push(customOverlay);
+            });
           });
+        };
 
-          customOverlay.setMap(mapObjRef.current);
-          markersRef.current.push(customOverlay);
-        });
+        if (window.kakao && window.kakao.maps) {
+          initMap();
+        } else {
+          const timer = setInterval(() => {
+            if (window.kakao && window.kakao.maps) {
+              clearInterval(timer);
+              initMap();
+            }
+          }, 300);
+          return () => clearInterval(timer);
+        }
       }, [selectedSpot, vizMode]);
 
       const fetchCityAllData = async (spotName) => {

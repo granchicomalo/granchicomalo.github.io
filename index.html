@@ -479,6 +479,25 @@
           const map = new window.kakao.maps.Map(container, options);
           setMapInstance(map);
 
+          const triggerRelayout = () => {
+            if (map) {
+              map.relayout();
+              map.setCenter(map.getCenter());
+            }
+          };
+
+          requestAnimationFrame(triggerRelayout);
+          setTimeout(triggerRelayout, 100);
+          setTimeout(triggerRelayout, 300);
+          setTimeout(triggerRelayout, 600);
+
+          if (window.ResizeObserver && container) {
+            const ro = new ResizeObserver(() => triggerRelayout());
+            ro.observe(container);
+          }
+
+          window.addEventListener('resize', triggerRelayout);
+
           const geocoder = new window.kakao.maps.services.Geocoder();
           let marker = new window.kakao.maps.Marker({
             position: map.getCenter()
@@ -1616,6 +1635,25 @@
               mapObjRef.current.relayout();
               mapObjRef.current.setCenter(centerPos);
             }
+
+            const triggerRelayout = () => {
+              if (mapObjRef.current) {
+                mapObjRef.current.relayout();
+                mapObjRef.current.setCenter(centerPos);
+              }
+            };
+
+            requestAnimationFrame(triggerRelayout);
+            setTimeout(triggerRelayout, 100);
+            setTimeout(triggerRelayout, 300);
+            setTimeout(triggerRelayout, 600);
+
+            if (window.ResizeObserver && mapContainerRef.current) {
+              const ro = new ResizeObserver(() => triggerRelayout());
+              ro.observe(mapContainerRef.current);
+            }
+
+            window.addEventListener('resize', triggerRelayout);
 
             // 기존 마커 제거
             markersRef.current.forEach(m => m.setMap(null));

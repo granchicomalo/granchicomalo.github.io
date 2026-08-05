@@ -2,4 +2,3 @@ User-agent: *
 Allow: /
 
 Sitemap: https://granchicomalo.github.io/sitemap.xml
-Sitemap: https://granchicomalo.github.io/public/sitemap.xml

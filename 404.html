@@ -1685,9 +1685,24 @@
         if (centerMarkerRef.current) centerMarkerRef.current.setMap(null);
         if (radiusCircleRef.current) radiusCircleRef.current.setMap(null);
 
-        // 2. 중심점 마커 표시
+        // 2. 중심점 마커 표시 (사용자가 직접 클릭한 중심점은 눈에 띄는 붉은색 핀 마커로 색상 구분)
+        const redPinSvg = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="42" viewBox="0 0 36 42">
+            <path fill="#ef4444" stroke="#ffffff" stroke-width="2.5" d="M18 0C8.059 0 0 8.059 0 18c0 13.5 18 24 18 24s18-10.5 18-24C36 8.059 27.941 0 18 0z"/>
+            <circle cx="18" cy="16" r="6" fill="#ffffff"/>
+          </svg>
+        `)}`;
+
+        const redMarkerImage = new window.kakao.maps.MarkerImage(
+          redPinSvg,
+          new window.kakao.maps.Size(36, 42),
+          { offset: new window.kakao.maps.Point(18, 42) }
+        );
+
         centerMarkerRef.current = new window.kakao.maps.Marker({
-          position: centerLatLng
+          position: centerLatLng,
+          image: redMarkerImage,
+          zIndex: 10
         });
         centerMarkerRef.current.setMap(map);
 

@@ -1654,7 +1654,126 @@
     function AdminSeoulCmrclPage({ setView, adminUser, handleLogout, refreshLeads }) {
       const mapContainerRef = useRef(null);
       const mapObjRef = useRef(null);
+      const storeMarkersRef = useRef([]);
+      const centerMarkerRef = useRef(null);
+      const radiusCircleRef = useRef(null);
+      const activeInfoWindowRef = useRef(null);
+
       const [searchKeyword, setSearchKeyword] = useState('');
+      const [isLoading, setIsLoading] = useState(false);
+      const [storeCount, setStoreCount] = useState(0);
+      const [currentAddress, setCurrentAddress] = useState('서울 중심점');
+
+      const SERVICE_KEY = 'BahaUoW8jiYD6HVMXVBRJEpafXTnR%2FVHFkUWR0WwW%2BOzXumYn3YlV8oqDnoc8PYSg0vcwp3qT%2FalQ7707m0fKA%3D%3D';
+
+      // 300m 반경 내 소상공인 상가업소 조회 API 호출 및 지도 마커 렌더링
+      const fetchStoresInRadius = async (lat, lng) => {
+        if (!mapObjRef.current || !window.kakao) return;
+        setIsLoading(true);
+
+        const map = mapObjRef.current;
+        const centerLatLng = new window.kakao.maps.LatLng(lat, lng);
+
+        // 1. 기존 마커 및 300m 반경 원 초기화
+        if (storeMarkersRef.current.length > 0) {
+          storeMarkersRef.current.forEach(m => m.setMap(null));
+          storeMarkersRef.current = [];
+        }
+        if (activeInfoWindowRef.current) {
+          activeInfoWindowRef.current.close();
+        }
+        if (centerMarkerRef.current) centerMarkerRef.current.setMap(null);
+        if (radiusCircleRef.current) radiusCircleRef.current.setMap(null);
+
+        // 2. 중심점 마커 표시
+        centerMarkerRef.current = new window.kakao.maps.Marker({
+          position: centerLatLng
+        });
+        centerMarkerRef.current.setMap(map);
+
+        // 3. 300m 반경 원 표시
+        radiusCircleRef.current = new window.kakao.maps.Circle({
+          center: centerLatLng,
+          radius: 300,
+          strokeWeight: 2,
+          strokeColor: '#2563eb',
+          strokeOpacity: 0.9,
+          strokeStyle: 'dashed',
+          fillColor: '#3b82f6',
+          fillOpacity: 0.18
+        });
+        radiusCircleRef.current.setMap(map);
+
+        // Geocoder로 현재 주소 변환
+        const geocoder = new window.kakao.maps.services.Geocoder();
+        geocoder.coord2Address(lng, lat, (result, status) => {
+          if (status === window.kakao.maps.services.Status.OK && result[0]) {
+            setCurrentAddress(result[0].address ? result[0].address.address_name : '선택 위치');
+          }
+        });
+
+        // 4. 소상공인시장진흥공단 반경내 상가업소 조회 API 요청
+        const targetUrl = `https://apis.data.go.kr/B553077/api/open/sdsc2/storeListInRadius?radius=300&cx=${lng}&cy=${lat}&type=json&numOfRows=100&ServiceKey=${SERVICE_KEY}`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+
+        try {
+          const res = await fetch(proxyUrl).catch(() => null);
+          let items = [];
+
+          if (res && res.ok) {
+            const data = await res.json().catch(() => null);
+            if (data && data.body && data.body.items) {
+              items = Array.isArray(data.body.items) ? data.body.items : [data.body.items];
+            }
+          }
+
+          setStoreCount(items.length);
+
+          // 5. 상가업소 마커 렌더링 & 클릭 이벤트 등록
+          items.forEach(store => {
+            const storeLat = parseFloat(store.lat);
+            const storeLng = parseFloat(store.lon);
+            if (!storeLat || !storeLng) return;
+
+            const storePos = new window.kakao.maps.LatLng(storeLat, storeLng);
+            const storeMarker = new window.kakao.maps.Marker({
+              position: storePos,
+              map: map
+            });
+
+            const contentHtml = `
+              <div style="padding: 12px; min-width: 200px; font-family: 'Pretendard', sans-serif; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);">
+                <div style="font-weight: 800; font-size: 13px; color: #0f172a; margin-bottom: 4px; line-height: 1.3;">
+                  🏢 ${store.bizesNm || '상가업소'}
+                </div>
+                <div style="display: inline-block; font-size: 10px; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 2px 6px; border-radius: 4px; margin-bottom: 6px;">
+                  ${store.indsSclsNm || store.indsMclsNm || '소상공인 업종'}
+                </div>
+                <div style="font-size: 11px; color: #64748b; line-height: 1.4;">
+                  📍 ${store.rdnmAdr || store.lnoAdr || '주소 정보 없음'}
+                </div>
+              </div>
+            `;
+
+            const infowindow = new window.kakao.maps.InfoWindow({
+              content: contentHtml,
+              removable: true
+            });
+
+            window.kakao.maps.event.addListener(storeMarker, 'click', () => {
+              if (activeInfoWindowRef.current) activeInfoWindowRef.current.close();
+              infowindow.open(map, storeMarker);
+              activeInfoWindowRef.current = infowindow;
+            });
+
+            storeMarkersRef.current.push(storeMarker);
+          });
+        } catch (err) {
+          console.warn("storeListInRadius fetch warning:", err);
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
       useEffect(() => {
         const initMap = () => {
@@ -1664,27 +1783,30 @@
             const container = mapContainerRef.current;
             if (!container) return;
 
-            const centerPos = new window.kakao.maps.LatLng(37.5665, 126.9780);
+            const initialLat = 37.5665;
+            const initialLng = 126.9780;
+            const centerPos = new window.kakao.maps.LatLng(initialLat, initialLng);
 
             if (!mapObjRef.current) {
-              const options = { center: centerPos, level: 7 };
+              const options = { center: centerPos, level: 4 };
               mapObjRef.current = new window.kakao.maps.Map(container, options);
             } else {
               mapObjRef.current.relayout();
               mapObjRef.current.setCenter(centerPos);
             }
 
+            // 초기 300m 상가업소 조회
+            fetchStoresInRadius(initialLat, initialLng);
+
             const triggerRelayout = () => {
               if (mapObjRef.current) {
                 mapObjRef.current.relayout();
-                mapObjRef.current.setCenter(centerPos);
               }
             };
 
             requestAnimationFrame(triggerRelayout);
             setTimeout(triggerRelayout, 100);
             setTimeout(triggerRelayout, 300);
-            setTimeout(triggerRelayout, 600);
 
             if (window.ResizeObserver && mapContainerRef.current) {
               const ro = new ResizeObserver(() => triggerRelayout());
@@ -1693,10 +1815,11 @@
 
             window.addEventListener('resize', triggerRelayout);
 
-            // 지도 클릭 시 중심 이동
+            // 지도 클릭 이벤트: 중심점 이동 및 300m 상가 조회
             window.kakao.maps.event.addListener(mapObjRef.current, 'click', (mouseEvent) => {
               const latlng = mouseEvent.latLng;
               mapObjRef.current.panTo(latlng);
+              fetchStoresInRadius(latlng.getLat(), latlng.getLng());
             });
           });
         };
@@ -1720,9 +1843,13 @@
 
         const ps = new window.kakao.maps.services.Places();
         ps.keywordSearch(searchKeyword, (data, status) => {
-          if (status === window.kakao.maps.services.Status.OK) {
-            const targetPos = new window.kakao.maps.LatLng(data[0].y, data[0].x);
-            mapObjRef.current.setCenter(targetPos);
+          if (status === window.kakao.maps.services.Status.OK && data[0]) {
+            const targetLat = parseFloat(data[0].y);
+            const targetLng = parseFloat(data[0].x);
+            const targetPos = new window.kakao.maps.LatLng(targetLat, targetLng);
+            
+            mapObjRef.current.panTo(targetPos);
+            fetchStoresInRadius(targetLat, targetLng);
           } else {
             alert('검색한 위치를 찾을 수 없습니다.');
           }
@@ -1734,23 +1861,41 @@
           <AdminNav setView={setView} currentView="admin_seoul_cmrcl" adminUser={adminUser} refreshLeads={refreshLeads} handleLogout={handleLogout} />
           
           <div className="flex-1 w-full relative">
-            {/* 상단 검색바 */}
-            <div className="absolute top-4 left-4 z-10 w-72 sm:w-80 bg-slate-900/90 border border-slate-700/80 backdrop-blur-md rounded-2xl shadow-xl p-3 text-white">
+            {/* 좌측 상단 위치 검색 & 반경 300m 상가 현황 리포트 바 */}
+            <div className="absolute top-4 left-4 z-10 w-80 sm:w-96 bg-slate-900/95 border border-slate-700/80 backdrop-blur-md rounded-2xl shadow-2xl p-4 text-white space-y-3">
               <form onSubmit={handleSearchSubmit} className="flex gap-2">
                 <input
                   type="text"
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
-                  placeholder="위치 또는 지역 검색 (예: 강남역, 명동)"
+                  placeholder="위치/주소 검색 (예: 강남역, 명동, 홍대입구)"
                   className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-medium text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
                 />
                 <button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-500 font-extrabold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-md"
+                  disabled={isLoading}
+                  className="bg-blue-600 hover:bg-blue-500 font-extrabold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-md whitespace-nowrap"
                 >
-                  🔍 검색
+                  {isLoading ? '⏳' : '🔍'} 검색
                 </button>
               </form>
+
+              {/* 반경 300m 상가 조회 결과 현황 카드 */}
+              <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/80 space-y-1.5 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="text-[11px] font-bold text-slate-400">📍 중심점 위치</span>
+                  <span className="text-xs font-black text-emerald-400 truncate max-w-[200px]">{currentAddress}</span>
+                </div>
+                <div className="flex justify-between items-center pt-1 border-t border-slate-700/60">
+                  <span className="text-[11px] font-bold text-blue-300">⭕ 탐색 반경: <strong>300m</strong></span>
+                  <span className="text-xs font-black text-blue-400 bg-blue-950 px-2 py-0.5 rounded-full border border-blue-700">
+                    🏪 발견 상가: <strong>{storeCount}개</strong>
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-400 pt-1 text-center">
+                  💡 지도를 클릭하거나 검색하면 중심점 반경 300m 이내 상가가 마커로 표시됩니다.
+                </p>
+              </div>
             </div>
 
             {/* Kakao Map 지도 영역 100% */}

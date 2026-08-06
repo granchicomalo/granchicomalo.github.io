@@ -1631,133 +1631,7 @@
     function AdminSeoulCmrclPage({ setView, adminUser, handleLogout, refreshLeads }) {
       const mapContainerRef = useRef(null);
       const mapObjRef = useRef(null);
-      const markerRef = useRef(null);
-      const circleRef = useRef(null);
-
-      const SIDO_DATA = [
-        { name: '서울특별시', sigungu: ['전체', '강남구', '강동구', '강북구', '강서구', '관악구', '광진구', '구로구', '금천구', '노원구', '도봉구', '동대문구', '동작구', '마포구', '서대문구', '서초구', '성동구', '성북구', '송파구', '양천구', '영등포구', '용산구', '은평구', '종로구', '중구', '중랑구'] },
-        { name: '경기도', sigungu: ['전체', '수원시', '성남시', '고양시', '용인시', '부천시', '안산시', '남양주시', '안양시', '화성시', '평택시', '의정부시', '파주시', '시흥시', '김포시', '광명시', '광주시', '군포시', '이천시', '오산시', '하남시', '양주시', '구리시', '안성시', '포천시', '의왕시', '여주시'] },
-        { name: '인천광역시', sigungu: ['전체', '중구', '동구', '미추홀구', '연수구', '남동구', '부평구', '계양구', '서구', '강화군', '옹진군'] },
-        { name: '부산광역시', sigungu: ['전체', '해운대구', '부산진구', '동래구', '남구', '북구', '사하구', '금정구', '강서구', '연제구', '수영구', '사상구', '중구', '동구', '영도구'] },
-        { name: '대구광역시', sigungu: ['전체', '중구', '동구', '서구', '남구', '북구', '수성구', '달서구', '달성군', '군위군'] },
-        { name: '대전광역시', sigungu: ['전체', '유성구', '서구', '중구', '동구', '대덕구'] },
-        { name: '광주광역시', sigungu: ['전체', '서구', '북구', '광산구', '동구', '남구'] },
-        { name: '세종특별자치시', sigungu: ['전체', '세종시'] }
-      ];
-
-      const [targetMonth, setTargetMonth] = useState('2026년 07월');
-      const [activeTab, setActiveTab] = useState('summary'); // 'summary' | 'gender' | 'age'
-      const [selectedSido, setSelectedSido] = useState('서울특별시');
-      const [selectedSigungu, setSelectedSigungu] = useState('강남구');
-      const [searchDong, setSearchDong] = useState('');
-      const [isLoading, setIsLoading] = useState(false);
-      
-      const [ppltnStats, setPpltnStats] = useState({
-        regionName: '서울특별시 강남구',
-        totPpltn: 541200,
-        totHshld: 234150,
-        ppltnPerHshld: 2.31,
-        malePpltn: 258400,
-        femalePpltn: 282800,
-        sexRatio: 91.3, // 여성 100명당 남성 수
-        age10sRatio: 12,
-        age20sRatio: 16,
-        age30sRatio: 22,
-        age40sRatio: 20,
-        age50sRatio: 15,
-        age60AboveRatio: 15
-      });
-
-      const MOIS_API_KEY = 'BahaUoW8jiYD6HVMXVBRJEpafXTnR%2FVHFkUWR0WwW%2BOzXumYn3YlV8oqDnoc8PYSg0vcwp3qT%2FalQ7707m0fKA%3D%3D';
-
-      const drawCircleAndMarker = (latlng, mapObj) => {
-        if (!mapObj || !window.kakao) return;
-
-        if (circleRef.current) circleRef.current.setMap(null);
-        if (markerRef.current) markerRef.current.setMap(null);
-
-        markerRef.current = new window.kakao.maps.Marker({ position: latlng });
-        markerRef.current.setMap(mapObj);
-
-        circleRef.current = new window.kakao.maps.Circle({
-          center: latlng,
-          radius: 500,
-          strokeWeight: 2,
-          strokeColor: '#2563eb',
-          strokeOpacity: 0.9,
-          strokeStyle: 'dashed',
-          fillColor: '#60a5fa',
-          fillOpacity: 0.22
-        });
-        circleRef.current.setMap(mapObj);
-      };
-
-      const fetchMoisPopData = async (sido, sigungu, dong = '') => {
-        setIsLoading(true);
-        const searchAddr = `${sido} ${sigungu === '전체' ? '' : sigungu} ${dong}`.trim();
-        
-        try {
-          const rawUrl = `https://apis.data.go.kr/1741000/admmPpltnHhStus/selectAdmmPpltnHhStus?serviceKey=${MOIS_API_KEY}&type=json&pageNo=1&numOfRows=20&srchTxt=${encodeURIComponent(searchAddr)}`;
-          const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(rawUrl)}`;
-
-          const res = await fetch(proxyUrl).catch(() => null);
-          let fetched = null;
-
-          if (res && res.ok) {
-            const data = await res.json().catch(() => null);
-            if (data) {
-              const items = data.Response?.body?.items || data.items || data.item || [];
-              if (Array.isArray(items) && items.length > 0) {
-                fetched = items[0];
-              } else if (typeof items === 'object') {
-                fetched = items;
-              }
-            }
-          }
-
-          if (mapObjRef.current && window.kakao) {
-            const ps = new window.kakao.maps.services.Places();
-            ps.keywordSearch(searchAddr, (dataArr, status) => {
-              if (status === window.kakao.maps.services.Status.OK && dataArr[0]) {
-                const targetPos = new window.kakao.maps.LatLng(dataArr[0].y, dataArr[0].x);
-                mapObjRef.current.panTo(targetPos);
-                drawCircleAndMarker(targetPos, mapObjRef.current);
-              }
-            });
-          }
-
-          if (fetched) {
-            const totPop = parseInt(fetched.totPpltnCo || fetched.totPop || '541200', 10);
-            const totHshld = parseInt(fetched.totHhCo || fetched.totHshld || '234150', 10);
-            const malePop = parseInt(fetched.malePpltnCo || fetched.mlPop || '258400', 10);
-            const femalePop = parseInt(fetched.femalePpltnCo || fetched.fmlPop || '282800', 10);
-            const pPerH = totHshld > 0 ? parseFloat((totPop / totHshld).toFixed(2)) : 2.31;
-            const sexR = femalePop > 0 ? parseFloat(((malePop / femalePop) * 100).toFixed(1)) : 91.3;
-
-            setPpltnStats({
-              regionName: searchAddr,
-              totPpltn: totPop,
-              totHshld: totHshld,
-              ppltnPerHshld: pPerH,
-              malePpltn: malePop,
-              femalePpltn: femalePop,
-              sexRatio: sexR,
-              age10sRatio: 12,
-              age20sRatio: 16,
-              age30sRatio: 22,
-              age40sRatio: 20,
-              age50sRatio: 15,
-              age60AboveRatio: 15
-            });
-          } else {
-            setPpltnStats(prev => ({ ...prev, regionName: searchAddr }));
-          }
-        } catch (err) {
-          console.warn("Mois API fetch error:", err.message);
-        } finally {
-          setIsLoading(false);
-        }
-      };
+      const [searchKeyword, setSearchKeyword] = useState('');
 
       useEffect(() => {
         const initMap = () => {
@@ -1770,14 +1644,12 @@
             const centerPos = new window.kakao.maps.LatLng(37.5665, 126.9780);
 
             if (!mapObjRef.current) {
-              const options = { center: centerPos, level: 6 };
+              const options = { center: centerPos, level: 7 };
               mapObjRef.current = new window.kakao.maps.Map(container, options);
             } else {
               mapObjRef.current.relayout();
               mapObjRef.current.setCenter(centerPos);
             }
-
-            drawCircleAndMarker(centerPos, mapObjRef.current);
 
             const triggerRelayout = () => {
               if (mapObjRef.current) {
@@ -1789,21 +1661,19 @@
             requestAnimationFrame(triggerRelayout);
             setTimeout(triggerRelayout, 100);
             setTimeout(triggerRelayout, 300);
+            setTimeout(triggerRelayout, 600);
+
+            if (window.ResizeObserver && mapContainerRef.current) {
+              const ro = new ResizeObserver(() => triggerRelayout());
+              ro.observe(mapContainerRef.current);
+            }
 
             window.addEventListener('resize', triggerRelayout);
 
+            // 지도 클릭 시 중심 이동
             window.kakao.maps.event.addListener(mapObjRef.current, 'click', (mouseEvent) => {
               const latlng = mouseEvent.latLng;
               mapObjRef.current.panTo(latlng);
-              drawCircleAndMarker(latlng, mapObjRef.current);
-
-              const geocoder = new window.kakao.maps.services.Geocoder();
-              geocoder.coord2Address(latlng.getLng(), latlng.getLat(), (result, status) => {
-                if (status === window.kakao.maps.services.Status.OK && result[0]) {
-                  const addr = result[0].address ? result[0].address.address_name : '선택 위치';
-                  setPpltnStats(prev => ({ ...prev, regionName: addr }));
-                }
-              });
             });
           });
         };
@@ -1821,246 +1691,43 @@
         }
       }, []);
 
-      const handleSidoChange = (e) => {
-        const sido = e.target.value;
-        setSelectedSido(sido);
-        const targetObj = SIDO_DATA.find(s => s.name === sido);
-        if (targetObj && targetObj.sigungu.length > 0) {
-          setSelectedSigungu(targetObj.sigungu[0]);
-        }
-      };
-
       const handleSearchSubmit = (e) => {
         e.preventDefault();
-        fetchMoisPopData(selectedSido, selectedSigungu, searchDong);
-      };
+        if (!searchKeyword.trim() || !mapObjRef.current || !window.kakao) return;
 
-      const currentSigunguList = SIDO_DATA.find(s => s.name === selectedSido)?.sigungu || [];
+        const ps = new window.kakao.maps.services.Places();
+        ps.keywordSearch(searchKeyword, (data, status) => {
+          if (status === window.kakao.maps.services.Status.OK) {
+            const targetPos = new window.kakao.maps.LatLng(data[0].y, data[0].x);
+            mapObjRef.current.setCenter(targetPos);
+          } else {
+            alert('검색한 위치를 찾을 수 없습니다.');
+          }
+        });
+      };
 
       return (
         <div className="bg-slate-900 text-white min-h-screen flex flex-col relative overflow-hidden">
           <AdminNav setView={setView} currentView="admin_seoul_cmrcl" adminUser={adminUser} refreshLeads={refreshLeads} handleLogout={handleLogout} />
           
           <div className="flex-1 w-full relative">
-            {/* 행정안전부 주민등록 인구통계 오픈 포털 패널 (jumin.go.kr 스타일) */}
-            <div className="absolute top-4 left-4 z-10 w-96 sm:w-[440px] bg-slate-900/95 border border-slate-700/90 backdrop-blur-xl rounded-2xl shadow-2xl p-5 text-white space-y-4 max-h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar">
-              
-              {/* 타이틀 & 헤더 */}
-              <div className="border-b border-slate-800 pb-3 flex justify-between items-start">
-                <div>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className="text-[10px] bg-blue-600/30 text-blue-300 font-extrabold px-2 py-0.5 rounded border border-blue-500/30 uppercase">
-                      행정안전부 오픈통계 포털
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-semibold">rdoa.jumin.go.kr API</span>
-                  </div>
-                  <h2 className="text-base font-black text-white flex items-center gap-1.5">
-                    🏛️ 주민등록 인구 및 세대현황
-                  </h2>
-                </div>
-              </div>
-
-              {/* 검색 및 검색 조건 설정 폼 */}
-              <form onSubmit={handleSearchSubmit} className="space-y-3 bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/60">
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">📅 기준년월</label>
-                    <select
-                      value={targetMonth}
-                      onChange={(e) => setTargetMonth(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white focus:outline-none focus:border-blue-500"
-                    >
-                      <option value="2026년 07월">2026년 07월 (최신)</option>
-                      <option value="2026년 06월">2026년 06월</option>
-                      <option value="2026년 05월">2026년 05월</option>
-                      <option value="2026년 04월">2026년 04월</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">🏙️ 시/도 선택</label>
-                    <select
-                      value={selectedSido}
-                      onChange={handleSidoChange}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white focus:outline-none focus:border-blue-500"
-                    >
-                      {SIDO_DATA.map((item, idx) => (
-                        <option key={idx} value={item.name}>{item.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">🏘️ 시/군/구 선택</label>
-                    <select
-                      value={selectedSigungu}
-                      onChange={(e) => setSelectedSigungu(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white focus:outline-none focus:border-blue-500"
-                    >
-                      {currentSigunguList.map((sg, idx) => (
-                        <option key={idx} value={sg}>{sg}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">🚩 읍/면/동 검색</label>
-                    <input
-                      type="text"
-                      value={searchDong}
-                      onChange={(e) => setSearchDong(e.target.value)}
-                      placeholder="동/리 입력 (선택)"
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-
+            {/* 상단 검색바 */}
+            <div className="absolute top-4 left-4 z-10 w-72 sm:w-80 bg-slate-900/90 border border-slate-700/80 backdrop-blur-md rounded-2xl shadow-xl p-3 text-white">
+              <form onSubmit={handleSearchSubmit} className="flex gap-2">
+                <input
+                  type="text"
+                  value={searchKeyword}
+                  onChange={(e) => setSearchKeyword(e.target.value)}
+                  placeholder="위치 또는 지역 검색 (예: 강남역, 명동)"
+                  className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-medium text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                />
                 <button
                   type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs py-2 rounded-lg transition flex items-center justify-center gap-1.5 shadow-md"
+                  className="bg-blue-600 hover:bg-blue-500 font-extrabold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-md"
                 >
-                  {isLoading ? '⏳ 통계 데이터 검색 중...' : '📊 주민등록 통계 조회하기'}
+                  🔍 검색
                 </button>
               </form>
-
-              {/* 통계 구분 탭 버튼 (jumin.go.kr 스타일) */}
-              <div className="flex bg-slate-800 p-1 rounded-xl gap-1">
-                <button
-                  onClick={() => setActiveTab('summary')}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${activeTab === 'summary' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'}`}
-                >
-                  인구·세대 총괄
-                </button>
-                <button
-                  onClick={() => setActiveTab('gender')}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${activeTab === 'gender' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'}`}
-                >
-                  성별 인구·성비
-                </button>
-                <button
-                  onClick={() => setActiveTab('age')}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${activeTab === 'age' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'}`}
-                >
-                  연령별 분포
-                </button>
-              </div>
-
-              {/* 행정안전부 오픈통계 테이블 결과 뷰 */}
-              <div className="bg-slate-800/90 rounded-xl p-3.5 border border-slate-700/80 space-y-3">
-                <div className="flex justify-between items-center border-b border-slate-700/80 pb-2">
-                  <span className="text-[11px] font-bold text-slate-400">조회 행정구역:</span>
-                  <span className="text-xs font-black text-emerald-400">{ppltnStats.regionName}</span>
-                </div>
-
-                {/* 탭 1: 인구 / 세대 총괄 표 */}
-                {activeTab === 'summary' && (
-                  <div className="space-y-2.5">
-                    <table className="w-full text-xs text-left border-collapse">
-                      <thead>
-                        <tr className="bg-slate-900/80 text-slate-300 font-bold border-b border-slate-700 text-[11px]">
-                          <th className="p-2">항목</th>
-                          <th className="p-2 text-right">인구/세대 수</th>
-                          <th className="p-2 text-right">비고</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-700/50 text-[11px]">
-                        <tr>
-                          <td className="p-2 text-slate-300 font-bold">👥 총 주민등록 인구</td>
-                          <td className="p-2 text-right font-black text-blue-300">{ppltnStats.totPpltn.toLocaleString()} 명</td>
-                          <td className="p-2 text-right text-slate-400 text-[10px]">기준년월</td>
-                        </tr>
-                        <tr>
-                          <td className="p-2 text-slate-300 font-bold">🏠 총 세대 수</td>
-                          <td className="p-2 text-right font-black text-emerald-400">{ppltnStats.totHshld.toLocaleString()} 세대</td>
-                          <td className="p-2 text-right text-slate-400 text-[10px]">주민등록 기준</td>
-                        </tr>
-                        <tr>
-                          <td className="p-2 text-slate-300 font-bold">👨‍👩‍👧 세대당 인구 수</td>
-                          <td className="p-2 text-right font-black text-amber-300">{ppltnStats.ppltnPerHshld} 명</td>
-                          <td className="p-2 text-right text-slate-400 text-[10px]">평균 세대원</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-
-                {/* 탭 2: 성별 인구 및 성비 표 */}
-                {activeTab === 'gender' && (
-                  <div className="space-y-2.5">
-                    <table className="w-full text-xs text-left border-collapse">
-                      <thead>
-                        <tr className="bg-slate-900/80 text-slate-300 font-bold border-b border-slate-700 text-[11px]">
-                          <th className="p-2">구분</th>
-                          <th className="p-2 text-right">인구 수</th>
-                          <th className="p-2 text-right">비율</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-700/50 text-[11px]">
-                        <tr>
-                          <td className="p-2 text-blue-400 font-bold">♂️ 남성 인구</td>
-                          <td className="p-2 text-right font-black text-blue-300">{ppltnStats.malePpltn.toLocaleString()} 명</td>
-                          <td className="p-2 text-right font-bold text-slate-200">
-                            {ppltnStats.totPpltn > 0 ? ((ppltnStats.malePpltn / ppltnStats.totPpltn) * 100).toFixed(1) : '47.7'}%
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="p-2 text-rose-400 font-bold">♀️ 여성 인구</td>
-                          <td className="p-2 text-right font-black text-rose-300">{ppltnStats.femalePpltn.toLocaleString()} 명</td>
-                          <td className="p-2 text-right font-bold text-slate-200">
-                            {ppltnStats.totPpltn > 0 ? ((ppltnStats.femalePpltn / ppltnStats.totPpltn) * 100).toFixed(1) : '52.3'}%
-                          </td>
-                        </tr>
-                        <tr className="bg-slate-900/40">
-                          <td className="p-2 text-amber-300 font-bold">⚖️ 성비 (여100명당)</td>
-                          <td className="p-2 text-right font-black text-amber-300" colSpan="2">
-                            {ppltnStats.sexRatio} 명
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-
-                {/* 탭 3: 연령별 인구 분포 */}
-                {activeTab === 'age' && (
-                  <div className="space-y-2 text-xs">
-                    <span className="text-[10px] font-bold text-slate-400 block mb-1">📊 연령대별 분포 비율 (%)</span>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-700/50 text-center">
-                        <span className="text-[10px] text-slate-400 block mb-0.5">10대 이하</span>
-                        <strong className="text-xs font-black text-blue-300">{ppltnStats.age10sRatio}%</strong>
-                      </div>
-                      <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-700/50 text-center">
-                        <span className="text-[10px] text-slate-400 block mb-0.5">20대</span>
-                        <strong className="text-xs font-black text-emerald-400">{ppltnStats.age20sRatio}%</strong>
-                      </div>
-                      <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-700/50 text-center">
-                        <span className="text-[10px] text-slate-400 block mb-0.5">30대</span>
-                        <strong className="text-xs font-black text-amber-300">{ppltnStats.age30sRatio}%</strong>
-                      </div>
-                      <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-700/50 text-center">
-                        <span className="text-[10px] text-slate-400 block mb-0.5">40대</span>
-                        <strong className="text-xs font-black text-purple-300">{ppltnStats.age40sRatio}%</strong>
-                      </div>
-                      <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-700/50 text-center">
-                        <span className="text-[10px] text-slate-400 block mb-0.5">50대</span>
-                        <strong className="text-xs font-black text-slate-200">{ppltnStats.age50sRatio}%</strong>
-                      </div>
-                      <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-700/50 text-center">
-                        <span className="text-[10px] text-slate-400 block mb-0.5">60대 이상</span>
-                        <strong className="text-xs font-black text-slate-400">{ppltnStats.age60AboveRatio}%</strong>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="pt-1 text-[9px] text-slate-400 text-center border-t border-slate-700/60">
-                  🏛️ 행정안전부 주민등록 인구통계 시스템 (`rdoa.jumin.go.kr`) 연동
-                </div>
-              </div>
             </div>
 
             {/* Kakao Map 지도 영역 100% */}

@@ -1654,7 +1654,7 @@
     function AdminSeoulCmrclPage({ setView, adminUser, handleLogout, refreshLeads }) {
       const mapContainerRef = useRef(null);
       const mapObjRef = useRef(null);
-      const storeMarkersRef = useRef([]);
+      const storeMarkerMapRef = useRef({}); // bizesId -> { marker, infowindow, store }
       const centerMarkerRef = useRef(null);
       const radiusCircleRef = useRef(null);
       const activeInfoWindowRef = useRef(null);
@@ -1662,30 +1662,66 @@
       const [searchKeyword, setSearchKeyword] = useState('');
       const [isLoading, setIsLoading] = useState(false);
       const [storeCount, setStoreCount] = useState(0);
+      const [groupedStores, setGroupedStores] = useState({});
       const [currentAddress, setCurrentAddress] = useState('서울 중심점');
+      const [selectedBizesId, setSelectedBizesId] = useState(null);
 
       const SERVICE_KEY = 'BahaUoW8jiYD6HVMXVBRJEpafXTnR%2FVHFkUWR0WwW%2BOzXumYn3YlV8oqDnoc8PYSg0vcwp3qT%2FalQ7707m0fKA%3D%3D';
+
+      // 마커 이미지 정의 (기본 마커 vs 하이라이트 마커)
+      const getMarkerImages = () => {
+        if (!window.kakao) return { defaultImg: null, highlightImg: null };
+
+        const defaultSvg = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="34" viewBox="0 0 28 34">
+            <path fill="#2563eb" stroke="#ffffff" stroke-width="2" d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 20 14 20s14-9.5 14-20C28 6.268 21.732 0 14 0z"/>
+            <circle cx="14" cy="12" r="5" fill="#ffffff"/>
+          </svg>
+        `)}`;
+
+        const highlightSvg = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="38" height="46" viewBox="0 0 38 46">
+            <path fill="#f59e0b" stroke="#ffffff" stroke-width="3" d="M19 0C8.507 0 0 8.507 0 19c0 14.25 19 27 19 27s19-12.75 19-27C38 8.507 29.493 0 19 0z"/>
+            <circle cx="19" cy="17" r="7" fill="#ffffff"/>
+          </svg>
+        `)}`;
+
+        const defaultImg = new window.kakao.maps.MarkerImage(
+          defaultSvg,
+          new window.kakao.maps.Size(28, 34),
+          { offset: new window.kakao.maps.Point(14, 34) }
+        );
+
+        const highlightImg = new window.kakao.maps.MarkerImage(
+          highlightSvg,
+          new window.kakao.maps.Size(38, 46),
+          { offset: new window.kakao.maps.Point(19, 46) }
+        );
+
+        return { defaultImg, highlightImg };
+      };
 
       // 300m 반경 내 소상공인 상가업소 조회 API 호출 및 지도 마커 렌더링
       const fetchStoresInRadius = async (lat, lng) => {
         if (!mapObjRef.current || !window.kakao) return;
         setIsLoading(true);
+        setSelectedBizesId(null);
 
         const map = mapObjRef.current;
         const centerLatLng = new window.kakao.maps.LatLng(lat, lng);
+        const { defaultImg } = getMarkerImages();
 
-        // 1. 기존 마커 및 300m 반경 원 초기화
-        if (storeMarkersRef.current.length > 0) {
-          storeMarkersRef.current.forEach(m => m.setMap(null));
-          storeMarkersRef.current = [];
-        }
-        if (activeInfoWindowRef.current) {
-          activeInfoWindowRef.current.close();
-        }
+        // 1. 기존 마커 및 300m 반경 원, 맵핑 객체 초기화
+        Object.values(storeMarkerMapRef.current).forEach(item => {
+          if (item.marker) item.marker.setMap(null);
+        });
+        storeMarkerMapRef.current = {};
+
+        if (activeInfoWindowRef.current) activeInfoWindowRef.current.close();
         if (centerMarkerRef.current) centerMarkerRef.current.setMap(null);
         if (radiusCircleRef.current) radiusCircleRef.current.setMap(null);
 
-        // 2. 중심점 마커 표시 (사용자가 직접 클릭한 중심점은 눈에 띄는 붉은색 핀 마커로 색상 구분)
+        // 2. 중심점 마커 표시 (붉은색 핀 마커)
         const redPinSvg = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
           <svg xmlns="http://www.w3.org/2000/svg" width="36" height="42" viewBox="0 0 36 42">
             <path fill="#ef4444" stroke="#ffffff" stroke-width="2.5" d="M18 0C8.059 0 0 8.059 0 18c0 13.5 18 24 18 24s18-10.5 18-24C36 8.059 27.941 0 18 0z"/>
@@ -1706,16 +1742,16 @@
         });
         centerMarkerRef.current.setMap(map);
 
-        // 3. 300m 반경 원 표시
+        // 3. 반경 300m 원(Circle) 시각화 (strokeColor: #00a0e9, strokeOpacity: 0.8, fillColor: #00a0e9, fillOpacity: 0.2)
         radiusCircleRef.current = new window.kakao.maps.Circle({
           center: centerLatLng,
           radius: 300,
-          strokeWeight: 2,
-          strokeColor: '#2563eb',
+          strokeWeight: 1,
+          strokeColor: '#00a0e9',
           strokeOpacity: 0.9,
-          strokeStyle: 'dashed',
-          fillColor: '#3b82f6',
-          fillOpacity: 0.18
+          strokeStyle: 'solid',
+          fillColor: '#00a0e9',
+          fillOpacity: 0.2
         });
         radiusCircleRef.current.setMap(map);
 
@@ -1727,7 +1763,7 @@
           }
         });
 
-        // 4. 소상공인시장진흥공단 반경내 상가업소 조회 API 요청
+        // 4. 소상공인시장진흥공단 반경내 상가업소 조회 API 요청 (radius=300)
         const targetUrl = `https://apis.data.go.kr/B553077/api/open/sdsc2/storeListInRadius?radius=300&cx=${lng}&cy=${lat}&type=json&numOfRows=100&ServiceKey=${SERVICE_KEY}`;
         const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
 
@@ -1744,15 +1780,28 @@
 
           setStoreCount(items.length);
 
-          // 5. 상가업소 마커 렌더링 & 클릭 이벤트 등록
+          // 5. 업종 대분류(indsLclsNm) 기준 데이터 그룹화
+          const groups = items.reduce((acc, store) => {
+            const cat = store.indsLclsNm || '기타 서비스';
+            if (!acc[cat]) acc[cat] = [];
+            acc[cat].push(store);
+            return acc;
+          }, {});
+
+          setGroupedStores(groups);
+
+          // 6. 상가업소 마커 렌더링 및 markerMapRef 맵핑
           items.forEach(store => {
             const storeLat = parseFloat(store.lat);
             const storeLng = parseFloat(store.lon);
+            const bId = store.bizesId || `store_${Math.random()}`;
+
             if (!storeLat || !storeLng) return;
 
             const storePos = new window.kakao.maps.LatLng(storeLat, storeLng);
             const storeMarker = new window.kakao.maps.Marker({
               position: storePos,
+              image: defaultImg,
               map: map
             });
 
@@ -1762,7 +1811,7 @@
                   🏢 ${store.bizesNm || '상가업소'}
                 </div>
                 <div style="display: inline-block; font-size: 10px; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 2px 6px; border-radius: 4px; margin-bottom: 6px;">
-                  ${store.indsSclsNm || store.indsMclsNm || '소상공인 업종'}
+                  ${store.indsLclsNm || ''} > ${store.indsSclsNm || store.indsMclsNm || '업종'}
                 </div>
                 <div style="font-size: 11px; color: #64748b; line-height: 1.4;">
                   📍 ${store.rdnmAdr || store.lnoAdr || '주소 정보 없음'}
@@ -1775,18 +1824,55 @@
               removable: true
             });
 
-            window.kakao.maps.event.addListener(storeMarker, 'click', () => {
-              if (activeInfoWindowRef.current) activeInfoWindowRef.current.close();
-              infowindow.open(map, storeMarker);
-              activeInfoWindowRef.current = infowindow;
-            });
+            // 마커 맵핑 저장
+            storeMarkerMapRef.current[bId] = {
+              marker: storeMarker,
+              infowindow: infowindow,
+              store: store
+            };
 
-            storeMarkersRef.current.push(storeMarker);
+            // 마커 클릭 이벤트: 해당 리포트 하이라이트
+            window.kakao.maps.event.addListener(storeMarker, 'click', () => {
+              highlightStoreMarker(bId);
+            });
           });
         } catch (err) {
           console.warn("storeListInRadius fetch warning:", err);
         } finally {
           setIsLoading(false);
+        }
+      };
+
+      // 리스트 항목 클릭 시 마커 하이라이트 & 지도 이동 & 인포윈도우 오픈
+      const highlightStoreMarker = (bizesId) => {
+        if (!mapObjRef.current || !window.kakao) return;
+        const map = mapObjRef.current;
+        const { defaultImg, highlightImg } = getMarkerImages();
+
+        // 1. 모든 마커 이미지 기본 초기화
+        Object.values(storeMarkerMapRef.current).forEach(item => {
+          if (item.marker && defaultImg) {
+            item.marker.setImage(defaultImg);
+            item.marker.setZIndex(1);
+          }
+        });
+
+        if (activeInfoWindowRef.current) {
+          activeInfoWindowRef.current.close();
+        }
+
+        // 2. 선택된 상가 마커 하이라이트
+        const targetItem = storeMarkerMapRef.current[bizesId];
+        if (targetItem && targetItem.marker) {
+          if (highlightImg) {
+            targetItem.marker.setImage(highlightImg);
+            targetItem.marker.setZIndex(20);
+          }
+          
+          map.panTo(targetItem.marker.getPosition());
+          targetItem.infowindow.open(map, targetItem.marker);
+          activeInfoWindowRef.current = targetItem.infowindow;
+          setSelectedBizesId(bizesId);
         }
       };
 
@@ -1876,14 +1962,16 @@
           <AdminNav setView={setView} currentView="admin_seoul_cmrcl" adminUser={adminUser} refreshLeads={refreshLeads} handleLogout={handleLogout} />
           
           <div className="flex-1 w-full relative">
-            {/* 좌측 상단 위치 검색 & 반경 300m 상가 현황 리포트 바 */}
-            <div className="absolute top-4 left-4 z-10 w-80 sm:w-96 bg-slate-900/95 border border-slate-700/80 backdrop-blur-md rounded-2xl shadow-2xl p-4 text-white space-y-3">
-              <form onSubmit={handleSearchSubmit} className="flex gap-2">
+            {/* 좌측 패널: 위치 검색 + 반경 300m 시각화 + 업종 대분류 상가 스크롤 리스트 */}
+            <div className="absolute top-4 left-4 z-10 w-80 sm:w-96 bg-slate-900/95 border border-slate-700/90 backdrop-blur-xl rounded-2xl shadow-2xl p-4 text-white space-y-3.5 max-h-[calc(100vh-80px)] flex flex-col">
+              
+              {/* 상단 위치 검색 폼 */}
+              <form onSubmit={handleSearchSubmit} className="flex gap-2 flex-shrink-0">
                 <input
                   type="text"
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
-                  placeholder="위치/주소 검색 (예: 강남역, 명동, 홍대입구)"
+                  placeholder="위치/주소 검색 (예: 강남역, 명동)"
                   className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-medium text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
                 />
                 <button
@@ -1895,21 +1983,81 @@
                 </button>
               </form>
 
-              {/* 반경 300m 상가 조회 결과 현황 카드 */}
-              <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/80 space-y-1.5 text-xs">
+              {/* 반경 300m 요약 카드 */}
+              <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/80 space-y-1.5 text-xs flex-shrink-0">
                 <div className="flex justify-between items-center">
-                  <span className="text-[11px] font-bold text-slate-400">📍 중심점 위치</span>
-                  <span className="text-xs font-black text-emerald-400 truncate max-w-[200px]">{currentAddress}</span>
+                  <span className="text-[11px] font-bold text-slate-400">📍 중심 위치</span>
+                  <span className="text-xs font-black text-emerald-400 truncate max-w-[190px]">{currentAddress}</span>
                 </div>
                 <div className="flex justify-between items-center pt-1 border-t border-slate-700/60">
-                  <span className="text-[11px] font-bold text-blue-300">⭕ 탐색 반경: <strong>300m</strong></span>
-                  <span className="text-xs font-black text-blue-400 bg-blue-950 px-2 py-0.5 rounded-full border border-blue-700">
-                    🏪 발견 상가: <strong>{storeCount}개</strong>
+                  <span className="text-[11px] font-bold text-blue-300">⭕ 반경: <strong className="text-sky-400">300m</strong></span>
+                  <span className="text-xs font-black text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-700/80">
+                    🏪 상가업소: <strong>{storeCount}개</strong>
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-400 pt-1 text-center">
-                  💡 지도를 클릭하거나 검색하면 중심점 반경 300m 이내 상가가 마커로 표시됩니다.
-                </p>
+              </div>
+
+              {/* 업종 대분류 그룹별 상가 스크롤 목록 */}
+              <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 pr-1">
+                {isLoading ? (
+                  <div className="py-8 text-center text-xs text-slate-400 space-y-2">
+                    <div className="animate-spin text-lg">⏳</div>
+                    <p>반경 300m 상가업소를 불러오는 중...</p>
+                  </div>
+                ) : Object.keys(groupedStores).length === 0 ? (
+                  <div className="py-8 text-center text-xs text-slate-400">
+                    반경 300m 이내에 검색된 상가가 없습니다.
+                  </div>
+                ) : (
+                  Object.entries(groupedStores).map(([category, stores]) => (
+                    <div key={category} className="space-y-1.5">
+                      {/* 대분류 카테고리 헤더 */}
+                      <div className="flex justify-between items-center sticky top-0 bg-slate-800/95 py-1 px-2 rounded-lg border-l-4 border-blue-500 backdrop-blur-md">
+                        <span className="text-xs font-black text-blue-300">📁 {category}</span>
+                        <span className="text-[10px] bg-slate-900 text-slate-300 font-bold px-1.5 py-0.5 rounded-full">
+                          {stores.length}
+                        </span>
+                      </div>
+
+                      {/* 세부 상가 아이템 리스트 */}
+                      <ul className="space-y-1 pl-1">
+                        {stores.map((store) => {
+                          const bId = store.bizesId || `store_${Math.random()}`;
+                          const isSelected = selectedBizesId === bId;
+
+                          return (
+                            <li
+                              key={bId}
+                              data-id={bId}
+                              onClick={() => highlightStoreMarker(bId)}
+                              className={`p-2.5 rounded-xl border transition cursor-pointer text-xs ${
+                                isSelected
+                                  ? 'bg-amber-500/20 border-amber-400 text-amber-200 shadow-md ring-1 ring-amber-400'
+                                  : 'bg-slate-800/50 border-slate-700/60 hover:bg-slate-800 hover:border-slate-600 text-slate-200'
+                              }`}
+                            >
+                              <div className="flex justify-between items-start mb-0.5">
+                                <strong className="font-extrabold text-white text-xs truncate max-w-[200px]">
+                                  {store.bizesNm}
+                                </strong>
+                                <span className="text-[10px] text-blue-400 font-bold bg-blue-950/60 px-1.5 py-0.5 rounded border border-blue-800/50">
+                                  {store.indsSclsNm || '업종'}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-slate-400 truncate">
+                                📍 {store.rdnmAdr || store.lnoAdr || '주소 미상'}
+                              </p>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="text-[9px] text-slate-400 text-center pt-1 border-t border-slate-800 flex-shrink-0">
+                💡 목록 클릭 시 해당 마커로 지도 이동 및 황금색 핀 하이라이트 표시
               </div>
             </div>
 

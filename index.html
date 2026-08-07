@@ -1641,12 +1641,13 @@
       const [storeCount, setStoreCount] = useState(0);
       const [groupedStores, setGroupedStores] = useState({});
       const [collapsedCategories, setCollapsedCategories] = useState({});
+      const [collapsedSubCategories, setCollapsedSubCategories] = useState({});
       const [currentAddress, setCurrentAddress] = useState('서울 중심점');
       const [selectedBizesId, setSelectedBizesId] = useState(null);
 
       const SERVICE_KEY = 'BahaUoW8jiYD6HVMXVBRJEpafXTnR%2FVHFkUWR0WwW%2BOzXumYn3YlV8oqDnoc8PYSg0vcwp3qT%2FalQ7707m0fKA%3D%3D';
 
-      // 카테고리 접기/펼치기 토글 핸들러
+      // 1단계 (대분류) 접기/펼치기 토글
       const toggleCategory = (cat) => {
         setCollapsedCategories(prev => ({
           ...prev,
@@ -1654,13 +1655,31 @@
         }));
       };
 
-      const expandAllCategories = () => setCollapsedCategories({});
+      // 2단계 (소분류) 접기/펼치기 토글
+      const toggleSubCategory = (mainCat, subCat) => {
+        const key = `${mainCat}::${subCat}`;
+        setCollapsedSubCategories(prev => ({
+          ...prev,
+          [key]: !prev[key]
+        }));
+      };
+
+      const expandAllCategories = () => {
+        setCollapsedCategories({});
+        setCollapsedSubCategories({});
+      };
+
       const collapseAllCategories = () => {
-        const collapsed = {};
-        Object.keys(groupedStores).forEach(cat => {
-          collapsed[cat] = true;
+        const collapsedMain = {};
+        const collapsedSub = {};
+        Object.entries(groupedStores).forEach(([mainCat, subMap]) => {
+          collapsedMain[mainCat] = true;
+          Object.keys(subMap).forEach(subCat => {
+            collapsedSub[`${mainCat}::${subCat}`] = true;
+          });
         });
-        setCollapsedCategories(collapsed);
+        setCollapsedCategories(collapsedMain);
+        setCollapsedSubCategories(collapsedSub);
       };
 
       // 마커 이미지 정의 (기본 마커 vs 하이라이트 마커)
@@ -1787,16 +1806,20 @@
 
           setStoreCount(items.length);
 
-          // 5. 업종 대분류(indsLclsNm) 기준 데이터 그룹화
+          // 5. 업종 대분류(indsLclsNm) -> 소분류(indsSclsNm / indsMclsNm) 2단계 데이터 그룹화
           const groups = items.reduce((acc, store) => {
-            const cat = store.indsLclsNm || '기타 서비스';
-            if (!acc[cat]) acc[cat] = [];
-            acc[cat].push(store);
+            const mainCat = store.indsLclsNm || '기타 서비스';
+            const subCat = store.indsSclsNm || store.indsMclsNm || '기타 업종';
+
+            if (!acc[mainCat]) acc[mainCat] = {};
+            if (!acc[mainCat][subCat]) acc[mainCat][subCat] = [];
+            acc[mainCat][subCat].push(store);
             return acc;
           }, {});
 
           setGroupedStores(groups);
           setCollapsedCategories({});
+          setCollapsedSubCategories({});
 
           // 6. 상가업소 마커 렌더링 및 markerMapRef 맵핑
           items.forEach(store => {
@@ -1883,8 +1906,10 @@
           setSelectedBizesId(bizesId);
 
           if (targetItem.store) {
-            const cat = targetItem.store.indsLclsNm || '기타 서비스';
-            setCollapsedCategories(prev => ({ ...prev, [cat]: false }));
+            const mainCat = targetItem.store.indsLclsNm || '기타 서비스';
+            const subCat = targetItem.store.indsSclsNm || targetItem.store.indsMclsNm || '기타 업종';
+            setCollapsedCategories(prev => ({ ...prev, [mainCat]: false }));
+            setCollapsedSubCategories(prev => ({ ...prev, [`${mainCat}::${subCat}`]: false }));
           }
         }
       };
@@ -2045,62 +2070,95 @@
                       </div>
                     </div>
 
-                    {Object.entries(groupedStores).map(([category, stores]) => {
-                      const isCollapsed = !!collapsedCategories[category];
+                    {Object.entries(groupedStores).map(([mainCategory, subMap]) => {
+                      const isMainCollapsed = !!collapsedCategories[mainCategory];
+                      const mainStoreCount = Object.values(subMap).reduce((sum, list) => sum + list.length, 0);
 
                       return (
-                        <div key={category} className="space-y-1">
-                          {/* 대분류 카테고리 헤더 (클릭 시 접기/펼치기) */}
+                        <div key={mainCategory} className="space-y-1.5">
+                          {/* 1단계: 대분류 카테고리 헤더 */}
                           <div
-                            onClick={() => toggleCategory(category)}
-                            className="flex justify-between items-center sticky top-0 bg-slate-800/95 py-1.5 px-2.5 rounded-xl border-l-4 border-blue-500 backdrop-blur-md cursor-pointer hover:bg-slate-700/90 transition select-none shadow-sm"
+                            onClick={() => toggleCategory(mainCategory)}
+                            className="flex justify-between items-center sticky top-0 bg-slate-800/95 py-1.5 px-2.5 rounded-xl border-l-4 border-blue-500 backdrop-blur-md cursor-pointer hover:bg-slate-700/90 transition select-none shadow-sm z-10"
                           >
                             <div className="flex items-center gap-1.5 min-w-0">
-                              <span className={`text-[10px] text-blue-400 transition-transform duration-200 inline-block ${isCollapsed ? '' : 'rotate-90'}`}>
+                              <span className={`text-[10px] text-blue-400 transition-transform duration-200 inline-block ${isMainCollapsed ? '' : 'rotate-90'}`}>
                                 ▶
                               </span>
                               <span className="text-xs font-black text-blue-200 truncate">
-                                📁 {category}
+                                📁 {mainCategory}
                               </span>
                             </div>
                             <span className="text-[10px] bg-slate-900 text-slate-300 font-bold px-2 py-0.5 rounded-full border border-slate-700/80 flex-shrink-0">
-                              {stores.length}개
+                              {mainStoreCount}개
                             </span>
                           </div>
 
-                          {/* 세부 상가 아이템 리스트 (펼침 상태일 때만 렌더링) */}
-                          {!isCollapsed && (
-                            <ul className="space-y-1 pl-1 pt-0.5">
-                              {stores.map((store) => {
-                                const bId = store.bizesId || `store_${Math.random()}`;
-                                const isSelected = selectedBizesId === bId;
+                          {/* 2단계: 소분류 카테고리 그룹 (대분류가 펼쳐져 있을 때만) */}
+                          {!isMainCollapsed && (
+                            <div className="pl-2 space-y-1.5 pt-0.5">
+                              {Object.entries(subMap).map(([subCategory, stores]) => {
+                                const subKey = `${mainCategory}::${subCategory}`;
+                                const isSubCollapsed = !!collapsedSubCategories[subKey];
 
                                 return (
-                                  <li
-                                    key={bId}
-                                    data-id={bId}
-                                    onClick={() => highlightStoreMarker(bId)}
-                                    className={`p-2.5 rounded-xl border transition cursor-pointer text-xs ${
-                                      isSelected
-                                        ? 'bg-amber-500/20 border-amber-400 text-amber-200 shadow-md ring-1 ring-amber-400'
-                                        : 'bg-slate-800/50 border-slate-700/60 hover:bg-slate-800 hover:border-slate-600 text-slate-200'
-                                    }`}
-                                  >
-                                    <div className="flex justify-between items-start mb-0.5">
-                                      <strong className="font-extrabold text-white text-xs truncate max-w-[200px]">
-                                        {store.bizesNm}
-                                      </strong>
-                                      <span className="text-[10px] text-blue-400 font-bold bg-blue-950/60 px-1.5 py-0.5 rounded border border-blue-800/50">
-                                        {store.indsSclsNm || '업종'}
+                                  <div key={subCategory} className="space-y-1">
+                                    {/* 소분류 카테고리 헤더 */}
+                                    <div
+                                      onClick={() => toggleSubCategory(mainCategory, subCategory)}
+                                      className="flex justify-between items-center bg-slate-800/80 py-1 px-2.5 rounded-lg border-l-2 border-sky-400 cursor-pointer hover:bg-slate-750 transition select-none text-xs"
+                                    >
+                                      <div className="flex items-center gap-1.5 min-w-0">
+                                        <span className={`text-[9px] text-sky-400 transition-transform duration-200 inline-block ${isSubCollapsed ? '' : 'rotate-90'}`}>
+                                          ▶
+                                        </span>
+                                        <span className="text-xs font-bold text-sky-300 truncate">
+                                          🏷️ {subCategory}
+                                        </span>
+                                      </div>
+                                      <span className="text-[9px] bg-slate-900/80 text-sky-200 font-bold px-1.5 py-0.5 rounded-md border border-slate-700/60 flex-shrink-0">
+                                        {stores.length}개
                                       </span>
                                     </div>
-                                    <p className="text-[10px] text-slate-400 truncate">
-                                      📍 {store.rdnmAdr || store.lnoAdr || '주소 미상'}
-                                    </p>
-                                  </li>
+
+                                    {/* 3단계: 세부 상가 업소 리스트 (소분류가 펼쳐져 있을 때만) */}
+                                    {!isSubCollapsed && (
+                                      <ul className="space-y-1 pl-1.5 pt-0.5">
+                                        {stores.map((store) => {
+                                          const bId = store.bizesId || `store_${Math.random()}`;
+                                          const isSelected = selectedBizesId === bId;
+
+                                          return (
+                                            <li
+                                              key={bId}
+                                              data-id={bId}
+                                              onClick={() => highlightStoreMarker(bId)}
+                                              className={`p-2.5 rounded-xl border transition cursor-pointer text-xs ${
+                                                isSelected
+                                                  ? 'bg-amber-500/20 border-amber-400 text-amber-200 shadow-md ring-1 ring-amber-400'
+                                                  : 'bg-slate-800/50 border-slate-700/60 hover:bg-slate-800 hover:border-slate-600 text-slate-200'
+                                              }`}
+                                            >
+                                              <div className="flex justify-between items-start mb-0.5">
+                                                <strong className="font-extrabold text-white text-xs truncate max-w-[200px]">
+                                                  {store.bizesNm}
+                                                </strong>
+                                                <span className="text-[10px] text-blue-400 font-bold bg-blue-950/60 px-1.5 py-0.5 rounded border border-blue-800/50">
+                                                  {subCategory}
+                                                </span>
+                                              </div>
+                                              <p className="text-[10px] text-slate-400 truncate">
+                                                📍 {store.rdnmAdr || store.lnoAdr || '주소 미상'}
+                                              </p>
+                                            </li>
+                                          );
+                                        })}
+                                      </ul>
+                                    )}
+                                  </div>
                                 );
                               })}
-                            </ul>
+                            </div>
                           )}
                         </div>
                       );

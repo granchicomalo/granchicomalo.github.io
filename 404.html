@@ -266,6 +266,38 @@
       const [currentAddress, setCurrentAddress] = useState('서울 중심점');
       const [selectedBizesId, setSelectedBizesId] = useState(null);
 
+      const [collapsedCategories, setCollapsedCategories] = useState({});
+      const [collapsedSubCategories, setCollapsedSubCategories] = useState({});
+
+      const toggleCategory = (cat) => {
+        setCollapsedCategories(prev => ({ ...prev, [cat]: !prev[cat] }));
+      };
+
+      const toggleSubCategory = (cat, subCat) => {
+        const key = `${cat}_${subCat}`;
+        setCollapsedSubCategories(prev => ({ ...prev, [key]: !prev[key] }));
+      };
+
+      const expandAllCategories = () => {
+        setCollapsedCategories({});
+        setCollapsedSubCategories({});
+      };
+
+      const collapseAllCategories = () => {
+        const allCats = {};
+        const allSubCats = {};
+        Object.entries(groupedStores).forEach(([cat, subMap]) => {
+          allCats[cat] = true;
+          if (typeof subMap === 'object' && !Array.isArray(subMap)) {
+            Object.keys(subMap).forEach(sub => {
+              allSubCats[`${cat}_${sub}`] = true;
+            });
+          }
+        });
+        setCollapsedCategories(allCats);
+        setCollapsedSubCategories(allSubCats);
+      };
+
       const SERVICE_KEY = 'BahaUoW8jiYD6HVMXVBRJEpafXTnR%2FVHFkUWR0WwW%2BOzXumYn3YlV8oqDnoc8PYSg0vcwp3qT%2FalQ7707m0fKA%3D%3D';
 
       // 마커 이미지 정의 (기본 마커 vs 하이라이트 마커)
@@ -380,11 +412,14 @@
 
           setStoreCount(items.length);
 
-          // 5. 업종 대분류(indsLclsNm) 기준 데이터 그룹화
+          // 5. 업종 대분류(indsLclsNm) > 중/소분류(indsSclsNm/indsMclsNm) 2단계 중첩 그룹화
           const groups = items.reduce((acc, store) => {
-            const cat = store.indsLclsNm || '기타 서비스';
-            if (!acc[cat]) acc[cat] = [];
-            acc[cat].push(store);
+            const mainCat = store.indsLclsNm || '기타 서비스';
+            const subCat = store.indsSclsNm || store.indsMclsNm || '기타 업종';
+
+            if (!acc[mainCat]) acc[mainCat] = {};
+            if (!acc[mainCat][subCat]) acc[mainCat][subCat] = [];
+            acc[mainCat][subCat].push(store);
             return acc;
           }, {});
 
@@ -473,6 +508,14 @@
           targetItem.infowindow.open(map, targetItem.marker);
           activeInfoWindowRef.current = targetItem.infowindow;
           setSelectedBizesId(bizesId);
+
+          if (targetItem.store) {
+            const mainCat = targetItem.store.indsLclsNm || '기타 서비스';
+            const subCat = targetItem.store.indsSclsNm || targetItem.store.indsMclsNm || '기타 업종';
+
+            setCollapsedCategories(prev => ({ ...prev, [mainCat]: false }));
+            setCollapsedSubCategories(prev => ({ ...prev, [`${mainCat}_${subCat}`]: false }));
+          }
         }
       };
 
@@ -597,7 +640,17 @@
                 </div>
               </div>
 
-              {/* 업종 대분류 그룹별 상가 스크롤 목록 */}
+              {/* 전체 펼치기 / 전체 접기 버튼 */}
+              <div className="flex justify-between items-center text-[11px] px-1 text-slate-400 font-bold flex-shrink-0">
+                <span>Total {storeCount}개 상가</span>
+                <div className="flex gap-2">
+                  <button onClick={expandAllCategories} className="hover:text-white transition">📂 전체 펼치기</button>
+                  <span>|</span>
+                  <button onClick={collapseAllCategories} className="hover:text-white transition">📁 전체 접기</button>
+                </div>
+              </div>
+
+              {/* 2단계 중첩 카테고리 (대분류 > 소분류) 접기/펼치기 스크롤 목록 */}
               <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 pr-1">
                 {isLoading ? (
                   <div className="py-8 text-center text-xs text-slate-400 space-y-2">
@@ -609,50 +662,91 @@
                     반경 300m 이내에 검색된 상가가 없습니다.
                   </div>
                 ) : (
-                  Object.entries(groupedStores).map(([category, stores]) => (
-                    <div key={category} className="space-y-1.5">
-                      {/* 대분류 카테고리 헤더 */}
-                      <div className="flex justify-between items-center sticky top-0 bg-slate-800/95 py-1 px-2 rounded.lg border-l-4 border-blue-500 backdrop-blur-md">
-                        <span className="text-xs font-black text-blue-300">📁 {category}</span>
-                        <span className="text-[10px] bg-slate-900 text-slate-300 font-bold px-1.5 py-0.5 rounded-full">
-                          {stores.length}
-                        </span>
+                  Object.entries(groupedStores).map(([mainCategory, subGroup]) => {
+                    const isMainCollapsed = collapsedCategories[mainCategory];
+                    const totalMainCount = Object.values(subGroup).reduce((sum, list) => sum + list.length, 0);
+
+                    return (
+                      <div key={mainCategory} className="bg-slate-800/60 rounded-xl border border-slate-700/70 overflow-hidden shadow-sm">
+                        {/* 1단계: 대분류 카테고리 헤더 */}
+                        <button
+                          onClick={() => toggleCategory(mainCategory)}
+                          className="w-full flex justify-between items-center bg-slate-800/90 hover:bg-slate-700/80 px-3 py-2 text-xs font-black text-blue-300 transition text-left border-l-4 border-blue-500"
+                        >
+                          <div className="flex items-center gap-1.5 truncate">
+                            <span className="text-slate-400 text-[10px]">{isMainCollapsed ? '▶' : '▼'}</span>
+                            <span className="truncate">📁 {mainCategory}</span>
+                          </div>
+                          <span className="text-[10px] bg-blue-950 text-blue-300 font-bold px-2 py-0.5 rounded-full border border-blue-800/60">
+                            {totalMainCount}개
+                          </span>
+                        </button>
+
+                        {/* 대분류 펼침 시 2단계 소분류 그룹 출력 */}
+                        {!isMainCollapsed && (
+                          <div className="p-2 space-y-2 bg-slate-900/40">
+                            {Object.entries(subGroup).map(([subCategory, storeList]) => {
+                              const subKey = `${mainCategory}_${subCategory}`;
+                              const isSubCollapsed = collapsedSubCategories[subKey];
+
+                              return (
+                                <div key={subCategory} className="space-y-1 pl-1">
+                                  {/* 2단계: 소분류 카테고리 헤더 */}
+                                  <button
+                                    onClick={() => toggleSubCategory(mainCategory, subCategory)}
+                                    className="w-full flex justify-between items-center bg-slate-800/50 hover:bg-slate-800 px-2 py-1.5 rounded-lg text-[11px] font-bold text-slate-300 transition text-left"
+                                  >
+                                    <div className="flex items-center gap-1 truncate">
+                                      <span className="text-slate-500 text-[9px]">{isSubCollapsed ? '▶' : '▼'}</span>
+                                      <span className="truncate">🏷️ {subCategory}</span>
+                                    </div>
+                                    <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">
+                                      {storeList.length}
+                                    </span>
+                                  </button>
+
+                                  {/* 소분류 펼침 시 해당 상가 항목들 */}
+                                  {!isSubCollapsed && (
+                                    <ul className="space-y-1 pl-2">
+                                      {storeList.map((store) => {
+                                        const bId = store.bizesId || `store_${Math.random()}`;
+                                        const isSelected = selectedBizesId === bId;
+
+                                        return (
+                                          <li
+                                            key={bId}
+                                            data-id={bId}
+                                            onClick={() => highlightStoreMarker(bId)}
+                                            className={`p-2.5 rounded-xl border transition cursor-pointer text-xs ${
+                                              isSelected
+                                                ? 'bg-amber-500/20 border-amber-400 text-amber-200 shadow-md ring-1 ring-amber-400'
+                                                : 'bg-slate-800/50 border-slate-700/60 hover:bg-slate-800 hover:border-slate-600 text-slate-200'
+                                            }`}
+                                          >
+                                            <div className="flex justify-between items-start mb-0.5">
+                                              <strong className="font-extrabold text-white text-xs truncate max-w-[200px]">
+                                                {store.bizesNm}
+                                              </strong>
+                                              <span className="text-[10px] text-blue-400 font-bold bg-blue-950/60 px-1.5 py-0.5 rounded border border-blue-800/50">
+                                                {subCategory}
+                                              </span>
+                                            </div>
+                                            <p className="text-[10px] text-slate-400 truncate">
+                                              📍 {store.rdnmAdr || store.lnoAdr || '주소 미상'}
+                                            </p>
+                                          </li>
+                                        );
+                                      })}
+                                    </ul>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
-
-                      {/* 세부 상가 아이템 리스트 */}
-                      <ul className="space-y-1 pl-1">
-                        {stores.map((store) => {
-                          const bId = store.bizesId || `store_${Math.random()}`;
-                          const isSelected = selectedBizesId === bId;
-
-                          return (
-                            <li
-                              key={bId}
-                              data-id={bId}
-                              onClick={() => highlightStoreMarker(bId)}
-                              className={`p-2.5 rounded-xl border transition cursor-pointer text-xs ${
-                                isSelected
-                                  ? 'bg-amber-500/20 border-amber-400 text-amber-200 shadow-md ring-1 ring-amber-400'
-                                  : 'bg-slate-800/50 border-slate-700/60 hover:bg-slate-800 hover:border-slate-600 text-slate-200'
-                              }`}
-                            >
-                              <div className="flex justify-between items-start mb-0.5">
-                                <strong className="font-extrabold text-white text-xs truncate max-w-[200px]">
-                                  {store.bizesNm}
-                                </strong>
-                                <span className="text-[10px] text-blue-400 font-bold bg-blue-950/60 px-1.5 py-0.5 rounded border border-blue-800/50">
-                                  {store.indsSclsNm || '업종'}
-                                </span>
-                              </div>
-                              <p className="text-[10px] text-slate-400 truncate">
-                                📍 {store.rdnmAdr || store.lnoAdr || '주소 미상'}
-                              </p>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
 

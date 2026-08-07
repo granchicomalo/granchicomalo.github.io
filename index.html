@@ -1645,6 +1645,11 @@
       const [currentAddress, setCurrentAddress] = useState('서울 중심점');
       const [selectedBizesId, setSelectedBizesId] = useState(null);
 
+      // 기능/API 선택 탭 상태 ('store': 근처상가, 'population': 인구/세대현황, 'other': 기타 API)
+      const [activeTab, setActiveTab] = useState('store');
+      const [currentCoords, setCurrentCoords] = useState({ lat: 37.5665, lng: 126.9780 });
+      const [isStoreFetched, setIsStoreFetched] = useState(false);
+
       const SERVICE_KEY = 'BahaUoW8jiYD6HVMXVBRJEpafXTnR%2FVHFkUWR0WwW%2BOzXumYn3YlV8oqDnoc8PYSg0vcwp3qT%2FalQ7707m0fKA%3D%3D';
 
       // 1단계 (대분류) 접기/펼치기 토글
@@ -1715,27 +1720,16 @@
         return { defaultImg, highlightImg };
       };
 
-      // 300m 반경 내 소상공인 상가업소 조회 API 호출 및 지도 마커 렌더링
-      const fetchStoresInRadius = async (lat, lng) => {
+      // 중심 위치 변경 및 붉은색 핀 마커 표시 (API 호출 없이 위치만 지정)
+      const updateCenterLocation = (lat, lng) => {
         if (!mapObjRef.current || !window.kakao) return;
-        setIsLoading(true);
-        setSelectedBizesId(null);
-
         const map = mapObjRef.current;
         const centerLatLng = new window.kakao.maps.LatLng(lat, lng);
-        const { defaultImg } = getMarkerImages();
 
-        // 1. 기존 마커 및 300m 반경 원, 맵핑 객체 초기화
-        Object.values(storeMarkerMapRef.current).forEach(item => {
-          if (item.marker) item.marker.setMap(null);
-        });
-        storeMarkerMapRef.current = {};
+        map.panTo(centerLatLng);
+        setCurrentCoords({ lat, lng });
 
-        if (activeInfoWindowRef.current) activeInfoWindowRef.current.close();
         if (centerMarkerRef.current) centerMarkerRef.current.setMap(null);
-        if (radiusCircleRef.current) radiusCircleRef.current.setMap(null);
-
-        // 2. 중심점 마커 표시 (붉은색 핀 마커)
         const redPinSvg = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
           <svg xmlns="http://www.w3.org/2000/svg" width="36" height="42" viewBox="0 0 36 42">
             <path fill="#ef4444" stroke="#ffffff" stroke-width="2.5" d="M18 0C8.059 0 0 8.059 0 18c0 13.5 18 24 18 24s18-10.5 18-24C36 8.059 27.941 0 18 0z"/>
@@ -1756,7 +1750,37 @@
         });
         centerMarkerRef.current.setMap(map);
 
-        // 3. 반경 300m 원(Circle) 시각화 (strokeColor: #00a0e9, strokeOpacity: 0.8, fillColor: #00a0e9, fillOpacity: 0.2)
+        const geocoder = new window.kakao.maps.services.Geocoder();
+        geocoder.coord2Address(lng, lat, (result, status) => {
+          if (status === window.kakao.maps.services.Status.OK && result[0]) {
+            setCurrentAddress(result[0].address ? result[0].address.address_name : '선택 위치');
+          }
+        });
+      };
+
+      // 300m 반경 내 소상공인 상가업소 조회 API 호출 및 지도 마커 렌더링
+      const fetchStoresInRadius = async (lat, lng) => {
+        if (!mapObjRef.current || !window.kakao) return;
+        setIsLoading(true);
+        setSelectedBizesId(null);
+
+        const map = mapObjRef.current;
+        const centerLatLng = new window.kakao.maps.LatLng(lat, lng);
+        const { defaultImg } = getMarkerImages();
+
+        // 1. 기존 마커 및 300m 반경 원, 맵핑 객체 초기화
+        Object.values(storeMarkerMapRef.current).forEach(item => {
+          if (item.marker) item.marker.setMap(null);
+        });
+        storeMarkerMapRef.current = {};
+
+        if (activeInfoWindowRef.current) activeInfoWindowRef.current.close();
+        if (radiusCircleRef.current) radiusCircleRef.current.setMap(null);
+
+        // 중심 핀 및 주소 설정
+        updateCenterLocation(lat, lng);
+
+        // 2. 반경 300m 원(Circle) 시각화
         radiusCircleRef.current = new window.kakao.maps.Circle({
           center: centerLatLng,
           radius: 300,
@@ -1769,15 +1793,7 @@
         });
         radiusCircleRef.current.setMap(map);
 
-        // Geocoder로 현재 주소 변환
-        const geocoder = new window.kakao.maps.services.Geocoder();
-        geocoder.coord2Address(lng, lat, (result, status) => {
-          if (status === window.kakao.maps.services.Status.OK && result[0]) {
-            setCurrentAddress(result[0].address ? result[0].address.address_name : '선택 위치');
-          }
-        });
-
-        // 4. 소상공인시장진흥공단 반경내 상가업소 조회 API 요청 (radius=300)
+        // 3. 소상공인시장진흥공단 반경내 상가업소 조회 API 요청 (radius=300)
         const targetUrl = `https://apis.data.go.kr/B553077/api/open/sdsc2/storeListInRadius?radius=300&cx=${lng}&cy=${lat}&type=json&numOfRows=100&ServiceKey=${SERVICE_KEY}`;
         const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
 
@@ -1806,7 +1822,7 @@
 
           setStoreCount(items.length);
 
-          // 5. 업종 대분류(indsLclsNm) -> 소분류(indsSclsNm / indsMclsNm) 2단계 데이터 그룹화
+          // 4. 업종 대분류(indsLclsNm) -> 소분류(indsSclsNm / indsMclsNm) 2단계 데이터 그룹화
           const groups = items.reduce((acc, store) => {
             const mainCat = store.indsLclsNm || '기타 서비스';
             const subCat = store.indsSclsNm || store.indsMclsNm || '기타 업종';
@@ -1820,8 +1836,9 @@
           setGroupedStores(groups);
           setCollapsedCategories({});
           setCollapsedSubCategories({});
+          setIsStoreFetched(true);
 
-          // 6. 상가업소 마커 렌더링 및 markerMapRef 맵핑
+          // 5. 상가업소 마커 렌더링 및 markerMapRef 맵핑
           items.forEach(store => {
             const storeLat = parseFloat(store.lat);
             const storeLng = parseFloat(store.lon);
@@ -1863,207 +1880,260 @@
             };
 
             // 마커 클릭 이벤트: 해당 리포트 하이라이트
-            window.kakao.maps.event.addListener(storeMarker, 'click', () => {
-              highlightStoreMarker(bId);
-            });
-          });
-        } catch (err) {
-          console.warn("storeListInRadius fetch warning:", err);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      // 리스트 항목 클릭 시 마커 하이라이트 & 지도 이동 & 인포윈도우 오픈
-      const highlightStoreMarker = (bizesId) => {
-        if (!mapObjRef.current || !window.kakao) return;
-        const map = mapObjRef.current;
-        const { defaultImg, highlightImg } = getMarkerImages();
-
-        // 1. 모든 마커 이미지 기본 초기화
-        Object.values(storeMarkerMapRef.current).forEach(item => {
-          if (item.marker && defaultImg) {
-            item.marker.setImage(defaultImg);
-            item.marker.setZIndex(1);
-          }
-        });
-
-        if (activeInfoWindowRef.current) {
-          activeInfoWindowRef.current.close();
-        }
-
-        // 2. 선택된 상가 마커 하이라이트
-        const targetItem = storeMarkerMapRef.current[bizesId];
-        if (targetItem && targetItem.marker) {
-          if (highlightImg) {
-            targetItem.marker.setImage(highlightImg);
-            targetItem.marker.setZIndex(20);
-          }
-          
-          map.panTo(targetItem.marker.getPosition());
-          targetItem.infowindow.open(map, targetItem.marker);
-          activeInfoWindowRef.current = targetItem.infowindow;
-          setSelectedBizesId(bizesId);
-
-          if (targetItem.store) {
-            const mainCat = targetItem.store.indsLclsNm || '기타 서비스';
-            const subCat = targetItem.store.indsSclsNm || targetItem.store.indsMclsNm || '기타 업종';
-            setCollapsedCategories(prev => ({ ...prev, [mainCat]: false }));
-            setCollapsedSubCategories(prev => ({ ...prev, [`${mainCat}::${subCat}`]: false }));
-          }
-        }
-      };
-
-      useEffect(() => {
-        const initMap = () => {
-          if (!window.kakao || !window.kakao.maps || !mapContainerRef.current) return;
-
-          window.kakao.maps.load(() => {
-            const container = mapContainerRef.current;
-            if (!container) return;
-
-            const initialLat = 37.5665;
-            const initialLng = 126.9780;
-            const centerPos = new window.kakao.maps.LatLng(initialLat, initialLng);
-
-            if (!mapObjRef.current) {
-              const options = { center: centerPos, level: 4 };
-              mapObjRef.current = new window.kakao.maps.Map(container, options);
-            } else {
-              mapObjRef.current.relayout();
-              mapObjRef.current.setCenter(centerPos);
-            }
-
-            // 초기 300m 상가업소 조회
-            fetchStoresInRadius(initialLat, initialLng);
-
-            const triggerRelayout = () => {
-              if (mapObjRef.current) {
-                mapObjRef.current.relayout();
-              }
-            };
-
-            requestAnimationFrame(triggerRelayout);
-            setTimeout(triggerRelayout, 100);
-            setTimeout(triggerRelayout, 300);
-
-            if (window.ResizeObserver && mapContainerRef.current) {
-              const ro = new ResizeObserver(() => triggerRelayout());
-              ro.observe(mapContainerRef.current);
-            }
-
-            window.addEventListener('resize', triggerRelayout);
-
-            // 지도 클릭 이벤트: 중심점 이동 및 300m 상가 조회
-            window.kakao.maps.event.addListener(mapObjRef.current, 'click', (mouseEvent) => {
-              const latlng = mouseEvent.latLng;
-              mapObjRef.current.panTo(latlng);
-              fetchStoresInRadius(latlng.getLat(), latlng.getLng());
-            });
-          });
-        };
-
-        if (window.kakao && window.kakao.maps) {
-          initMap();
-        } else {
-          const timer = setInterval(() => {
-            if (window.kakao && window.kakao.maps) {
-              clearInterval(timer);
-              initMap();
-            }
-          }, 300);
-          return () => clearInterval(timer);
-        }
-      }, []);
-
-      const handleSearchSubmit = (e) => {
-        e.preventDefault();
-        if (!searchKeyword.trim() || !mapObjRef.current || !window.kakao) return;
-
-        const ps = new window.kakao.maps.services.Places();
-        ps.keywordSearch(searchKeyword, (data, status) => {
-          if (status === window.kakao.maps.services.Status.OK && data[0]) {
-            const targetLat = parseFloat(data[0].y);
-            const targetLng = parseFloat(data[0].x);
-            const targetPos = new window.kakao.maps.LatLng(targetLat, targetLng);
-            
-            mapObjRef.current.panTo(targetPos);
-            fetchStoresInRadius(targetLat, targetLng);
-          } else {
-            alert('검색한 위치를 찾을 수 없습니다.');
-          }
-        });
-      };
-
-      return (
-        <div className="bg-slate-900 text-white min-h-screen flex flex-col relative overflow-hidden">
-          <AdminNav setView={setView} currentView="admin_seoul_cmrcl" adminUser={adminUser} refreshLeads={refreshLeads} handleLogout={handleLogout} />
-          
-          <div className="flex-1 w-full relative">
-            {/* 좌측 패널: 위치 검색 + 반경 300m 시각화 + 업종 대분류 상가 스크롤 리스트 */}
-            <div className="absolute top-4 left-4 z-10 w-80 sm:w-96 bg-slate-900/95 border border-slate-700/90 backdrop-blur-xl rounded-2xl shadow-2xl p-4 text-white space-y-3.5 max-h-[calc(100vh-80px)] flex flex-col">
-              
-              {/* 상단 위치 검색 폼 */}
-              <form onSubmit={handleSearchSubmit} className="flex gap-2 flex-shrink-0">
-                <input
-                  type="text"
-                  value={searchKeyword}
-                  onChange={(e) => setSearchKeyword(e.target.value)}
-                  placeholder="위치/주소 검색 (예: 강남역, 명동)"
-                  className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-medium text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
-                />
+                {/* 상단 API / 기능 선택 탭 (확장성 고려) */}
+              <div className="flex p-1 bg-slate-800/90 rounded-xl border border-slate-700/80 gap-1 flex-shrink-0">
                 <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="bg-blue-600 hover:bg-blue-500 font-extrabold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-md whitespace-nowrap"
+                  type="button"
+                  onClick={() => setActiveTab('store')}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-black transition flex items-center justify-center gap-1 ${
+                    activeTab === 'store'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
+                  }`}
                 >
-                  {isLoading ? '⏳' : '🔍'} 검색
+                  🏪 근처 상가
                 </button>
-              </form>
-
-              {/* 반경 300m 요약 카드 */}
-              <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/80 space-y-1.5 text-xs flex-shrink-0">
-                <div className="flex justify-between items-center">
-                  <span className="text-[11px] font-bold text-slate-400">📍 중심 위치</span>
-                  <span className="text-xs font-black text-emerald-400 truncate max-w-[190px]">{currentAddress}</span>
-                </div>
-                <div className="flex justify-between items-center pt-1 border-t border-slate-700/60">
-                  <span className="text-[11px] font-bold text-blue-300">⭕ 반경: <strong className="text-sky-400">300m</strong></span>
-                  <span className="text-xs font-black text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-700/80">
-                    🏪 상가업소: <strong>{storeCount}개</strong>
-                  </span>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('population')}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-black transition flex items-center justify-center gap-1 ${
+                    activeTab === 'population'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
+                  }`}
+                >
+                  👥 인구/세대
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('other')}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-black transition flex items-center justify-center gap-1 ${
+                    activeTab === 'other'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
+                  }`}
+                >
+                  📊 기타 API
+                </button>
               </div>
 
-              {/* 업종 대분류 그룹별 상가 스크롤 목록 */}
-              <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
-                {isLoading ? (
-                  <div className="py-8 text-center text-xs text-slate-400 space-y-2">
-                    <div className="animate-spin text-lg">⏳</div>
-                    <p>반경 300m 상가업소를 불러오는 중...</p>
+              {/* 1. 근처 상가 분석 탭 컨텐츠 */}
+              {activeTab === 'store' && (
+                <>
+                  {/* 근처 상가 조회를 위한 중심 위치 카드 & 실행 버튼 */}
+                  <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/80 space-y-2 text-xs flex-shrink-0">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[11px] font-bold text-slate-400">📍 중심 위치</span>
+                      <span className="text-xs font-black text-emerald-400 truncate max-w-[190px]">{currentAddress}</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-1.5 border-t border-slate-700/60">
+                      <span className="text-[11px] font-bold text-blue-300">⭕ 반경: <strong className="text-sky-400">300m</strong></span>
+                      {isStoreFetched && (
+                        <span className="text-xs font-black text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-700/80">
+                          🏪 상가업소: <strong>{storeCount}개</strong>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* [핵심] 근처 상가 300m 실행 버튼 */}
+                    <button
+                      type="button"
+                      onClick={() => fetchStoresInRadius(currentCoords.lat, currentCoords.lng)}
+                      disabled={isLoading}
+                      className="w-full mt-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 font-extrabold text-xs py-2.5 px-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow-lg active:scale-98 cursor-pointer"
+                    >
+                      {isLoading ? '⏳ 상가 데이터 불러오는 중...' : '🏪 근처 상가 300m 조회하기'}
+                    </button>
                   </div>
-                ) : Object.keys(groupedStores).length === 0 ? (
-                  <div className="py-8 text-center text-xs text-slate-400">
-                    반경 300m 이내에 검색된 상가가 없습니다.
+
+                  {/* 업종 대분류 그룹별 상가 스크롤 목록 */}
+                  <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
+                    {isLoading ? (
+                      <div className="py-8 text-center text-xs text-slate-400 space-y-2">
+                        <div className="animate-spin text-lg">⏳</div>
+                        <p>반경 300m 상가업소를 불러오는 중...</p>
+                      </div>
+                    ) : !isStoreFetched ? (
+                      <div className="py-10 px-4 text-center text-xs text-slate-400 bg-slate-800/40 rounded-xl border border-dashed border-slate-700 space-y-2">
+                        <div className="text-2xl">🎯</div>
+                        <p className="font-bold text-slate-300">위치 선택 후 버튼을 누르세요</p>
+                        <p className="text-[11px] text-slate-400 leading-relaxed">
+                          지도에서 원하시는 위치를 클릭하거나 검색한 후<br/>
+                          <strong className="text-blue-400">[🏪 근처 상가 300m 조회하기]</strong> 버튼을 누르시면 해당 위치의 상가 업소가 조회됩니다.
+                        </p>
+                      </div>
+                    ) : Object.keys(groupedStores).length === 0 ? (
+                      <div className="py-8 text-center text-xs text-slate-400">
+                        반경 300m 이내에 검색된 상가가 없습니다.
+                      </div>
+                    ) : (
+                      <>
+                        {/* 전체 펼치기 / 접기 버튼 Bar */}
+                        <div className="flex justify-between items-center pb-1 text-[11px] text-slate-400 border-b border-slate-700/50 mb-2">
+                          <span className="font-bold text-slate-300">업종 분류 ({Object.keys(groupedStores).length}개)</span>
+                          <div className="flex gap-2 text-[10px]">
+                            <button
+                              type="button"
+                              onClick={expandAllCategories}
+                              className="text-blue-400 hover:text-blue-300 transition cursor-pointer font-bold"
+                            >
+                              📂 전체 펼치기
+                            </button>
+                            <span className="text-slate-600">|</span>
+                            <button
+                              type="button"
+                              onClick={collapseAllCategories}
+                              className="text-slate-400 hover:text-amber-300 transition cursor-pointer font-bold"
+                            >
+                              📁 전체 접기
+                            </button>
+                          </div>
+                        </div>
+
+                        {Object.entries(groupedStores).map(([mainCategory, subMap]) => {
+                          const isMainCollapsed = !!collapsedCategories[mainCategory];
+                          const mainStoreCount = Object.values(subMap).reduce((sum, list) => sum + list.length, 0);
+
+                          return (
+                            <div key={mainCategory} className="space-y-1.5">
+                              {/* 1단계: 대분류 카테고리 헤더 */}
+                              <div
+                                onClick={() => toggleCategory(mainCategory)}
+                                className="flex justify-between items-center sticky top-0 bg-slate-800/95 py-1.5 px-2.5 rounded-xl border-l-4 border-blue-500 backdrop-blur-md cursor-pointer hover:bg-slate-700/90 transition select-none shadow-sm z-10"
+                              >
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span className={`text-[10px] text-blue-400 transition-transform duration-200 inline-block ${isMainCollapsed ? '' : 'rotate-90'}`}>
+                                    ▶
+                                  </span>
+                                  <span className="text-xs font-black text-blue-200 truncate">
+                                    📁 {mainCategory}
+                                  </span>
+                                </div>
+                                <span className="text-[10px] bg-slate-900 text-slate-300 font-bold px-2 py-0.5 rounded-full border border-slate-700/80 flex-shrink-0">
+                                  {mainStoreCount}개
+                                </span>
+                              </div>
+
+                              {/* 2단계: 소분류 카테고리 그룹 */}
+                              {!isMainCollapsed && (
+                                <div className="pl-2 space-y-1.5 pt-0.5">
+                                  {Object.entries(subMap).map(([subCategory, stores]) => {
+                                    const subKey = `${mainCategory}::${subCategory}`;
+                                    const isSubCollapsed = !!collapsedSubCategories[subKey];
+
+                                    return (
+                                      <div key={subCategory} className="space-y-1">
+                                        {/* 소분류 카테고리 헤더 */}
+                                        <div
+                                          onClick={() => toggleSubCategory(mainCategory, subCategory)}
+                                          className="flex justify-between items-center bg-slate-800/80 py-1 px-2.5 rounded-lg border-l-2 border-sky-400 cursor-pointer hover:bg-slate-750 transition select-none text-xs"
+                                        >
+                                          <div className="flex items-center gap-1.5 min-w-0">
+                                            <span className={`text-[9px] text-sky-400 transition-transform duration-200 inline-block ${isSubCollapsed ? '' : 'rotate-90'}`}>
+                                              ▶
+                                            </span>
+                                            <span className="text-xs font-bold text-sky-300 truncate">
+                                              🏷️ {subCategory}
+                                            </span>
+                                          </div>
+                                          <span className="text-[9px] bg-slate-900/80 text-sky-200 font-bold px-1.5 py-0.5 rounded-md border border-slate-700/60 flex-shrink-0">
+                                            {stores.length}개
+                                          </span>
+                                        </div>
+
+                                        {/* 3단계: 세부 상가 업소 리스트 */}
+                                        {!isSubCollapsed && (
+                                          <ul className="space-y-1 pl-1.5 pt-0.5">
+                                            {stores.map((store) => {
+                                              const bId = store.bizesId || `store_${Math.random()}`;
+                                              const isSelected = selectedBizesId === bId;
+
+                                              return (
+                                                <li
+                                                  key={bId}
+                                                  data-id={bId}
+                                                  onClick={() => highlightStoreMarker(bId)}
+                                                  className={`p-2.5 rounded-xl border transition cursor-pointer text-xs ${
+                                                    isSelected
+                                                      ? 'bg-amber-500/20 border-amber-400 text-amber-200 shadow-md ring-1 ring-amber-400'
+                                                      : 'bg-slate-800/50 border-slate-700/60 hover:bg-slate-800 hover:border-slate-600 text-slate-200'
+                                                  }`}
+                                                >
+                                                  <div className="flex justify-between items-start mb-0.5">
+                                                    <strong className="font-extrabold text-white text-xs truncate max-w-[200px]">
+                                                      {store.bizesNm}
+                                                    </strong>
+                                                    <span className="text-[10px] text-blue-400 font-bold bg-blue-950/60 px-1.5 py-0.5 rounded border border-blue-800/50">
+                                                      {subCategory}
+                                                    </span>
+                                                  </div>
+                                                  <p className="text-[10px] text-slate-400 truncate">
+                                                    📍 {store.rdnmAdr || store.lnoAdr || '주소 미상'}
+                                                  </p>
+                                                </li>
+                                              );
+                                            })}
+                                          </ul>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </>
+                    )}
                   </div>
-                ) : (
-                  <>
-                    {/* 전체 펼치기 / 접기 버튼 Bar */}
-                    <div className="flex justify-between items-center pb-1 text-[11px] text-slate-400 border-b border-slate-700/50 mb-2">
-                      <span className="font-bold text-slate-300">업종 분류 ({Object.keys(groupedStores).length}개)</span>
-                      <div className="flex gap-2 text-[10px]">
-                        <button
-                          type="button"
-                          onClick={expandAllCategories}
-                          className="text-blue-400 hover:text-blue-300 transition cursor-pointer font-bold"
-                        >
-                          📂 전체 펼치기
-                        </button>
-                        <span className="text-slate-600">|</span>
-                        <button
-                          type="button"
-                          onClick={collapseAllCategories}
-                          className="text-slate-400 hover:text-amber-300 transition cursor-pointer font-bold"
+                </>
+              )}
+
+              {/* 2. 인구/세대 현황 탭 컨텐츠 */}
+              {activeTab === 'population' && (
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 bg-slate-800/40 rounded-xl border border-slate-700/60 space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-extrabold text-blue-300">
+                    <span className="text-base">👥</span>
+                    <span>행정동별 주민등록 인구 및 세대현황</span>
+                  </div>
+                  <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/80 space-y-2 text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[11px] font-bold text-slate-400">📍 현재 위치</span>
+                      <span className="text-xs font-black text-emerald-400 truncate max-w-[190px]">{currentAddress}</span>
+                    </div>
+                  </div>
+                  <div className="p-4 text-center text-xs text-slate-400 bg-slate-800/60 rounded-xl border border-dashed border-slate-700 space-y-2">
+                    <div className="text-2xl">📊</div>
+                    <p className="font-bold text-slate-300">행정안전부 인구/세대 현황 API 연동 공간</p>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      해당 위치(행정동)의 주민등록 인구 수, 세대 현황 등의 데이터 연동을 위한 전용 메뉴 영역입니다.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* 3. 기타 상권 API 탭 컨텐츠 */}
+              {activeTab === 'other' && (
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 bg-slate-800/40 rounded-xl border border-slate-700/60 space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-extrabold text-amber-300">
+                    <span className="text-base">📊</span>
+                    <span>기타 상권 데이터 API</span>
+                  </div>
+                  <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/80 space-y-2 text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[11px] font-bold text-slate-400">📍 현재 위치</span>
+                      <span className="text-xs font-black text-emerald-400 truncate max-w-[190px]">{currentAddress}</span>
+                    </div>
+                  </div>
+                  <div className="p-4 text-center text-xs text-slate-400 bg-slate-800/60 rounded-xl border border-dashed border-slate-700 space-y-2">
+                    <div className="text-2xl">🧩</div>
+                    <p className="font-bold text-slate-300">추가 공공데이터 API 확장 영역</p>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      유동인구, 집객시설, 매출 통계 등 필요에 따라 공공 API를 확장 연결하실 수 있습니다.
+                    </p>
+                  </div>
+                </div>
+              )}cursor-pointer font-bold"
                         >
                           📁 전체 접기
                         </button>

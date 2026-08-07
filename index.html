@@ -1751,7 +1751,19 @@
           if (res && res.ok) {
             const data = await res.json().catch(() => null);
             if (data && data.body && data.body.items) {
-              items = Array.isArray(data.body.items) ? data.body.items : [data.body.items];
+              const rawItems = Array.isArray(data.body.items) ? data.body.items : [data.body.items];
+              
+              // 카카오맵 Polyline을 사용하여 실제 반경 300m 이내의 상가만 필터링
+              items = rawItems.filter(store => {
+                const storeLat = parseFloat(store.lat);
+                const storeLng = parseFloat(store.lon);
+                if (!storeLat || !storeLng) return false;
+                const storePos = new window.kakao.maps.LatLng(storeLat, storeLng);
+                const poly = new window.kakao.maps.Polyline({
+                  path: [centerLatLng, storePos]
+                });
+                return poly.getLength() <= 300;
+              });
             }
           }
 

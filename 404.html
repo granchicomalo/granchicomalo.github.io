@@ -1628,8 +1628,8 @@
         if (!window.kakao) return { defaultImg: null, highlightImg: null };
 
         const defaultSvg = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="34" viewBox="0 0 28 34">
-            <path fill="#2563eb" stroke="#ffffff" stroke-width="2" d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 20 14 20s14-9.5 14-20C28 6.268 21.732 0 14 0z"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 28 34">
+            <path fill="#2563eb" stroke="#ffffff" stroke-width="1.5" d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 20 14 20s14-9.5 14-20C28 6.268 21.732 0 14 0z"/>
             <circle cx="14" cy="12" r="5" fill="#ffffff"/>
           </svg>
         `)}`;
@@ -1643,8 +1643,8 @@
 
         const defaultImg = new window.kakao.maps.MarkerImage(
           defaultSvg,
-          new window.kakao.maps.Size(28, 34),
-          { offset: new window.kakao.maps.Point(14, 34) }
+          new window.kakao.maps.Size(20, 24),
+          { offset: new window.kakao.maps.Point(10, 24) }
         );
 
         const highlightImg = new window.kakao.maps.MarkerImage(
@@ -2066,20 +2066,11 @@
                 </div>
               </div>
 
-              {/* API 결과 표시 영역 */}
-              {activeApi === null ? (
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 bg-slate-800/40 rounded-xl border border-slate-700/60 flex flex-col items-center justify-center text-center space-y-3">
-                  <div className="w-10 h-10 rounded-2xl bg-blue-950/80 border border-blue-800/60 flex items-center justify-center text-xl shadow-inner text-blue-400">
-                    👆
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-bold text-xs text-slate-200">상권 분석 API를 선택해 주세요</p>
-                    <p className="text-[11px] text-slate-400 leading-relaxed max-w-[240px]">
-                      위의 <strong className="text-blue-400 font-bold">🏪 근처 상가</strong> 버튼을 누르면 현재 위치 반경 300m 이내의 소상공인 상가업소 데이터가 실시간으로 조회됩니다.
-                    </p>
-                  </div>
-                </div>
-              ) : (
+            </div>
+
+            {/* 우측 패널: API 결과 표시 영역 */}
+            {activeApi === 'nearby_stores' && (
+              <div className="absolute top-4 right-4 z-10 w-80 sm:w-96 bg-slate-900/95 border border-slate-700/90 backdrop-blur-xl rounded-2xl shadow-2xl p-4 text-white space-y-3.5 max-h-[calc(100vh-80px)] flex flex-col">
                 <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
                   {/* 반경 300m 요약 바 */}
                   <div className="bg-slate-800/90 rounded-xl p-2.5 border border-slate-700/80 flex justify-between items-center text-xs flex-shrink-0 mb-1">
@@ -2216,14 +2207,13 @@
                       );
                     })}
                   </>
-                )}
-              </div>
-              )}
+                </div>
 
-              <div className="text-[9px] text-slate-400 text-center pt-1 border-t border-slate-800 flex-shrink-0">
-                💡 목록 클릭 시 해당 마커로 지도 이동 및 황금색 핀 하이라이트 표시
+                <div className="text-[9px] text-slate-400 text-center pt-1 border-t border-slate-800 flex-shrink-0">
+                  💡 목록 클릭 시 해당 마커로 지도 이동 및 황금색 핀 하이라이트 표시
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Kakao Map 지도 영역 100% */}
             <div ref={mapContainerRef} className="w-full h-[calc(100vh-64px)] z-0" />

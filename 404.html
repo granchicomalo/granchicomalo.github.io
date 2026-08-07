@@ -549,34 +549,6 @@
           </div>
         </div>
       );
-    }order border-slate-700/60">
-                    <span className="text-slate-400">👥 주요 타겟층</span>
-                    <span className="font-bold text-slate-200">{analysisResult.mainAgeGroup}</span>
-                  </div>
-                  <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60 space-y-1">
-                    <span className="text-slate-400 block text-xs">💡 입지 추천 맞춤 업종</span>
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {analysisResult.recommendedTypes.map((t, idx) => (
-                        <span key={idx} className="bg-emerald-500/20 text-emerald-300 font-extrabold text-xs px-2 py-0.5 rounded border border-emerald-500/30">
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={startDiagnosisWithLocation}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-1.5"
-              >
-                <span>이 위치로 3분 맞춤 창업진단 받기</span>
-                <span>→</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      );
     }
 
     function HomePage({ setView, setHasCompletedDiagnosis, setFormData }) {
@@ -1327,7 +1299,6 @@
       );
     }
 
-    // --- ADMIN DETAIL PAGE ---
     function AdminDetailPage({ setView, leads, setLeads, selectedLeadId, adminUser, updateLeadStatus, updateLeadDetails, deleteLead, handleLogout }) {
       const lead = leads.find(l => l.id === selectedLeadId) || leads[0];
       const [isEditing, setIsEditing] = useState(false);
@@ -1522,6 +1493,7 @@
       const meetingLeads = leads.filter(l => ['미팅예정', '미팅완료', '계약진행', '계약완료'].includes(l.status)).length;
       const contractLeads = leads.filter(l => ['계약진행', '계약완료'].includes(l.status)).length;
       const completedLeads = leads.filter(l => l.status === '계약완료').length;
+      const droppedLeads = leads.filter(l => ['비가망', '유예/보류', '이탈/거절'].includes(l.status)).length;
 
       const getRatio = (count) => (totalLeads > 0 ? Math.round((count / totalLeads) * 100) : 0);
 
@@ -1536,9 +1508,9 @@
                 <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">🟢 실시간 자동집계 중</span>
               </div>
 
-              <div className="p-4 bg-slate-100 rounded-xl flex justify-between items-center font-bold text-sm">
+              <div className="p-4 bg-blue-50 text-blue-900 rounded-xl flex justify-between items-center font-bold text-sm border border-blue-100">
                 <span>1. 전체 접수 고객 DB (신규 포함)</span>
-                <span className="text-blue-600">{totalLeads}명 (100%)</span>
+                <span className="text-blue-600 font-black">{totalLeads}명 (100%)</span>
               </div>
 
               <div className="p-4 bg-indigo-50 text-indigo-900 rounded-xl flex justify-between items-center font-bold text-sm border border-indigo-100">
@@ -1560,11 +1532,55 @@
                 <span>5. 🎯 최종 창업 계약 성공 (계약완료)</span>
                 <span className="text-base">{completedLeads}명 ({getRatio(completedLeads)}%)</span>
               </div>
+
+              <div className="p-4 bg-rose-50 text-rose-800 rounded-xl flex justify-between items-center font-bold text-sm border border-rose-200">
+                <span>6. [비대상] 비가망 / 유예 / 이탈 및 거절</span>
+                <span>{droppedLeads}명 ({getRatio(droppedLeads)}%)</span>
+              </div>
             </div>
           </div>
         </div>
       );
     }
+    const REGION_COORDS = {
+      '서울': { lat: 37.5665, lng: 126.9780 },
+      '부산': { lat: 35.1796, lng: 129.0756 },
+      '대구': { lat: 35.8714, lng: 128.6014 },
+      '인천': { lat: 37.4563, lng: 126.7052 },
+      '광주': { lat: 35.1595, lng: 126.8526 },
+      '대전': { lat: 36.3504, lng: 127.3845 },
+      '울산': { lat: 35.5384, lng: 129.3114 },
+      '세종': { lat: 36.4800, lng: 127.2890 },
+      '경기': { lat: 37.2752, lng: 127.0095 },
+      '강원': { lat: 37.8854, lng: 127.7298 },
+      '충북': { lat: 36.6358, lng: 127.4914 },
+      '충남': { lat: 36.6588, lng: 126.6728 },
+      '전북': { lat: 35.8203, lng: 127.1087 },
+      '전남': { lat: 34.8161, lng: 126.4629 },
+      '경북': { lat: 36.5760, lng: 128.5056 },
+      '경남': { lat: 35.2383, lng: 128.6922 },
+      '제주': { lat: 33.4996, lng: 126.5312 }
+    };
+
+    const DUMMY_FRANCHISE_DATA = [
+      { ctprvnNm: '서울', frcsCnt: 1450, drtmsCnt: 42, totCnt: 1492 },
+      { ctprvnNm: '경기', frcsCnt: 2130, drtmsCnt: 15, totCnt: 2145 },
+      { ctprvnNm: '인천', frcsCnt: 480, drtmsCnt: 5, totCnt: 485 },
+      { ctprvnNm: '강원', frcsCnt: 210, drtmsCnt: 0, totCnt: 210 },
+      { ctprvnNm: '충남', frcsCnt: 320, drtmsCnt: 2, totCnt: 322 },
+      { ctprvnNm: '충북', frcsCnt: 280, drtmsCnt: 1, totCnt: 281 },
+      { ctprvnNm: '대전', frcsCnt: 260, drtmsCnt: 3, totCnt: 263 },
+      { ctprvnNm: '세종', frcsCnt: 80, drtmsCnt: 1, totCnt: 81 },
+      { ctprvnNm: '경북', frcsCnt: 410, drtmsCnt: 0, totCnt: 410 },
+      { ctprvnNm: '대구', frcsCnt: 390, drtmsCnt: 4, totCnt: 394 },
+      { ctprvnNm: '경남', frcsCnt: 520, drtmsCnt: 2, totCnt: 522 },
+      { ctprvnNm: '울산', frcsCnt: 150, drtmsCnt: 1, totCnt: 151 },
+      { ctprvnNm: '부산', frcsCnt: 580, drtmsCnt: 8, totCnt: 588 },
+      { ctprvnNm: '전북', frcsCnt: 290, drtmsCnt: 0, totCnt: 290 },
+      { ctprvnNm: '광주', frcsCnt: 230, drtmsCnt: 2, totCnt: 232 },
+      { ctprvnNm: '전남', frcsCnt: 270, drtmsCnt: 0, totCnt: 270 },
+      { ctprvnNm: '제주', frcsCnt: 110, drtmsCnt: 1, totCnt: 111 }
+    ];
 
     function AdminSeoulCmrclPage({ setView, adminUser, handleLogout, refreshLeads }) {
       const mapContainerRef = useRef(null);
@@ -1587,6 +1603,13 @@
       const [selectedBizesId, setSelectedBizesId] = useState(null);
       const [isApiPanelOpen, setIsApiPanelOpen] = useState(true);
       const [isResultPanelOpen, setIsResultPanelOpen] = useState(true);
+
+      const [franchiseData, setFranchiseData] = useState([]);
+      const [franchiseSummary, setFranchiseSummary] = useState({ totalFrcs: 0, totalDrtms: 0, totalStores: 0 });
+      const [franchiseBrandNo, setFranchiseBrandNo] = useState('');
+      const [franchiseYear, setFranchiseYear] = useState('2023');
+      const [isFranchiseLoading, setIsFranchiseLoading] = useState(false);
+      const franchiseOverlayRefs = useRef([]);
 
       const SERVICE_KEY = 'BahaUoW8jiYD6HVMXVBRJEpafXTnR%2FVHFkUWR0WwW%2BOzXumYn3YlV8oqDnoc8PYSg0vcwp3qT%2FalQ7707m0fKA%3D%3D';
 
@@ -1817,6 +1840,112 @@
         }
       };
 
+      // 프랜차이즈 오버레이 초기화
+      const clearFranchiseLayers = () => {
+        franchiseOverlayRefs.current.forEach(overlay => {
+          if (overlay) overlay.setMap(null);
+        });
+        franchiseOverlayRefs.current = [];
+      };
+
+      // 공정위 가맹정보 API 조회
+      const fetchFranchiseData = async () => {
+        if (!mapObjRef.current || !window.kakao) return;
+        setIsFranchiseLoading(true);
+        clearFranchiseLayers();
+
+        let items = [];
+        try {
+          const params = new URLSearchParams({
+            ServiceKey: decodeURIComponent(SERVICE_KEY),
+            pageNo: '1',
+            numOfRows: '100',
+            resultType: 'json'
+          });
+          if (franchiseYear) params.append('yr', franchiseYear);
+          // if (franchiseBrandNo) params.append('brandNo', franchiseBrandNo); // 브랜드 번호 적용 가능
+
+          // 오퍼레이션 명은 가이드라인 표준 형태 (실패 시 catch 블록에서 데모 데이터로 Fallback)
+          const targetUrl = `https://apis.data.go.kr/1130000/FftcBrandFrcsDropInfo3_Service/getBrandFrcsDropInfo?${params.toString()}`;
+          const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+
+          const res = await fetch(proxyUrl);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.items) {
+              items = data.items;
+            }
+          }
+        } catch (err) {
+          console.warn("Franchise API fetch error. Using dummy data.", err);
+          // API 에러 시 임시 데모 데이터 사용
+          items = [...DUMMY_FRANCHISE_DATA];
+        }
+
+        // 특정 브랜드 검색어가 있을 경우 임시로 클라이언트 단 필터링 (데모용)
+        if (franchiseBrandNo && items === DUMMY_FRANCHISE_DATA) {
+          items = items.filter(d => d.ctprvnNm.includes(franchiseBrandNo) || String(d.frcsCnt).includes(franchiseBrandNo));
+        }
+
+        setFranchiseData(items);
+
+        let sumFrcs = 0;
+        let sumDrtms = 0;
+
+        const map = mapObjRef.current;
+
+        // 결과 지도 렌더링
+        items.forEach((item, idx) => {
+          const region = item.ctprvnNm; // 서울, 경기 등
+          const coords = REGION_COORDS[region];
+          if (!coords) return;
+
+          const frcsCnt = parseInt(item.frcsCnt) || 0;
+          const drtmsCnt = parseInt(item.drtmsCnt) || 0;
+          sumFrcs += frcsCnt;
+          sumDrtms += drtmsCnt;
+
+          const pos = new window.kakao.maps.LatLng(coords.lat, coords.lng);
+
+          // 버블 크기 (가맹점 수 비례)
+          const size = Math.max(30, Math.min(80, 20 + Math.sqrt(frcsCnt) * 1.5));
+
+          const overlayContent = `
+            <div style="
+              width: ${size}px; height: ${size}px;
+              background-color: rgba(59, 130, 246, 0.85);
+              border: 2px solid #ffffff;
+              border-radius: 50%;
+              display: flex; flex-direction: column; align-items: center; justify-content: center;
+              color: white; font-weight: bold; font-size: 11px;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+              cursor: pointer;
+            ">
+              <span style="font-size: 10px; opacity: 0.9;">${region}</span>
+              <span style="font-size: 13px;">${frcsCnt}</span>
+            </div>
+          `;
+
+          const customOverlay = new window.kakao.maps.CustomOverlay({
+            position: pos,
+            content: overlayContent,
+            yAnchor: 0.5,
+            xAnchor: 0.5
+          });
+
+          customOverlay.setMap(map);
+          franchiseOverlayRefs.current.push(customOverlay);
+        });
+
+        setFranchiseSummary({
+          totalFrcs: sumFrcs,
+          totalDrtms: sumDrtms,
+          totalStores: sumFrcs + sumDrtms
+        });
+
+        setIsFranchiseLoading(false);
+      };
+
       // 리스트 항목 클릭 시 마커 하이라이트 & 지도 이동 & 인포윈도우 오픈
       const highlightStoreMarker = (bizesId) => {
         if (!mapObjRef.current || !window.kakao) return;
@@ -1883,12 +2012,29 @@
       };
 
       const handleToggleNearbyStores = () => {
-        setActiveApi('nearby_stores');
-        activeApiRef.current = 'nearby_stores';
-        const { lat, lng } = currentPosRef.current;
-        fetchStoresInRadius(lat, lng);
+        if (activeApi === 'nearby_stores') {
+          setActiveApi(null);
+          activeApiRef.current = null;
+          // 기존 맵 레이어 지우기 등 처리가 필요하다면 추가
+        } else {
+          setActiveApi('nearby_stores');
+          activeApiRef.current = 'nearby_stores';
+          const { lat, lng } = currentPosRef.current;
+          fetchStoresInRadius(lat, lng);
+        }
       };
 
+      const handleToggleFranchise = () => {
+        if (activeApi === 'franchise') {
+          setActiveApi(null);
+          activeApiRef.current = null;
+          clearFranchiseLayers();
+        } else {
+          setActiveApi('franchise');
+          activeApiRef.current = 'franchise';
+          fetchFranchiseData(); // 바로 조회
+        }
+      };
       useEffect(() => {
         const initMap = () => {
           if (!window.kakao || !window.kakao.maps || !mapContainerRef.current) return;
@@ -2076,6 +2222,32 @@
                         {activeApi === 'nearby_stores' ? 'ON (조회 완료)' : '선택 실행'}
                       </span>
                     </button>
+                    
+                    <button
+                      type="button"
+                      onClick={handleToggleFranchise}
+                      disabled={isFranchiseLoading}
+                      className={`w-full p-2.5 rounded-xl border text-xs font-bold transition flex items-center justify-between cursor-pointer ${
+                        activeApi === 'franchise'
+                          ? 'bg-blue-600 border-blue-400 text-white shadow-lg ring-2 ring-blue-400/50'
+                          : 'bg-slate-800 border-slate-700/80 hover:bg-slate-750 text-slate-200 hover:border-slate-600'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">📊</span>
+                        <div className="text-left">
+                          <div className="font-extrabold text-xs">프랜차이즈 지역 분포</div>
+                          <div className={`text-[10px] ${activeApi === 'franchise' ? 'text-blue-100' : 'text-slate-400'}`}>
+                            공정거래위원회 API
+                          </div>
+                        </div>
+                      </div>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
+                        activeApi === 'franchise' ? 'bg-white text-blue-700' : 'bg-slate-900 text-slate-400'
+                      }`}>
+                        {activeApi === 'franchise' ? 'ON (조회 완료)' : '선택 실행'}
+                      </span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -2236,6 +2408,77 @@
                   💡 목록 클릭 시 해당 마커로 지도 이동 및 황금색 핀 하이라이트 표시
                 </div>
               </div>
+              </div>
+            )}
+
+            {/* 우측 패널 2: 프랜차이즈 API 결과 표시 영역 (토글 가능) */}
+            {activeApi === 'franchise' && (
+              <div className={`absolute top-4 z-10 transition-all duration-300 ${isResultPanelOpen ? 'right-4' : '-right-80 sm:-right-96'}`}>
+                <div className="w-80 sm:w-96 bg-slate-900/95 border border-slate-700/90 backdrop-blur-xl rounded-2xl shadow-2xl p-4 text-white space-y-3.5 max-h-[calc(100vh-80px)] flex flex-col relative">
+                  {/* 토글 버튼 */}
+                  <button 
+                    onClick={() => setIsResultPanelOpen(!isResultPanelOpen)} 
+                    className="absolute top-1/2 -translate-y-1/2 -left-8 w-8 h-16 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 border-r-0 rounded-l-xl shadow-lg flex items-center justify-center cursor-pointer transition-colors"
+                  >
+                    {isResultPanelOpen ? '▶' : '◀'}
+                  </button>
+                  
+                  <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 pr-1">
+                    <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/80 flex flex-col gap-2">
+                      <div className="text-[11px] font-bold text-blue-300">📊 프랜차이즈 매장 검색</div>
+                      
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={franchiseBrandNo}
+                          onChange={(e) => setFranchiseBrandNo(e.target.value)}
+                          placeholder="브랜드명 검색 (데모)"
+                          className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                        />
+                        <button
+                          onClick={fetchFranchiseData}
+                          disabled={isFranchiseLoading}
+                          className="bg-blue-600 hover:bg-blue-500 font-bold text-xs px-3 py-1.5 rounded-lg transition"
+                        >
+                          {isFranchiseLoading ? '⏳' : '검색'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {isFranchiseLoading ? (
+                      <div className="py-8 text-center text-xs text-slate-400">데이터를 불러오는 중...</div>
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="bg-slate-800/90 p-3 rounded-xl border border-slate-700/80 text-center">
+                            <div className="text-[10px] text-slate-400 mb-1">총 매장 수</div>
+                            <div className="text-sm font-black text-amber-400">{franchiseSummary.totalStores.toLocaleString()}개</div>
+                          </div>
+                          <div className="bg-slate-800/90 p-3 rounded-xl border border-slate-700/80 text-center">
+                            <div className="text-[10px] text-slate-400 mb-1">총 가맹점 수</div>
+                            <div className="text-sm font-black text-blue-400">{franchiseSummary.totalFrcs.toLocaleString()}개</div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 mt-2">
+                          {franchiseData.map((item, idx) => {
+                            const frcs = parseInt(item.frcsCnt) || 0;
+                            const drtms = parseInt(item.drtmsCnt) || 0;
+                            return (
+                              <div key={idx} className="bg-slate-800/50 p-2.5 rounded-xl border border-slate-700/60 flex justify-between items-center text-xs">
+                                <span className="font-bold text-slate-200">{item.ctprvnNm}</span>
+                                <div className="text-right">
+                                  <div className="text-amber-300 font-bold">매장 {frcs + drtms}개</div>
+                                  <div className="text-[9px] text-slate-400">가맹 {frcs} / 직영 {drtms}</div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 

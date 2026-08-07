@@ -252,6 +252,7 @@
       );
     }
     function AdminSeoulCmrclPage({ setView, adminUser, handleLogout, refreshLeads }) {
+      const { useState, useEffect, useRef } = React;
       const mapContainerRef = useRef(null);
       const mapObjRef = useRef(null);
       const storeMarkerMapRef = useRef({}); // bizesId -> { marker, infowindow, store }
@@ -1010,52 +1011,6 @@
                     )}
                   </div>
                 </>
-              )}
-
-              {/* 2. 인구/세대 현황 탭 컨텐츠 */}
-              {activeTab === 'population' && (
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 bg-slate-800/40 rounded-xl border border-slate-700/60 space-y-3">
-                  <div className="flex items-center gap-2 text-xs font-extrabold text-blue-300">
-                    <span className="text-base">👥</span>
-                    <span>행정동별 주민등록 인구 및 세대현황</span>
-                  </div>
-                  <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/80 space-y-2 text-xs">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[11px] font-bold text-slate-400">📍 현재 위치</span>
-                      <span className="text-xs font-black text-emerald-400 truncate max-w-[190px]">{currentAddress}</span>
-                    </div>
-                  </div>
-                  <div className="p-4 text-center text-xs text-slate-400 bg-slate-800/60 rounded-xl border border-dashed border-slate-700 space-y-2">
-                    <div className="text-2xl">📊</div>
-                    <p className="font-bold text-slate-300">행정안전부 인구/세대 현황 API 연동 공간</p>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      해당 위치(행정동)의 주민등록 인구 수, 세대 현황 등의 데이터 연동을 위한 전용 메뉴 영역입니다.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* 3. 기타 상권 API 탭 컨텐츠 */}
-              {activeTab === 'other' && (
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 bg-slate-800/40 rounded-xl border border-slate-700/60 space-y-3">
-                  <div className="flex items-center gap-2 text-xs font-extrabold text-amber-300">
-                    <span className="text-base">📊</span>
-                    <span>기타 상권 데이터 API</span>
-                  </div>
-                  <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/80 space-y-2 text-xs">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[11px] font-bold text-slate-400">📍 현재 위치</span>
-                      <span className="text-xs font-black text-emerald-400 truncate max-w-[190px]">{currentAddress}</span>
-                    </div>
-                  </div>
-                  <div className="p-4 text-center text-xs text-slate-400 bg-slate-800/60 rounded-xl border border-dashed border-slate-700 space-y-2">
-                    <div className="text-2xl">🧩</div>
-                    <p className="font-bold text-slate-300">추가 공공데이터 API 확장 영역</p>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      유동인구, 집객시설, 매출 통계 등 필요에 따라 공공 API를 확장 연결하실 수 있습니다.
-                    </p>
-                  </div>
-                </div>
               )}
 
               <div className="text-[9px] text-slate-400 text-center pt-1 border-t border-slate-800 flex-shrink-0">

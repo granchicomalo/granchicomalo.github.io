@@ -407,89 +407,6 @@
         recommendedTypes: ['소자본 카페', '무인 세탁/스튜디오', '프랜차이즈 식음료']
       });
 
-      const SEOUL_API_KEY = '4a5a6847726368693930764b467365';
-
-      const fetchSeoulRepopData = async (targetAddress) => {
-        setIsLoadingApi(true);
-        try {
-          const apiUrl = `https://corsproxy.io/?${encodeURIComponent('http://openapi.seoul.go.kr:8088/' + SEOUL_API_KEY + '/xml/VwsmTrdhlRepopQq/1/1000/')}`;
-          const res = await fetch(apiUrl);
-          if (res.ok) {
-            const text = await res.text();
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(text, 'text/xml');
-            const rows = xmlDoc.getElementsByTagName('row');
-
-            let matchedRow = null;
-            for (let i = 0; i < rows.length; i++) {
-              const trdarNm = rows[i].getElementsByTagName('TRDAR_CD_NM')[0]?.textContent || '';
-              if (targetAddress.includes(trdarNm) || (trdarNm.length >= 2 && targetAddress.includes(trdarNm.substring(0, 2)))) {
-                matchedRow = rows[i];
-                break;
-              }
-            }
-
-            if (!matchedRow && rows.length > 0) {
-              matchedRow = rows[Math.floor(Math.random() * rows.length)];
-            }
-
-            if (matchedRow) {
-              const totPop = parseInt(matchedRow.getElementsByTagName('TOT_REPOP_CO')[0]?.textContent || '15000', 10);
-              const households = parseInt(matchedRow.getElementsByTagName('TOT_HSHLD_CO')[0]?.textContent || '6500', 10);
-
-              const p10 = parseInt(matchedRow.getElementsByTagName('AGRDE_10_REPOP_CO')[0]?.textContent || '0', 10);
-              const p20 = parseInt(matchedRow.getElementsByTagName('AGRDE_20_REPOP_CO')[0]?.textContent || '0', 10);
-              const p30 = parseInt(matchedRow.getElementsByTagName('AGRDE_30_REPOP_CO')[0]?.textContent || '0', 10);
-              const p40 = parseInt(matchedRow.getElementsByTagName('AGRDE_40_REPOP_CO')[0]?.textContent || '0', 10);
-              const p50 = parseInt(matchedRow.getElementsByTagName('AGRDE_50_REPOP_CO')[0]?.textContent || '0', 10);
-              const p60 = parseInt(matchedRow.getElementsByTagName('AGRDE_60_ABOVE_REPOP_CO')[0]?.textContent || '0', 10);
-
-              const r10 = Math.round((p10 / totPop) * 100) || 11;
-              const r20 = Math.round((p20 / totPop) * 100) || 13;
-              const r30 = Math.round((p30 / totPop) * 100) || 14;
-              const r40 = Math.round((p40 / totPop) * 100) || 13;
-              const r50 = Math.round((p50 / totPop) * 100) || 18;
-              const r60 = Math.round((p60 / totPop) * 100) || 31;
-
-              setAnalysisResult({
-                floatingPop: `${totPop.toLocaleString()} 명`,
-                households: `${households.toLocaleString()} 세대`,
-                ageRatios: [
-                  { label: '10대', ratio: r10 },
-                  { label: '20대', ratio: r20 },
-                  { label: '30대', ratio: r30 },
-                  { label: '40대', ratio: r40 },
-                  { label: '50대', ratio: r50 },
-                  { label: '60대이상', ratio: r60 }
-                ],
-                recommendedTypes: ['1인/무인 창업', '소자본 카페', '밀키트/배달전문']
-              });
-              setIsLoadingApi(false);
-              return;
-            }
-          }
-        } catch (err) {
-          console.warn("Seoul API fetch fallback:", err.message);
-        }
-
-        const totPopSim = Math.floor(Math.random() * 15000) + 10000;
-        const houseSim = Math.floor(Math.random() * 7000) + 3000;
-        setAnalysisResult({
-          floatingPop: `${totPopSim.toLocaleString()} 명`,
-          households: `${houseSim.toLocaleString()} 세대`,
-          ageRatios: [
-            { label: '10대', ratio: 12 },
-            { label: '20대', ratio: 15 },
-            { label: '30대', ratio: 16 },
-            { label: '40대', ratio: 14 },
-            { label: '50대', ratio: 17 },
-            { label: '60대이상', ratio: 26 }
-          ],
-          recommendedTypes: ['소자본창업', '무인운영 매장', '프랜차이즈 카페']
-        });
-        setIsLoadingApi(false);
-      };
-
       const circleRef = useRef(null);
       const markerRef = useRef(null);
 
@@ -569,7 +486,6 @@
               if (status === window.kakao.maps.services.Status.OK) {
                 const addr = result[0].road_address ? result[0].road_address.address_name : result[0].address.address_name;
                 setSelectedAddress(addr);
-                fetchSeoulRepopData(addr);
               }
             });
           });
@@ -588,7 +504,6 @@
             drawCircleAndMarker(targetPos, mapInstance);
             const targetAddr = data[0].address_name || data[0].place_name;
             setSelectedAddress(targetAddr);
-            fetchSeoulRepopData(targetAddr);
           } else {
             alert('검색 결과를 찾을 수 없습니다. 정확한 지역명이나 도로명을 입력해 보세요.');
           }
@@ -1658,7 +1573,10 @@
       const centerMarkerRef = useRef(null);
       const radiusCircleRef = useRef(null);
       const activeInfoWindowRef = useRef(null);
+      const activeApiRef = useRef(null);
+      const currentPosRef = useRef({ lat: 37.5665, lng: 126.9780 });
 
+      const [activeApi, setActiveApi] = useState(null); // null or 'nearby_stores'
       const [searchKeyword, setSearchKeyword] = useState('');
       const [isLoading, setIsLoading] = useState(false);
       const [storeCount, setStoreCount] = useState(0);
@@ -1937,6 +1855,38 @@
         }
       };
 
+      const drawCenterMarker = (latlng, mapObj) => {
+        if (!mapObj || !window.kakao) return;
+        if (centerMarkerRef.current) centerMarkerRef.current.setMap(null);
+
+        const redPinSvg = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="42" viewBox="0 0 36 42">
+            <path fill="#ef4444" stroke="#ffffff" stroke-width="2.5" d="M18 0C8.059 0 0 8.059 0 18c0 13.5 18 24 18 24s18-10.5 18-24C36 8.059 27.941 0 18 0z"/>
+            <circle cx="18" cy="16" r="6" fill="#ffffff"/>
+          </svg>
+        `)}`;
+
+        const redMarkerImage = new window.kakao.maps.MarkerImage(
+          redPinSvg,
+          new window.kakao.maps.Size(36, 42),
+          { offset: new window.kakao.maps.Point(18, 42) }
+        );
+
+        centerMarkerRef.current = new window.kakao.maps.Marker({
+          position: latlng,
+          image: redMarkerImage,
+          zIndex: 10
+        });
+        centerMarkerRef.current.setMap(mapObj);
+      };
+
+      const handleToggleNearbyStores = () => {
+        setActiveApi('nearby_stores');
+        activeApiRef.current = 'nearby_stores';
+        const { lat, lng } = currentPosRef.current;
+        fetchStoresInRadius(lat, lng);
+      };
+
       useEffect(() => {
         const initMap = () => {
           if (!window.kakao || !window.kakao.maps || !mapContainerRef.current) return;
@@ -1947,6 +1897,7 @@
 
             const initialLat = 37.5665;
             const initialLng = 126.9780;
+            currentPosRef.current = { lat: initialLat, lng: initialLng };
             const centerPos = new window.kakao.maps.LatLng(initialLat, initialLng);
 
             if (!mapObjRef.current) {
@@ -1957,8 +1908,15 @@
               mapObjRef.current.setCenter(centerPos);
             }
 
-            // 초기 300m 상가업소 조회
-            fetchStoresInRadius(initialLat, initialLng);
+            drawCenterMarker(centerPos, mapObjRef.current);
+
+            // 초기 위치 지오코딩 주소 확인
+            const geocoder = new window.kakao.maps.services.Geocoder();
+            geocoder.coord2Address(initialLng, initialLat, (result, status) => {
+              if (status === window.kakao.maps.services.Status.OK && result[0]) {
+                setCurrentAddress(result[0].address ? result[0].address.address_name : '서울 중구 태평로1가');
+              }
+            });
 
             const triggerRelayout = () => {
               if (mapObjRef.current) {
@@ -1977,11 +1935,25 @@
 
             window.addEventListener('resize', triggerRelayout);
 
-            // 지도 클릭 이벤트: 중심점 이동 및 300m 상가 조회
+            // 지도 클릭 이벤트: 중심점 이동 및 API가 활성화되어 있으면 데이터 재조회
             window.kakao.maps.event.addListener(mapObjRef.current, 'click', (mouseEvent) => {
               const latlng = mouseEvent.latLng;
+              const lat = latlng.getLat();
+              const lng = latlng.getLng();
+              currentPosRef.current = { lat, lng };
+
               mapObjRef.current.panTo(latlng);
-              fetchStoresInRadius(latlng.getLat(), latlng.getLng());
+              drawCenterMarker(latlng, mapObjRef.current);
+
+              geocoder.coord2Address(lng, lat, (result, status) => {
+                if (status === window.kakao.maps.services.Status.OK && result[0]) {
+                  setCurrentAddress(result[0].address ? result[0].address.address_name : '선택 위치');
+                }
+              });
+
+              if (activeApiRef.current === 'nearby_stores') {
+                fetchStoresInRadius(lat, lng);
+              }
             });
           });
         };
@@ -2008,10 +1980,16 @@
           if (status === window.kakao.maps.services.Status.OK && data[0]) {
             const targetLat = parseFloat(data[0].y);
             const targetLng = parseFloat(data[0].x);
+            currentPosRef.current = { lat: targetLat, lng: targetLng };
             const targetPos = new window.kakao.maps.LatLng(targetLat, targetLng);
             
             mapObjRef.current.panTo(targetPos);
-            fetchStoresInRadius(targetLat, targetLng);
+            drawCenterMarker(targetPos, mapObjRef.current);
+            setCurrentAddress(data[0].address_name || data[0].place_name || '검색 위치');
+
+            if (activeApiRef.current === 'nearby_stores') {
+              fetchStoresInRadius(targetLat, targetLng);
+            }
           } else {
             alert('검색한 위치를 찾을 수 없습니다.');
           }
@@ -2023,7 +2001,7 @@
           <AdminNav setView={setView} currentView="admin_seoul_cmrcl" adminUser={adminUser} refreshLeads={refreshLeads} handleLogout={handleLogout} />
           
           <div className="flex-1 w-full relative">
-            {/* 좌측 패널: 위치 검색 + 반경 300m 시각화 + 업종 대분류 상가 스크롤 리스트 */}
+            {/* 좌측 패널: 위치 검색 + API 기능 선택 + 상가 목록 결과 */}
             <div className="absolute top-4 left-4 z-10 w-80 sm:w-96 bg-slate-900/95 border border-slate-700/90 backdrop-blur-xl rounded-2xl shadow-2xl p-4 text-white space-y-3.5 max-h-[calc(100vh-80px)] flex flex-col">
               
               {/* 상단 위치 검색 폼 */}
@@ -2044,33 +2022,84 @@
                 </button>
               </form>
 
-              {/* 반경 300m 요약 카드 */}
+              {/* 중심 위치 안내 카드 */}
               <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/80 space-y-1.5 text-xs flex-shrink-0">
                 <div className="flex justify-between items-center">
-                  <span className="text-[11px] font-bold text-slate-400">📍 중심 위치</span>
+                  <span className="text-[11px] font-bold text-slate-400">📍 현재 지도 위치</span>
                   <span className="text-xs font-black text-emerald-400 truncate max-w-[190px]">{currentAddress}</span>
-                </div>
-                <div className="flex justify-between items-center pt-1 border-t border-slate-700/60">
-                  <span className="text-[11px] font-bold text-blue-300">⭕ 반경: <strong className="text-sky-400">300m</strong></span>
-                  <span className="text-xs font-black text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-700/80">
-                    🏪 상가업소: <strong>{storeCount}개</strong>
-                  </span>
                 </div>
               </div>
 
-              {/* 업종 대분류 그룹별 상가 스크롤 목록 */}
-              <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
-                {isLoading ? (
-                  <div className="py-8 text-center text-xs text-slate-400 space-y-2">
-                    <div className="animate-spin text-lg">⏳</div>
-                    <p>반경 300m 상가업소를 불러오는 중...</p>
+              {/* 사용 가능한 API 기능 선택 섹션 */}
+              <div className="bg-slate-800/80 rounded-xl p-3 border border-slate-700/80 space-y-2 flex-shrink-0">
+                <div className="flex justify-between items-center text-xs font-extrabold text-blue-300">
+                  <span>⚡ 상권 분석 API 기능 선택</span>
+                  <span className="text-[10px] bg-blue-950/80 text-blue-300 px-2 py-0.5 rounded-md border border-blue-800/60 font-bold">1개 연동됨</span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2 pt-0.5">
+                  <button
+                    type="button"
+                    onClick={handleToggleNearbyStores}
+                    disabled={isLoading}
+                    className={`w-full p-2.5 rounded-xl border text-xs font-bold transition flex items-center justify-between cursor-pointer ${
+                      activeApi === 'nearby_stores'
+                        ? 'bg-blue-600 border-blue-400 text-white shadow-lg ring-2 ring-blue-400/50'
+                        : 'bg-slate-800 border-slate-700/80 hover:bg-slate-750 text-slate-200 hover:border-slate-600'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">🏪</span>
+                      <div className="text-left">
+                        <div className="font-extrabold text-xs">근처 상가 (300m)</div>
+                        <div className={`text-[10px] ${activeApi === 'nearby_stores' ? 'text-blue-100' : 'text-slate-400'}`}>
+                          소상공인시장진흥공단 API
+                        </div>
+                      </div>
+                    </div>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
+                      activeApi === 'nearby_stores' ? 'bg-white text-blue-700' : 'bg-slate-900 text-slate-400'
+                    }`}>
+                      {activeApi === 'nearby_stores' ? 'ON (조회 완료)' : '선택 실행'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* API 결과 표시 영역 */}
+              {activeApi === null ? (
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 bg-slate-800/40 rounded-xl border border-slate-700/60 flex flex-col items-center justify-center text-center space-y-3">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-950/80 border border-blue-800/60 flex items-center justify-center text-xl shadow-inner text-blue-400">
+                    👆
                   </div>
-                ) : Object.keys(groupedStores).length === 0 ? (
-                  <div className="py-8 text-center text-xs text-slate-400">
-                    반경 300m 이내에 검색된 상가가 없습니다.
+                  <div className="space-y-1">
+                    <p className="font-bold text-xs text-slate-200">상권 분석 API를 선택해 주세요</p>
+                    <p className="text-[11px] text-slate-400 leading-relaxed max-w-[240px]">
+                      위의 <strong className="text-blue-400 font-bold">🏪 근처 상가</strong> 버튼을 누르면 현재 위치 반경 300m 이내의 소상공인 상가업소 데이터가 실시간으로 조회됩니다.
+                    </p>
                   </div>
-                ) : (
-                  <>
+                </div>
+              ) : (
+                <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
+                  {/* 반경 300m 요약 바 */}
+                  <div className="bg-slate-800/90 rounded-xl p-2.5 border border-slate-700/80 flex justify-between items-center text-xs flex-shrink-0 mb-1">
+                    <span className="text-[11px] font-bold text-blue-300">⭕ 반경: <strong className="text-sky-400">300m</strong></span>
+                    <span className="text-xs font-black text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-700/80">
+                      🏪 상가업소: <strong>{storeCount}개</strong>
+                    </span>
+                  </div>
+
+                  {isLoading ? (
+                    <div className="py-8 text-center text-xs text-slate-400 space-y-2">
+                      <div className="animate-spin text-lg">⏳</div>
+                      <p>반경 300m 상가업소를 불러오는 중...</p>
+                    </div>
+                  ) : Object.keys(groupedStores).length === 0 ? (
+                    <div className="py-8 text-center text-xs text-slate-400">
+                      반경 300m 이내에 검색된 상가가 없습니다.
+                    </div>
+                  ) : (
+                    <>
                     {/* 전체 펼치기 / 접기 버튼 Bar */}
                     <div className="flex justify-between items-center pb-1 text-[11px] text-slate-400 border-b border-slate-700/50 mb-2">
                       <span className="font-bold text-slate-300">업종 분류 ({Object.keys(groupedStores).length}개)</span>

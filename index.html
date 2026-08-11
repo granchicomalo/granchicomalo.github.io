@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>프랜차이즈 창업 진단센터 | 나에게 맞는 맞춤 창업 조건 무료 진단</title>
-  <meta name="description" content="예산, 희망지역, 창업시기, 운영방식 등을 기준으로 나에게 맞는 창업 조건을 3분 만에 무료로 진단해보세요." />
-  <meta name="keywords" content="창업진단, 프랜차이즈, 소자본창업, 무인창업, 1인창업, 창업지원금, 소상공인24" />
+  <title>?�랜차이�?창업 진단?�터 | ?�에�?맞는 맞춤 창업 조건 무료 진단</title>
+  <meta name="description" content="?�산, ?�망지?? 창업?�기, ?�영방식 ?�을 기�??�로 ?�에�?맞는 창업 조건??3�?만에 무료�?진단?�보?�요." />
+  <meta name="keywords" content="창업진단, ?�랜차이�? ?�자본창?? 무인창업, 1?�창?? 창업지?�금, ?�상공인24" />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://granchicomalo.github.io/" />
   
@@ -14,11 +14,11 @@
   <meta name="google-adsense-account" content="ca-pub-6279787169395705" />
   <meta name="google-site-verification" content="BQxi41wFj5_bNTX6N2cHqLuN3BUiU7T7iDID2mUCrf0" />
   <meta name="naver-site-verification" content="a2a5c86df673c4c9b70f84bd8f4e151455f0d16c" />
-  <meta property="og:title" content="프랜차이즈 창업 진단센터 | 맞춤 창업 조건 3분 무료 진단" />
-  <meta property="og:description" content="내 자본과 조건에 맞는 창업, 3분 만에 객관적 데이터로 진단해보세요." />
+  <meta property="og:title" content="?�랜차이�?창업 진단?�터 | 맞춤 창업 조건 3�?무료 진단" />
+  <meta property="og:description" content="???�본�?조건??맞는 창업, 3�?만에 객�????�이?�로 진단?�보?�요." />
   <meta property="og:url" content="https://granchicomalo.github.io/" />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="프랜차이즈 창업 진단센터" />
+  <meta property="og:site_name" content="?�랜차이�?창업 진단?�터" />
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -82,7 +82,7 @@
     const { useState, useEffect, useRef } = React;
 
     const SITE_CONFIG = {
-      brandName: "프랜차이즈 창업 진단센터",
+      brandName: "?�랜차이�?창업 진단?�터",
       privacyVer: "v1.0 (2026.08.01)",
       marketingVer: "v1.0 (2026.08.01)",
       govSupportLink: "https://www.sbiz24.kr/#/combinePbancList"
@@ -113,36 +113,325 @@
 
     const INITIAL_LEADS = [];
 
+const INDUSTRY_MASTER = {
+  "?�식": ["?�식", "고기�?, "치킨", "분식", "카페", "베이커리", "주점", "배달?�문??],
+  "무인/?�매": ["무인 ?�이?�크�?, "무인?�의??, "무인문구??, "무인과자??, "무인?�매??, "?�의??, "?�형 ?�퍼", "반려?�물?�품??],
+  "?�비??: ["미용??, "?�일??, "?�탁??, "?�?�빨?�방", "?�차??, "?�진관", "부?�산", "?��????�매??],
+  "교육": ["공�?�?, "보습?�원", "?�어?�원", "?�학?�원", "?�서??, "?�터?�카??],
+  "?�포�??��?": ["?�크골프??, "골프?�습??, "?�크린골??, "?�즈카페", "체육?�설", "?�견?�치??, "?�견카페"],
+  "?�???�설??: ["?�???�식??, "?�??카페", "?�션", "캠핑??]
+};
+
+// 모든 ?�금?� '만원' ?�위 기�?
+const INDUSTRY_PROFILES = {
+  "카페": {
+    min_capital: 3000, recommended_capital: 8000, recommended_area: 15,
+    facility_cost: 3000, equipment_cost: 2000, deposit_cost: 3000,
+    preparation_months: 2, operation_difficulty: 4, labor_intensity: 6,
+    unstaffed_possible: false, franchise_suitability: 9, land_required: false, license_required: true,
+    region_dependence: 8, residential_suitability: 7, station_suitability: 9, office_suitability: 9, tourist_suitability: 8, suburb_suitability: 5,
+    competition_intensity: 10, market_growth: 5
+  },
+  "?�크골프??: {
+    min_capital: 20000, recommended_capital: 50000, recommended_area: 300,
+    facility_cost: 20000, equipment_cost: 5000, deposit_cost: 10000,
+    preparation_months: 6, operation_difficulty: 7, labor_intensity: 5,
+    unstaffed_possible: false, franchise_suitability: 4, land_required: true, license_required: true,
+    region_dependence: 4, residential_suitability: 2, station_suitability: 1, office_suitability: 1, tourist_suitability: 8, suburb_suitability: 10,
+    competition_intensity: 3, market_growth: 9
+  },
+  "무인 ?�이?�크�?: {
+    min_capital: 1500, recommended_capital: 2500, recommended_area: 10,
+    facility_cost: 1000, equipment_cost: 500, deposit_cost: 1000,
+    preparation_months: 1, operation_difficulty: 2, labor_intensity: 2,
+    unstaffed_possible: true, franchise_suitability: 10, land_required: false, license_required: false,
+    region_dependence: 9, residential_suitability: 10, station_suitability: 6, office_suitability: 4, tourist_suitability: 3, suburb_suitability: 2,
+    competition_intensity: 9, market_growth: 6
+  },
+  "?�?�빨?�방": {
+    min_capital: 5000, recommended_capital: 10000, recommended_area: 15,
+    facility_cost: 2000, equipment_cost: 6000, deposit_cost: 2000,
+    preparation_months: 2, operation_difficulty: 3, labor_intensity: 2,
+    unstaffed_possible: true, franchise_suitability: 8, land_required: false, license_required: true,
+    region_dependence: 8, residential_suitability: 9, station_suitability: 5, office_suitability: 6, tourist_suitability: 3, suburb_suitability: 2,
+    competition_intensity: 6, market_growth: 7
+  },
+  "?�터?�카??: {
+    min_capital: 10000, recommended_capital: 20000, recommended_area: 50,
+    facility_cost: 12000, equipment_cost: 3000, deposit_cost: 5000,
+    preparation_months: 2, operation_difficulty: 4, labor_intensity: 3,
+    unstaffed_possible: true, franchise_suitability: 9, land_required: false, license_required: true,
+    region_dependence: 7, residential_suitability: 9, station_suitability: 7, office_suitability: 5, tourist_suitability: 1, suburb_suitability: 3,
+    competition_intensity: 8, market_growth: 6
+  },
+  "?�식": {
+    min_capital: 5000, recommended_capital: 10000, recommended_area: 25,
+    facility_cost: 4000, equipment_cost: 2000, deposit_cost: 4000,
+    preparation_months: 2, operation_difficulty: 8, labor_intensity: 9,
+    unstaffed_possible: false, franchise_suitability: 7, land_required: false, license_required: true,
+    region_dependence: 7, residential_suitability: 8, station_suitability: 8, office_suitability: 9, tourist_suitability: 7, suburb_suitability: 6,
+    competition_intensity: 9, market_growth: 5
+  },
+  "고기�?: {
+    min_capital: 7000, recommended_capital: 15000, recommended_area: 35,
+    facility_cost: 6000, equipment_cost: 3000, deposit_cost: 6000,
+    preparation_months: 2, operation_difficulty: 8, labor_intensity: 9,
+    unstaffed_possible: false, franchise_suitability: 8, land_required: false, license_required: true,
+    region_dependence: 8, residential_suitability: 7, station_suitability: 9, office_suitability: 8, tourist_suitability: 7, suburb_suitability: 5,
+    competition_intensity: 9, market_growth: 5
+  },
+  "치킨": {
+    min_capital: 3000, recommended_capital: 7000, recommended_area: 15,
+    facility_cost: 2500, equipment_cost: 1500, deposit_cost: 3000,
+    preparation_months: 1, operation_difficulty: 6, labor_intensity: 8,
+    unstaffed_possible: false, franchise_suitability: 10, land_required: false, license_required: true,
+    region_dependence: 6, residential_suitability: 9, station_suitability: 7, office_suitability: 5, tourist_suitability: 4, suburb_suitability: 4,
+    competition_intensity: 10, market_growth: 4
+  },
+  "미용??: {
+    min_capital: 3000, recommended_capital: 7000, recommended_area: 15,
+    facility_cost: 3000, equipment_cost: 1000, deposit_cost: 3000,
+    preparation_months: 2, operation_difficulty: 7, labor_intensity: 7,
+    unstaffed_possible: false, franchise_suitability: 5, land_required: false, license_required: true,
+    region_dependence: 8, residential_suitability: 8, station_suitability: 8, office_suitability: 6, tourist_suitability: 3, suburb_suitability: 4,
+    competition_intensity: 8, market_growth: 5
+  },
+  "?�어?�원": {
+    min_capital: 4000, recommended_capital: 8000, recommended_area: 30,
+    facility_cost: 3000, equipment_cost: 1000, deposit_cost: 4000,
+    preparation_months: 2, operation_difficulty: 7, labor_intensity: 6,
+    unstaffed_possible: false, franchise_suitability: 8, land_required: false, license_required: true,
+    region_dependence: 9, residential_suitability: 10, station_suitability: 4, office_suitability: 2, tourist_suitability: 1, suburb_suitability: 5,
+    competition_intensity: 8, market_growth: 5
+  },
+  "?�크린골??: {
+    min_capital: 15000, recommended_capital: 30000, recommended_area: 80,
+    facility_cost: 10000, equipment_cost: 15000, deposit_cost: 5000,
+    preparation_months: 3, operation_difficulty: 5, labor_intensity: 4,
+    unstaffed_possible: false, franchise_suitability: 9, land_required: false, license_required: true,
+    region_dependence: 6, residential_suitability: 7, station_suitability: 6, office_suitability: 8, tourist_suitability: 3, suburb_suitability: 8,
+    competition_intensity: 7, market_growth: 7
+  },
+  "?�??카페": {
+    min_capital: 20000, recommended_capital: 50000, recommended_area: 150,
+    facility_cost: 25000, equipment_cost: 5000, deposit_cost: 20000,
+    preparation_months: 4, operation_difficulty: 7, labor_intensity: 7,
+    unstaffed_possible: false, franchise_suitability: 4, land_required: true, license_required: true,
+    region_dependence: 5, residential_suitability: 4, station_suitability: 3, office_suitability: 3, tourist_suitability: 9, suburb_suitability: 10,
+    competition_intensity: 8, market_growth: 6
+  }
+};
+
+// 미정???�종??경우 기본�?const DEFAULT_PROFILE = {
+  min_capital: 5000, recommended_capital: 10000, recommended_area: 20,
+  facility_cost: 3000, equipment_cost: 2000, deposit_cost: 5000,
+  preparation_months: 2, operation_difficulty: 5, labor_intensity: 5,
+  unstaffed_possible: false, franchise_suitability: 5, land_required: false, license_required: true,
+  region_dependence: 7, residential_suitability: 5, station_suitability: 5, office_suitability: 5, tourist_suitability: 5, suburb_suitability: 5,
+  competition_intensity: 5, market_growth: 5
+};
+
+const DiagnosisScoringEngine = {
+  evaluate: function(formData) {
+    const industryName = formData.industry || '기�?';
+    const profile = INDUSTRY_PROFILES[industryName] || DEFAULT_PROFILE;
+    
+    // ?�산 ?�싱
+    let userCapital = 0;
+    if (formData.budget === '2,000만원 미만') userCapital = 1500;
+    else if (formData.budget === '2,000~3,000만원') userCapital = 2500;
+    else if (formData.budget === '3,000~5,000만원') userCapital = 4000;
+    else if (formData.budget === '5,000~7,000만원') userCapital = 6000;
+    else if (formData.budget === '7,000만원~1?�원') userCapital = 8500;
+    else if (formData.budget === '1~2?�원') userCapital = 15000;
+    else if (formData.budget === '2?�원 ?�상') userCapital = 30000;
+    else userCapital = 5000; // 미정 ??중간�??�용
+    
+    let scores = {};
+    let rationales = {};
+
+    // 1. ?�금 ?�합??(25??
+    if (userCapital < profile.min_capital) {
+      scores.capital = Math.max(0, 25 - ((profile.min_capital - userCapital) / 1000) * 5);
+      rationales.capital = `?�당 ?�종 최소 ?�자�?${profile.min_capital}만원) ?��?가???�금??부족합?�다.`;
+    } else if (userCapital >= profile.recommended_capital) {
+      scores.capital = 25;
+      rationales.capital = `?�당 ?�종 권장 ?�자�?${profile.recommended_capital}만원) ?��??�금 ?�용??매우 ?�정?�입?�다.`;
+    } else {
+      scores.capital = 15 + ((userCapital - profile.min_capital) / (profile.recommended_capital - profile.min_capital)) * 10;
+      rationales.capital = `초기 ?�금?� ?�보?�었?�나, ?�영 ?�금 ?�유�??�해 ?��????�산 계획???�요?�니??`;
+    }
+
+    // 2. 지???�권 ?�합??(20??
+    const regionType = formData.region_type || '?��??�음';
+    let regionScoreMap = {
+      '주거밀�?: profile.residential_suitability,
+      '??���?: profile.station_suitability,
+      '?�피??: profile.office_suitability,
+      '관광�?': profile.tourist_suitability,
+      '교외': profile.suburb_suitability,
+    };
+    
+    let matchScore = regionScoreMap[regionType];
+    if (!matchScore) {
+      scores.region = 14;
+      rationales.region = `?�택???�종??보편?�인 ?�권 ?�존?��? 반영?��??�니??`;
+    } else {
+      scores.region = matchScore * 2; // 10??만점??20?�으�??��??�링
+      if (matchScore >= 8) rationales.region = `?�택?�신 ?�권 ?�형�??�종??궁합??매우 ?�수?�니??`;
+      else if (matchScore >= 5) rationales.region = `?�당 ?�권?�서 무난???�영???�상?�니??`;
+      else rationales.region = `?�당 ?�권 ?�성�??�종 ?�성???�소 맞�? ?�을 ???�습?�다.`;
+    }
+
+    // 3. ?�종/규모 ?�합??(20??
+    const storeSize = formData.store_size || '10???�하';
+    let requiredAreaScore = 20;
+    if (profile.land_required && storeSize !== '?��?/?�?�시???�요') {
+      requiredAreaScore = 5;
+      rationales.industry = `?�택???�종?� ?�규모 ?��????�수 ?�설???�수?�이?? ?�규�??�설???�택?�셨?�니??`;
+    } else if (storeSize === '10???�하' && profile.recommended_area > 15) {
+      requiredAreaScore = 12;
+      rationales.industry = `?�당 ?�종?� 최소 ${profile.recommended_area}???�상??권장?�니?? 공간???�소 ?�소?�니??`;
+    } else {
+      rationales.industry = `?�망?�시??매장 규모가 ?�종 ?�성 �?권장 면적�??�절??부?�합?�다.`;
+    }
+    scores.industry = requiredAreaScore;
+
+    // 4. 창업 ?�기 ?�합??(10??
+    const prepMonths = formData.startup_period === '1개월 ?�내' ? 1 :
+                       formData.startup_period === '3개월 ?�내' ? 3 :
+                       formData.startup_period === '6개월 ?�내' ? 6 :
+                       formData.startup_period === '6개월~1?? ? 9 :
+                       formData.startup_period === '1???�후' ? 12 : 3;
+    if (prepMonths < profile.preparation_months) {
+      scores.timing = 5;
+      rationales.timing = `?�당 ?�종?� ?�허가 �?공사??최소 ${profile.preparation_months}개월???�요?�여 준�??�정??빠듯?�니??`;
+    } else {
+      scores.timing = 10;
+      rationales.timing = `?�정?�으�?매장???�픈?�기??충분??준�?기간???�보?�셨?�니??`;
+    }
+
+    // 5. ?�영???�합??(10??
+    const opType = formData.operation_type || '직접 ?�영';
+    if (profile.unstaffed_possible === false && opType === '무인 ?�영') {
+      scores.operator = 2;
+      rationales.operator = `?�당 ?�종?� ?�전 무인 ?�영??불�??�하거나 매우 ?�렵?�니??`;
+    } else if (profile.labor_intensity > 7 && opType === '부??) {
+      scores.operator = 4;
+      rationales.operator = `?�동 강도가 매우 ?��? ?�종?�로 부???�태???�영?� 리스?��? ?�습?�다.`;
+    } else {
+      scores.operator = Math.max(10 - (profile.operation_difficulty * 0.3), 5);
+      rationales.operator = `?�택?�신 ?�영 방식�?�??�종???�영 ?�이?��? 조화�?��?�다.`;
+    }
+
+    // 6. ?�종 ?�성 기반 ?�장??경쟁?�경 ?��? (10??
+    scores.market = Math.max(10 - (profile.competition_intensity * 0.5) + (profile.market_growth * 0.2), 0);
+    scores.market = Math.min(10, scores.market);
+    rationales.market = `?�반?�인 ?�종 경쟁 강도?� 최근 ?�장 ?�렌???�장?�을 반영??지?�입?�다.`;
+
+    // 7. ?�험??(5??
+    scores.risk = 5 - (profile.operation_difficulty * 0.2) - (profile.competition_intensity * 0.1);
+    scores.risk = Math.max(0, scores.risk);
+    rationales.risk = `?�종 ?�체???�업�? 초기 ?�자�??�수 기간 ?�을 고려???�영 리스?�입?�다.`;
+
+    // 총점
+    let totalScore = Math.round(scores.capital + scores.region + scores.industry + scores.timing + scores.operator + scores.market + scores.risk);
+    totalScore = Math.max(0, Math.min(100, totalScore));
+
+    let grade = 'E';
+    let gradeLabel = '?�험/?��????�망';
+    if (totalScore >= 90) { grade = 'S'; gradeLabel = '최적??; }
+    else if (totalScore >= 80) { grade = 'A'; gradeLabel = '?�수/매우 ?�합'; }
+    else if (totalScore >= 70) { grade = 'B'; gradeLabel = '조건부 ?�합'; }
+    else if (totalScore >= 60) { grade = 'C'; gradeLabel = '보통/주의 ?�요'; }
+    else if (totalScore >= 50) { grade = 'D'; gradeLabel = '부?�합/리스???�음'; }
+
+    // 가????감점 ?�인 TOP 3 추출
+    const maxScores = { capital: 25, region: 20, industry: 20, timing: 10, operator: 10, market: 10, risk: 5 };
+    const lossArr = Object.keys(scores).map(key => ({
+      key,
+      loss: maxScores[key] - scores[key],
+      ratio: (maxScores[key] - scores[key]) / maxScores[key]
+    })).sort((a, b) => b.ratio - a.ratio);
+
+    const improvementTips = {
+      capital: "?�산??맞춰 ?�수�?줄이거나, 초기 권리금이 ?�는 ?�곽 지?? ?�는 ?�형 ?�화 ?�종?�로 변경을 검?�해 보세??",
+      region: "?�택???�종??�?고객층이 방문?�기 ?�운 ?� ?�권(?? ??���? 주거밀�????�로 ?��?�?변경하??것을 권장?�니??",
+      industry: "?�망?�는 매장 규모??맞춰 ?�설비용 부?�이 ?��? ?�른 ?�종???�택?�거?? 규모�??�릴 ???�도�??�금??추�? ?�보??보세??",
+      timing: "?��? 계약, ?�테리어, ?�허가 ??물리?�인 준�??�간?????�요?�니?? ?�픈 목표?�을 1~2개월 ??��??것을 권장?�니??",
+      operator: "초기 ?�영 ?�정?��? ?�해 부??무인보다??직접 ?�영 비중???�이거나, ?�스?�이 ??갖춰�??�랜차이�?브랜?��? ?�택?�세??",
+      market: "경쟁??매우 치열???�종?�니?? 명확??차별???�략(마�??? ?�화 메뉴 ?????�우거나 ?�새 ?�장???�려보세??",
+      risk: "?�영 ?�이?��? ?�고 리스?��? ?�는 ?�입?�다. 관???�종?�서??근무 경험??먼�? ?�거???�문가???�문??구하?�요."
+    };
+
+    const topPenalties = lossArr.slice(0, 3).filter(i => i.loss > 0).map(i => ({
+      name: i.key === 'capital' ? '?�용?�금 부�? :
+            i.key === 'region' ? '?�권 ?�성 불일�? :
+            i.key === 'industry' ? '?�종�?매장 규모 불일�? :
+            i.key === 'timing' ? '?�상 준비기�?부�? :
+            i.key === 'operator' ? '?�영 ?�이???��?경험/?�영방식 리스?? :
+            i.key === 'market' ? '치열??경쟁 �??�장 ?�경' : '구조???�영 리스??,
+      tip: improvementTips[i.key]
+    }));
+
+    return {
+      totalScore, grade, gradeLabel,
+      scores: {
+        capital: Math.round(scores.capital),
+        region: Math.round(scores.region),
+        industry: Math.round(scores.industry),
+        timing: Math.round(scores.timing),
+        operator: Math.round(scores.operator),
+        market: Math.round(scores.market),
+        risk: Math.round(scores.risk)
+      },
+      rationales,
+      topPenalties
+    };
+  },
+
+  recommendIndustries: function(formData) {
+    const results = [];
+    for (const industry in INDUSTRY_PROFILES) {
+      const mockData = { ...formData, industry: industry };
+      const evaluation = this.evaluate(mockData);
+      results.push({ name: industry, score: evaluation.totalScore });
+    }
+    return results.sort((a, b) => b.score - a.score).slice(0, 3);
+  }
+};
+
+
     const STATUS_OPTIONS = [
-      '신규',
-      '상담예정',
-      '상담완료',
-      '미팅예정',
-      '미팅완료',
+      '?�규',
+      '?�담?�정',
+      '?�담?�료',
+      '미팅?�정',
+      '미팅?�료',
       '계약진행',
-      '계약완료',
-      '비가망',
-      '유예/보류',
-      '이탈/거절'
+      '계약?�료',
+      '비�?�?,
+      '?�예/보류',
+      '?�탈/거절'
     ];
 
     function StatusSelect({ value, onChange, className = "" }) {
-      const currentVal = value || '신규';
+      const currentVal = value || '?�규';
 
       let dynamicStyle = "bg-white text-slate-800 border-slate-300 font-semibold";
-      if (currentVal === '신규') {
+      if (currentVal === '?�규') {
         dynamicStyle = "bg-blue-600 text-white border-blue-500 font-black shadow ring-2 ring-blue-300";
-      } else if (currentVal === '계약완료') {
+      } else if (currentVal === '계약?�료') {
         dynamicStyle = "bg-emerald-100 text-emerald-900 border-emerald-400 font-extrabold";
-      } else if (currentVal === '이탈/거절') {
+      } else if (currentVal === '?�탈/거절') {
         dynamicStyle = "bg-rose-100 text-rose-900 border-rose-400 font-extrabold";
-      } else if (currentVal === '상담예정' || currentVal === '상담완료') {
+      } else if (currentVal === '?�담?�정' || currentVal === '?�담?�료') {
         dynamicStyle = "bg-indigo-50 text-indigo-900 border-indigo-300 font-bold";
-      } else if (currentVal === '미팅예정' || currentVal === '미팅완료') {
+      } else if (currentVal === '미팅?�정' || currentVal === '미팅?�료') {
         dynamicStyle = "bg-purple-50 text-purple-900 border-purple-300 font-bold";
       } else if (currentVal === '계약진행') {
         dynamicStyle = "bg-amber-50 text-amber-900 border-amber-300 font-bold";
-      } else if (currentVal === '비가망' || currentVal === '유예/보류') {
+      } else if (currentVal === '비�?�? || currentVal === '?�예/보류') {
         dynamicStyle = "bg-slate-100 text-slate-700 border-slate-300 font-medium";
       }
 
@@ -152,20 +441,20 @@
           onChange={onChange}
           className={`p-1.5 border rounded-lg text-xs cursor-pointer focus:outline-none transition ${dynamicStyle} ${className}`}
         >
-          <option value="신규" className="bg-white text-blue-600 font-bold">✨ 신규</option>
-          <option disabled className="font-extrabold text-slate-400 bg-slate-100">[통화]</option>
-          <option value="상담예정" className="bg-white text-slate-800">&nbsp;&nbsp;상담예정</option>
-          <option value="상담완료" className="bg-white text-slate-800">&nbsp;&nbsp;상담완료</option>
-          <option disabled className="font-extrabold text-slate-400 bg-slate-100">[대면]</option>
-          <option value="미팅예정" className="bg-white text-slate-800">&nbsp;&nbsp;미팅예정</option>
-          <option value="미팅완료" className="bg-white text-slate-800">&nbsp;&nbsp;미팅완료</option>
+          <option value="?�규" className="bg-white text-blue-600 font-bold">???�규</option>
+          <option disabled className="font-extrabold text-slate-400 bg-slate-100">[?�화]</option>
+          <option value="?�담?�정" className="bg-white text-slate-800">&nbsp;&nbsp;?�담?�정</option>
+          <option value="?�담?�료" className="bg-white text-slate-800">&nbsp;&nbsp;?�담?�료</option>
+          <option disabled className="font-extrabold text-slate-400 bg-slate-100">[?��?</option>
+          <option value="미팅?�정" className="bg-white text-slate-800">&nbsp;&nbsp;미팅?�정</option>
+          <option value="미팅?�료" className="bg-white text-slate-800">&nbsp;&nbsp;미팅?�료</option>
           <option disabled className="font-extrabold text-slate-400 bg-slate-100">[계약]</option>
           <option value="계약진행" className="bg-white text-slate-800">&nbsp;&nbsp;계약진행</option>
-          <option value="계약완료" className="bg-white text-emerald-700 font-bold">&nbsp;&nbsp;계약완료</option>
-          <option disabled className="font-extrabold text-slate-400 bg-slate-100">[비대상]</option>
-          <option value="비가망" className="bg-white text-slate-800">&nbsp;&nbsp;비가망</option>
-          <option value="유예/보류" className="bg-white text-slate-800">&nbsp;&nbsp;유예/보류</option>
-          <option value="이탈/거절" className="bg-white text-rose-600 font-bold">&nbsp;&nbsp;이탈/거절</option>
+          <option value="계약?�료" className="bg-white text-emerald-700 font-bold">&nbsp;&nbsp;계약?�료</option>
+          <option disabled className="font-extrabold text-slate-400 bg-slate-100">[비�???</option>
+          <option value="비�?�? className="bg-white text-slate-800">&nbsp;&nbsp;비�?�?/option>
+          <option value="?�예/보류" className="bg-white text-slate-800">&nbsp;&nbsp;?�예/보류</option>
+          <option value="?�탈/거절" className="bg-white text-rose-600 font-bold">&nbsp;&nbsp;?�탈/거절</option>
         </select>
       );
     }
@@ -289,7 +578,7 @@
           try {
             const leadDocRef = window.FirebaseSDK.doc(firebaseDb, "leads", leadId);
             await window.FirebaseSDK.updateDoc(leadDocRef, updatedFields);
-            console.log("🔥 Lead details updated in Firestore:", updatedFields);
+            console.log("?�� Lead details updated in Firestore:", updatedFields);
           } catch (err) {
             console.error("Firestore lead update failed:", err);
           }
@@ -298,7 +587,7 @@
 
       const deleteLead = async (leadId, e) => {
         if (e) e.stopPropagation();
-        if (!confirm('정말로 이 고객 DB를 삭제하시겠습니까? (삭제 후 복구 불가)')) return;
+        if (!confirm('?�말�???고객 DB�???��?�시겠습?�까? (??�� ??복구 불�?)')) return;
 
         const filtered = leads.filter(l => l.id !== leadId);
         setLeads(filtered);
@@ -334,16 +623,16 @@
             <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
               <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
                 <div onClick={() => changeView('home')} className="flex items-center gap-2.5 cursor-pointer">
-                  <img src="/logo.png" alt="프랜차이즈 창업 진단센터 로고" className="h-9 sm:h-10 w-auto object-contain" />
+                  <img src="/logo.png" alt="?�랜차이�?창업 진단?�터 로고" className="h-9 sm:h-10 w-auto object-contain" />
                   <span className="font-extrabold text-xl text-slate-900">{SITE_CONFIG.brandName}</span>
-                  <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded font-semibold">공식센터</span>
+                  <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded font-semibold">공식?�터</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <button onClick={() => changeView('diagnosis')} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition">
-                    3분 창업진단 시작하기
+                    3�?창업진단 ?�작?�기
                   </button>
                   <button onClick={() => { setHasCompletedDiagnosis(false); changeView('consultation'); }} className="bg-slate-800 hover:bg-slate-900 text-white font-bold px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition">
-                    상담 바로 예약하기
+                    ?�담 바로 ?�약?�기
                   </button>
                 </div>
               </div>
@@ -369,17 +658,16 @@
               <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
                 <div className="flex flex-wrap items-center gap-4">
                   <span className="text-white font-bold text-sm">{SITE_CONFIG.brandName}</span>
-                  <a href="#" onClick={(e) => { e.preventDefault(); alert(SITE_CONFIG.privacyVer + ' 개인정보 처리방침\n상담 접수 및 고객 관리를 위해 수집합니다.'); }} className="text-blue-400 hover:underline">개인정보 처리방침</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); alert(SITE_CONFIG.privacyVer + ' 개인?�보 처리방침\n?�담 ?�수 �?고객 관리�? ?�해 ?�집?�니??'); }} className="text-blue-400 hover:underline">개인?�보 처리방침</a>
                   <a href={SITE_CONFIG.govSupportLink} target="_blank" rel="noopener noreferrer" className="text-emerald-400 font-bold hover:underline flex items-center gap-1">
-                    🏛️ 소상공인24 정부지원사업 공고 ↗
-                  </a>
+                    ?���??�상공인24 ?��?지?�사??공고 ??                  </a>
                 </div>
                 <div className="flex items-center gap-4">
-                  <a href="#" onClick={(e) => { e.preventDefault(); changeView(adminUser ? 'admin_dashboard' : 'admin_login'); }} className="text-slate-400 hover:text-white">영업자 CRM 로그인 (관리자 전용)</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); changeView(adminUser ? 'admin_dashboard' : 'admin_login'); }} className="text-slate-400 hover:text-white">?�업??CRM 로그??(관리자 ?�용)</a>
                 </div>
               </div>
               <div className="max-w-6xl mx-auto px-4 mt-6 pt-4 border-t border-slate-800 text-xs text-slate-500 text-center">
-                © 2026 {SITE_CONFIG.brandName}. All rights reserved. 본 서비스는 수익 확정 보장 표현을 일체 사용하지 않습니다.
+                © 2026 {SITE_CONFIG.brandName}. All rights reserved. �??�비?�는 ?�익 ?�정 보장 ?�현???�체 ?�용?��? ?�습?�다.
               </div>
             </footer>
           )}
@@ -390,21 +678,21 @@
     function KakaoMapAnalysisSection({ setView, setFormData }) {
       const mapContainerRef = React.useRef(null);
       const [mapInstance, setMapInstance] = React.useState(null);
-      const [selectedAddress, setSelectedAddress] = React.useState('서울시 서대문구 홍제동');
+      const [selectedAddress, setSelectedAddress] = React.useState('?�울???��?문구 ?�제??);
       const [searchKeyword, setSearchKeyword] = React.useState('');
       const [isLoadingApi, setIsLoadingApi] = React.useState(false);
       const [analysisResult, setAnalysisResult] = React.useState({
-        floatingPop: '17,605 명',
-        households: '7,973 세대',
+        floatingPop: '17,605 �?,
+        households: '7,973 ?��?',
         ageRatios: [
-          { label: '10대', ratio: 11 },
-          { label: '20대', ratio: 13 },
-          { label: '30대', ratio: 14 },
-          { label: '40대', ratio: 13 },
-          { label: '50대', ratio: 18 },
-          { label: '60대이상', ratio: 31 }
+          { label: '10?�', ratio: 11 },
+          { label: '20?�', ratio: 13 },
+          { label: '30?�', ratio: 14 },
+          { label: '40?�', ratio: 13 },
+          { label: '50?�', ratio: 18 },
+          { label: '60?�?�상', ratio: 31 }
         ],
-        recommendedTypes: ['소자본 카페', '무인 세탁/스튜디오', '프랜차이즈 식음료']
+        recommendedTypes: ['?�자�?카페', '무인 ?�탁/?�튜?�오', '?�랜차이�??�음�?]
       });
 
       const circleRef = useRef(null);
@@ -420,16 +708,15 @@
           markerRef.current.setMap(null);
         }
 
-        // 1. 선택 위치 핀 마커 생성
+        // 1. ?�택 ?�치 ?� 마커 ?�성
         markerRef.current = new window.kakao.maps.Marker({
           position: latlng
         });
         markerRef.current.setMap(mapObj);
 
-        // 2. 선택된 상권 반경 500m 배후지 반투명 영역 시각화
-        circleRef.current = new window.kakao.maps.Circle({
+        // 2. ?�택???�권 반경 500m 배후지 반투�??�역 ?�각??        circleRef.current = new window.kakao.maps.Circle({
           center: latlng,
-          radius: 500, // 500m 배후지 표준 영역
+          radius: 500, // 500m 배후지 ?��? ?�역
           strokeWeight: 2,
           strokeColor: '#3b82f6',
           strokeOpacity: 0.9,
@@ -505,7 +792,7 @@
             const targetAddr = data[0].address_name || data[0].place_name;
             setSelectedAddress(targetAddr);
           } else {
-            alert('검색 결과를 찾을 수 없습니다. 정확한 지역명이나 도로명을 입력해 보세요.');
+            alert('검??결과�?찾을 ???�습?�다. ?�확??지??��?�나 ?�로명을 ?�력??보세??');
           }
         });
       };
@@ -521,30 +808,29 @@
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-emerald-400 font-extrabold text-xs tracking-wider uppercase bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                  카카오 지도 상권 분석
+                  카카??지???�권 분석
                 </span>
               </div>
               <h3 className="text-xl sm:text-2xl font-black">
-                📍 지도에서 원하는 위치를 클릭하고 상권을 자유롭게 확인해보세요.
+                ?�� 지?�에???�하???�치�??�릭?�고 ?�권???�유�?�� ?�인?�보?�요.
               </h3>
             </div>
 
             <form onSubmit={handleSearch} className="flex gap-2">
               <input
                 type="text"
-                placeholder="예: 홍제동, 장안동, 충정로..."
+                placeholder="?? ?�제?? ?�안?? 충정�?.."
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
                 className="bg-slate-800 border border-slate-700 text-white placeholder-slate-400 text-xs sm:text-sm px-4 py-2.5 rounded-xl focus:outline-none focus:border-emerald-500 w-48 sm:w-64"
               />
               <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition">
-                검색
-              </button>
+                검??              </button>
             </form>
           </div>
 
           <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-slate-700/80 h-[480px] relative">
-            {/* 카카오 지도만 100% 깔끔하게 렌더링 */}
+            {/* 카카??지?�만 100% 깔끔?�게 ?�더�?*/}
             <div ref={mapContainerRef} className="w-full h-full" />
           </div>
         </div>
@@ -559,24 +845,23 @@
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-7 text-left space-y-6">
                 <a href={SITE_CONFIG.govSupportLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 text-xs sm:text-sm px-4 py-2 rounded-full border border-emerald-400/40 hover:bg-emerald-500/30 transition">
-                  <span>🏛️ [정부 공식] 소상공인24 지원사업 공고 보러가기 ↗</span>
+                  <span>?���?[?��? 공식] ?�상공인24 지?�사??공고 보러가�???/span>
                 </a>
 
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight text-white">
-                  내 자본과 조건에 맞는 창업,<br />
-                  <span className="text-blue-400">3분 만에 진단</span>해보세요.
+                  ???�본�?조건??맞는 창업,<br />
+                  <span className="text-blue-400">3�?만에 진단</span>?�보?�요.
                 </h1>
 
                 <p className="text-slate-300 text-base md:text-lg leading-relaxed">
-                  예산, 희망지역, 창업시기, 운영방식 등을 기준으로 1:1 맞춤 로드맵을 객관적인 데이터로 안내해 드립니다.
+                  ?�산, ?�망지?? 창업?�기, ?�영방식 ?�을 기�??�로 1:1 맞춤 로드맵을 객�??�인 ?�이?�로 ?�내???�립?�다.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-2">
                   <button onClick={() => setView('diagnosis')} className="bg-blue-600 hover:bg-blue-700 text-white text-base md:text-lg font-bold px-8 py-4 rounded-xl shadow-lg transition text-center">
-                    3분 창업진단 시작하기 →
-                  </button>
+                    3�?창업진단 ?�작?�기 ??                  </button>
                   <button onClick={() => { setHasCompletedDiagnosis(false); setView('consultation'); }} className="bg-slate-800 hover:bg-slate-700 text-white text-base font-semibold px-6 py-4 rounded-xl transition text-center border border-slate-700">
-                    상담 바로 예약하기
+                    ?�담 바로 ?�약?�기
                   </button>
                 </div>
               </div>
@@ -584,10 +869,10 @@
               {/* Hero Image 1 */}
               <div className="lg:col-span-5 space-y-3">
                 <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-700/60">
-                  <img src="/hero_consulting.png" alt="1:1 맞춤 창업 컨설팅" className="w-full h-auto object-cover transform hover:scale-105 transition duration-500" />
+                  <img src="/hero_consulting.png" alt="1:1 맞춤 창업 컨설?? className="w-full h-auto object-cover transform hover:scale-105 transition duration-500" />
                 </div>
                 <div className="bg-slate-800/90 p-3.5 rounded-xl border border-slate-700 text-xs sm:text-sm text-slate-200 font-semibold flex items-center justify-between shadow-md">
-                  <span>📊 1:1 맞춤 창업 성공 로드맵 제공</span>
+                  <span>?�� 1:1 맞춤 창업 ?�공 로드�??�공</span>
                   <span className="text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">100% 무료</span>
                 </div>
               </div>
@@ -605,7 +890,7 @@
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center mb-16">
                 <div className="lg:col-span-6 order-2 lg:order-1">
                   <div className="relative rounded-2xl overflow-hidden shadow-lg border border-slate-200">
-                    <img src="/data_analysis.png" alt="정밀 데이터 분석 팀" className="w-full h-auto object-cover" />
+                    <img src="/data_analysis.png" alt="?��? ?�이??분석 ?�" className="w-full h-auto object-cover" />
                     <div className="absolute top-4 left-4 bg-blue-600 text-white text-xs font-extrabold px-3 py-1.5 rounded-lg shadow">
                       DATA ANALYSIS TEAM
                     </div>
@@ -614,13 +899,13 @@
 
                 <div className="lg:col-span-6 space-y-4 order-1 lg:order-2">
                   <span className="text-blue-600 font-extrabold text-xs tracking-wider uppercase bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
-                    객관적 검증 프로세스
+                    객�???검�??�로?�스
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-black text-slate-900 leading-snug">
-                    "무조건 많이 버는 창업보다,<br />내 자본과 상권에 맞는 정밀 분석이 우선입니다."
+                    "무조�?많이 버는 창업보다,<br />???�본�??�권??맞는 ?��? 분석???�선?�니??"
                   </h2>
                   <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                    과장 광고나 맹목적인 가맹 권유가 아닙니다. 시장 경쟁력, 상권 유동 인구, 예상 운영 리스크를 입체적으로 분석하여 가장 안정적인 조건을 도출해 드립니다.
+                    과장 광고??맹목?�인 가�?권유가 ?�닙?�다. ?�장 경쟁?? ?�권 ?�동 ?�구, ?�상 ?�영 리스?��? ?�체?�으�?분석?�여 가???�정?�인 조건???�출???�립?�다.
                   </p>
                 </div>
               </div>
@@ -629,10 +914,10 @@
               <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
                 <div className="space-y-1 text-left">
                   <div className="flex items-center gap-2 text-emerald-900 font-extrabold text-base sm:text-lg">
-                    <span>🏛️ 2026 소상공인 창업 지원사업 & 정책자금 안내</span>
+                    <span>?���?2026 ?�상공인 창업 지?�사??& ?�책?�금 ?�내</span>
                   </div>
                   <p className="text-slate-600 text-xs sm:text-sm">
-                    창업 전 신청 가능한 소상공인24 정부 지원금 및 무이자·저리 정책자금 공고를 미리 확인해 보세요.
+                    창업 ???�청 가?�한 ?�상공인24 ?��? 지?�금 �?무이?�·�?�??�책?�금 공고�?미리 ?�인??보세??
                   </p>
                 </div>
                 <a
@@ -641,8 +926,7 @@
                   rel="noopener noreferrer"
                   className="whitespace-nowrap bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-sm shadow transition"
                 >
-                  지원사업 공고 조회 ↗
-                </a>
+                  지?�사??공고 조회 ??                </a>
               </div>
             </div>
           </section>
@@ -656,21 +940,20 @@
                     CERTIFIED SUCCESSFUL LAUNCH
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-black text-slate-900 leading-snug">
-                    검증된 프랜차이즈 맞춤 연결로<br />안정적인 매장 오픈을 지원합니다.
+                    검증된 ?�랜차이�?맞춤 ?�결�?br />?�정?�인 매장 ?�픈??지?�합?�다.
                   </h2>
                   <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                    본인의 자본금과 운영방식(무인/1인/부업/직원운영)에 가장 알맞은 우수 브랜드 파트너십을 찾아드리며 초기 준비부터 오픈까지 정직하게 동행합니다.
+                    본인???�본금과 ?�영방식(무인/1??부??직원?�영)??가???�맞?� ?�수 브랜???�트?�십??찾아?�리�?초기 준비�????�픈까�? ?�직?�게 ?�행?�니??
                   </p>
                   <div className="pt-2">
                     <button onClick={() => setView('diagnosis')} className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition shadow-md">
-                      내 맞춤 브랜드 3분 진단하기 →
-                    </button>
+                      ??맞춤 브랜??3�?진단?�기 ??                    </button>
                   </div>
                 </div>
 
                 <div className="lg:col-span-6">
                   <div className="relative rounded-2xl overflow-hidden shadow-xl border border-slate-200">
-                    <img src="/store_success.png" alt="성공적인 창업 매장 오픈" className="w-full h-auto object-cover" />
+                    <img src="/store_success.png" alt="?�공?�인 창업 매장 ?�픈" className="w-full h-auto object-cover" />
                   </div>
                 </div>
               </div>
@@ -682,247 +965,344 @@
 
     function DiagnosisPage({ setView, formData, setFormData, setHasCompletedDiagnosis }) {
       const [step, setStep] = useState(1);
-
-      const [customBudgetValue, setCustomBudgetValue] = useState('');
-      const [customBudgetUnit, setCustomBudgetUnit] = useState('만원');
-      const [isUncertainBudget, setIsUncertainBudget] = useState(false);
-
+    
+      const [category, setCategory] = useState(formData.industry_category || '');
+    
+      const stepTitles = [
+        "?�디?�서 창업???�망?�시?�요?",
+        "?�상 가?�한 창업 ?�산?� ?�느 ?�도?��???",
+        "?�제�?창업???�작?�고 ?�으?��???",
+        "가??관???�는 창업 ?�이?��? 무엇?��???",
+        "?�떤 방식?�로 매장???�영?�실 계획?��???",
+        "?�전??창업???�보??경험???�으?��???",
+        "?�상?�시??매장??규모???�느 ?�도?��???"
+      ];
+    
       const handleNext = () => {
-        if (step === 2) {
-          if (isUncertainBudget) {
-            setFormData({ ...formData, budget: '아직 정하지 않았어요' });
-          } else if (customBudgetValue.trim()) {
-            const formatted = `${customBudgetValue.trim()}${customBudgetUnit}`;
-            setFormData({ ...formData, budget: formatted });
-          } else {
-            alert('예상 투자금을 직접 입력하시거나 "아직 정하지 않았어요"를 선택해주세요.');
-            return;
-          }
-        }
-
-        if (step === 3) {
-          if (!formData.region_city.trim()) {
-            alert('희망하는 창업 지역을 입력해주세요.');
-            return;
-          }
-        }
-
-        if (step < 6) {
+        if (step === 1 && !formData.region_type) { alert('?�권 ?�형???�택?�주?�요.'); return; }
+        if (step === 2 && !formData.budget) { alert('?�용 가???�금???�택?�주?�요.'); return; }
+        if (step === 3 && !formData.startup_period) { alert('창업 ?�정 ?�기�??�택?�주?�요.'); return; }
+        if (step === 4 && !formData.industry) { alert('?�망 ?�종???�택?�주?�요.'); return; }
+        if (step === 5 && !formData.operation_type) { alert('?�영 ?�태�??�택?�주?�요.'); return; }
+        if (step === 6 && !formData.experience) { alert('창업 경험???�택?�주?�요.'); return; }
+        if (step === 7 && !formData.store_size) { alert('?�상 매장 규모�??�택?�주?�요.'); return; }
+    
+        if (step < 7) {
           setStep(step + 1);
         } else {
           setHasCompletedDiagnosis(true);
           setView('result');
         }
       };
-
+    
+      const OptionCard = ({ label, value, field }) => {
+        const isSelected = formData[field] === value;
+        return (
+          <button
+            onClick={() => setFormData({ ...formData, [field]: value })}
+            className={`w-full text-left p-4 rounded-xl border text-sm sm:text-base font-semibold transition-all ${
+              isSelected ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-600' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700'
+            }`}
+          >
+            {label}
+            {isSelected && <span className="float-right text-blue-600">??/span>}
+          </button>
+        );
+      };
+    
       return (
-        <div className="max-w-xl mx-auto px-4 py-10">
-          <div className="mb-6 flex justify-between items-center text-sm font-bold text-slate-600">
-            <button onClick={() => step > 1 ? setStep(step - 1) : setView('home')}>← 이전</button>
-            <span className="text-blue-600">STEP {step} / 6</span>
+        <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
+          {/* Progress Bar */}
+          <div className="mb-8">
+            <div className="flex justify-between items-center text-xs sm:text-sm font-bold text-slate-500 mb-2">
+              <button onClick={() => step > 1 ? setStep(step - 1) : setView('home')} className="hover:text-slate-800 transition">
+                ???�전
+              </button>
+              <span className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full border border-slate-200">
+                STEP {step} <span className="text-slate-400 font-normal">/ 7</span>
+              </span>
+            </div>
+            <div className="w-full bg-slate-100 h-2 sm:h-2.5 rounded-full overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-full transition-all duration-500 ease-out" style={{ width: `${(step / 7) * 100}%` }}></div>
+            </div>
           </div>
-          <div className="w-full bg-slate-200 h-2 rounded-full mb-8">
-            <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{ width: `${(step / 6) * 100}%` }}></div>
-          </div>
-
-          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-            {step === 1 && (
-              <div>
-                <h2 className="text-xl font-bold mb-6">창업을 생각하는 가장 큰 이유는 무엇인가요?</h2>
-                <div className="space-y-3">
-                  {['본업을 유지하면서 부업을 하고 싶어요', '새로운 사업을 시작하고 싶어요', '은퇴 후 창업을 준비하고 있어요', '기존 사업을 전환하고 싶어요', '아직 정확한 목적은 정하지 않았어요'].map((opt) => (
-                    <button key={opt} onClick={() => setFormData({...formData, startup_purpose: opt})} className={`w-full text-left p-4 rounded-xl border text-base font-semibold transition ${formData.startup_purpose === opt ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 hover:border-slate-300'}`}>
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div>
-                <h2 className="text-xl font-bold mb-2">창업에 사용할 수 있는 예상 투자금은 어느 정도인가요?</h2>
-                <p className="text-xs text-slate-500 mb-6">예상 금액을 직접 입력 후 단위를 선택하시거나 '아직 정하지 않았어요'를 선택하세요.</p>
-                
-                <div className="space-y-4">
-                  <div className={`p-4 rounded-xl border transition ${!isUncertainBudget && customBudgetValue ? 'border-blue-600 bg-blue-50/50' : 'border-slate-200'}`}>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">직접 금액 입력</label>
-                    <div className="flex gap-2">
+    
+          <div className="bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm min-h-[400px] flex flex-col">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 mb-8 tracking-tight">
+              {stepTitles[step - 1]}
+            </h2>
+    
+            <div className="flex-1 space-y-3">
+              {step === 1 && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1.5">????/label>
                       <input
-                        type="number"
-                        value={customBudgetValue}
-                        onChange={(e) => {
-                          setCustomBudgetValue(e.target.value);
-                          setIsUncertainBudget(false);
-                        }}
-                        placeholder="예: 5000 또는 1.5"
-                        className="flex-1 p-3 border border-slate-300 rounded-xl text-base font-bold text-slate-900 bg-white"
+                        type="text"
+                        value={formData.region_province || ''}
+                        onChange={(e) => setFormData({...formData, region_province: e.target.value})}
+                        placeholder="?? ?�울?�별??
+                        className="w-full p-3.5 border border-slate-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
-                      <select
-                        value={customBudgetUnit}
-                        onChange={(e) => setCustomBudgetUnit(e.target.value)}
-                        className="p-3 border border-slate-300 rounded-xl text-base font-bold text-slate-800 bg-white cursor-pointer"
-                      >
-                        <option value="만원">만원</option>
-                        <option value="억원">억원</option>
-                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1.5">??�?�?(??</label>
+                      <input
+                        type="text"
+                        value={formData.region_city || ''}
+                        onChange={(e) => setFormData({...formData, region_city: e.target.value})}
+                        placeholder="?? 강남�???��??
+                        className="w-full p-3.5 border border-slate-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      />
                     </div>
                   </div>
-
-                  <button
-                    onClick={() => {
-                      setIsUncertainBudget(true);
-                      setCustomBudgetValue('');
-                    }}
-                    className={`w-full text-left p-4 rounded-xl border text-base font-semibold transition ${isUncertainBudget ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 hover:border-slate-300'}`}
-                  >
-                    아직 정하지 않았어요 {isUncertainBudget ? '✓' : ''}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {step === 3 && (
-              <div>
-                <h2 className="text-xl font-bold mb-2">희망하는 창업 지역은 어디인가요?</h2>
-                <p className="text-xs text-slate-500 mb-6">희망하는 상권 또는 지역을 직접 작성해주세요.</p>
-                
-                <div className="space-y-4">
+                  
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">희망 창업 지역 전체 입력</label>
-                    <input
-                      type="text"
-                      value={formData.region_city}
-                      onChange={(e) => setFormData({...formData, region_city: e.target.value, region_province: ''})}
-                      className="w-full p-4 border border-slate-300 rounded-xl text-base font-semibold text-slate-900"
-                      placeholder="서울시 강남구 논현동"
-                    />
-                  </div>
-
-                  <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl text-xs text-blue-800 leading-relaxed font-medium">
-                    💡 <strong>TIP:</strong> 희망하는 시/도, 시/군/구 및 동 단위 상권까지 <strong>자세하게 적어주실수록</strong> 고객님의 조건에 최적화된 정밀한 창업 조건 및 입지 분석이 가능합니다.
+                    <label className="block text-xs font-bold text-slate-500 mb-2">?�권 ?�형 (??1)</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                      {['??���?, '주거밀�?, '?�피??, '?�?��?', '관광�?', '?�통?�장', '?�도??, '?�업?��?', '교외', '?��??�음'].map((opt) => (
+                        <OptionCard key={opt} label={opt} value={opt} field="region_type" />
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-
-            {step === 4 && (
-              <div>
-                <h2 className="text-xl font-bold mb-6">언제쯤 창업을 시작하고 싶으신가요?</h2>
-                <div className="space-y-3">
-                  {['1개월 이내', '3개월 이내', '6개월 이내', '1년 이내', '아직 미정'].map((opt) => (
-                    <button key={opt} onClick={() => setFormData({...formData, startup_period: opt})} className={`w-full text-left p-4 rounded-xl border text-base font-semibold transition ${formData.startup_period === opt ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 hover:border-slate-300'}`}>
-                      {opt}
-                    </button>
+              )}
+    
+              {step === 2 && (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {['2,000만원 미만', '2,000~3,000만원', '3,000~5,000만원', '5,000~7,000만원', '7,000만원~1?�원', '1~2?�원', '2?�원 ?�상'].map((opt) => (
+                    <OptionCard key={opt} label={opt} value={opt} field="budget" />
                   ))}
                 </div>
-              </div>
-            )}
-
-            {step === 5 && (
-              <div>
-                <h2 className="text-xl font-bold mb-6">어떤 방식으로 운영하고 싶으신가요?</h2>
-                <div className="space-y-3">
-                  {['직접 운영', '1인 운영', '무인 운영', '직원 운영', '아직 모르겠어요'].map((opt) => (
-                    <button key={opt} onClick={() => setFormData({...formData, operation_type: opt})} className={`w-full text-left p-4 rounded-xl border text-base font-semibold transition ${formData.operation_type === opt ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 hover:border-slate-300'}`}>
-                      {opt}
-                    </button>
+              )}
+    
+              {step === 3 && (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {['1개월 ?�내', '3개월 ?�내', '6개월 ?�내', '6개월~1??, '1???�후', '미정'].map((opt) => (
+                    <OptionCard key={opt} label={opt} value={opt} field="startup_period" />
                   ))}
                 </div>
-              </div>
-            )}
-
-            {step === 6 && (
-              <div>
-                <h2 className="text-xl font-bold mb-2">관심 있는 창업 유형은 무엇인가요?</h2>
-                <p className="text-xs text-slate-500 mb-6">(복수 선택이 가능합니다)</p>
-                <div className="space-y-3">
-                  {['소자본창업', '무인창업', '1인창업', '부업', '프랜차이즈', '업종을 아직 정하지 않았어요'].map((opt) => {
-                    const selected = (formData.interest_types || []).includes(opt);
-                    return (
-                      <button key={opt} onClick={() => {
-                        const current = formData.interest_types || [];
-                        const next = selected ? current.filter(v => v !== opt) : [...current, opt];
-                        setFormData({...formData, interest_types: next.length ? next : [opt]});
-                      }} className={`w-full text-left p-4 rounded-xl border text-base font-semibold transition ${selected ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 hover:border-slate-300'}`}>
-                        {opt} {selected ? '✓' : ''}
-                      </button>
-                    );
-                  })}
+              )}
+    
+              {step === 4 && (
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-2">?�분류 (?�종 카테고리)</label>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.keys(INDUSTRY_MASTER).map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => { setCategory(cat); setFormData({...formData, industry_category: cat, industry: ''}); }}
+                          className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                            category === cat ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+    
+                  {category && (
+                    <div className="pt-4 border-t border-slate-100">
+                      <label className="block text-xs font-bold text-slate-500 mb-2">?�분�?(?�세 ?�종)</label>
+                      <div className="grid grid-cols-2 gap-2.5">
+                        {INDUSTRY_MASTER[category].map((ind) => (
+                          <OptionCard key={ind} label={ind} value={ind} field="industry" />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
-
-            <button onClick={handleNext} className="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold p-4 rounded-xl">
-              {step === 6 ? '진단 결과 확인하기' : '다음 단계 →'}
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    // --- RESULT PAGE (정부 지원사업 안내 링크 카드 포함) ---
-    function ResultPage({ setView, formData }) {
-      const score = 78;
-
-      return (
-        <div className="max-w-xl mx-auto px-4 py-10">
-          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm text-center mb-6">
-            <span className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">창업 준비도 체크</span>
-            <h2 className="text-xl font-extrabold mt-3 mb-6">당신의 창업 준비도 점수</h2>
-
-            <div className="w-36 h-36 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex flex-col items-center justify-center mx-auto mb-6 shadow-md">
-              <span className="text-4xl font-black">{score}</span>
-              <span className="text-xs text-blue-200">점 / 100점</span>
+              )}
+    
+              {step === 5 && (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {['직접 ?�영', '직원 ?�영', '무인 ?�영', '부??, '가�??�영', '?�자??].map((opt) => (
+                    <OptionCard key={opt} label={opt} value={opt} field="operation_type" />
+                  ))}
+                </div>
+              )}
+    
+              {step === 6 && (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {['�?창업', '창업 경험 ?�음', '?�재 ?�업 ?�영 �?, '?�일 ?�종 경험 ?�음'].map((opt) => (
+                    <OptionCard key={opt} label={opt} value={opt} field="experience" />
+                  ))}
+                </div>
+              )}
+    
+              {step === 7 && (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {['10???�하', '10~20??, '20~40??, '40~70??, '70???�상', '?��?/?�?�시???�요'].map((opt) => (
+                    <OptionCard key={opt} label={opt} value={opt} field="store_size" />
+                  ))}
+                </div>
+              )}
             </div>
-
-            <div className="bg-emerald-50 text-emerald-700 font-bold p-3 rounded-xl text-sm mb-6">
-              🟢 현재 조건에서 창업 검토를 시작하기 좋은 단계입니다.
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 text-left text-xs bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
-              <div><span className="text-slate-400 block">예산:</span> <strong className="text-slate-800">{formData.budget || '미입력'}</strong></div>
-              <div><span className="text-slate-400 block">시기:</span> <strong className="text-slate-800">{formData.startup_period || '미입력'}</strong></div>
-              <div><span className="text-slate-400 block">운영:</span> <strong className="text-slate-800">{formData.operation_type || '미입력'}</strong></div>
-              <div><span className="text-slate-400 block">지역:</span> <strong className="text-slate-800">{formData.region_province || ''} {formData.region_city || '미입력'}</strong></div>
-            </div>
-
-            {/* 정부 지원사업 연동 배너 */}
-            <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-4 rounded-xl text-left mb-6 shadow-sm flex items-center justify-between gap-3">
-              <div>
-                <span className="text-[11px] font-bold bg-white/20 px-2 py-0.5 rounded text-emerald-100">정부 지원혜택 안내</span>
-                <p className="text-xs font-bold mt-1">소상공인 창업 지원금 & 정책자금 지원사업 확인하기</p>
-              </div>
-              <a
-                href={SITE_CONFIG.govSupportLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="whitespace-nowrap bg-white text-emerald-700 font-extrabold px-3 py-1.5 rounded-lg text-xs hover:bg-emerald-50 transition"
+    
+            <div className="mt-8 pt-6 border-t border-slate-100">
+              <button
+                onClick={handleNext}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-black py-4 rounded-2xl shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2"
               >
-                소상공인24 ↗
-              </a>
+                {step === 7 ? '진단 결과 ?�인?�기 ??' : '?�음 ?�계�???}
+              </button>
             </div>
-
-            <p className="text-xs text-slate-500 leading-relaxed bg-slate-100 p-3 rounded-lg text-left mb-6">
-              ※ 본 진단 결과는 입력하신 정보를 기반으로 한 참고용 분석이며 실제 창업 가능 여부는 희망지역 상권 및 임대 조건에 따라 달라질 수 있습니다.
-            </p>
-
-            <button onClick={() => setView('consultation')} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-4 rounded-xl shadow-lg mb-3">
-              내 조건에 맞는 창업 1:1 상담받기 →
-            </button>
-            <button onClick={() => setView('home')} className="text-xs text-slate-500 underline">
-              상담 없이 홈으로 이동
-            </button>
           </div>
         </div>
       );
     }
+    
+
+    function ResultPage({ setView, formData }) {
+      const result = DiagnosisScoringEngine.evaluate(formData);
+      const recommendations = DiagnosisScoringEngine.recommendIndustries(formData);
+    
+      const CircleGauge = ({ score }) => {
+        const radius = 60;
+        const circumference = 2 * Math.PI * radius;
+        const strokeDashoffset = circumference - (score / 100) * circumference;
+        
+        return (
+          <div className="relative flex justify-center items-center w-40 h-40 mx-auto">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 140 140">
+              <circle cx="70" cy="70" r={radius} stroke="currentColor" strokeWidth="12" fill="transparent" className="text-slate-100" />
+              <circle 
+                cx="70" cy="70" r={radius} 
+                stroke="currentColor" 
+                strokeWidth="12" 
+                fill="transparent" 
+                strokeDasharray={circumference} 
+                strokeDashoffset={strokeDashoffset} 
+                className={`${score >= 80 ? 'text-emerald-500' : score >= 60 ? 'text-blue-500' : 'text-rose-500'} transition-all duration-1000 ease-out`}
+                strokeLinecap="round" 
+              />
+            </svg>
+            <div className="absolute flex flex-col items-center justify-center">
+              <span className="text-4xl font-black text-slate-900">{score}<span className="text-xl font-bold text-slate-400">??/span></span>
+            </div>
+          </div>
+        );
+      };
+    
+      const BarChartItem = ({ label, score, maxScore, rationale }) => {
+        const percentage = (score / maxScore) * 100;
+        return (
+          <div className="mb-4">
+            <div className="flex justify-between items-end mb-1">
+              <span className="text-sm font-bold text-slate-700">{label}</span>
+              <span className="text-xs font-black text-slate-900">{score}<span className="text-slate-400 font-normal"> / {maxScore}</span></span>
+            </div>
+            <div className="w-full bg-slate-100 h-2.5 rounded-full mb-1.5 overflow-hidden">
+              <div className="bg-blue-500 h-full rounded-full transition-all duration-1000" style={{ width: `${percentage}%` }}></div>
+            </div>
+            <p className="text-[11px] text-slate-500 leading-tight">{rationale}</p>
+          </div>
+        );
+      };
+    
+      return (
+        <div className="bg-slate-50 min-h-screen py-10 px-4">
+          <div className="max-w-3xl mx-auto space-y-6">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">맞춤 창업 진단 리포??/h1>
+              <button onClick={() => setView('home')} className="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50">처음?�로</button>
+            </div>
+    
+            {/* Main Score Section */}
+            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm text-center">
+              <h2 className="text-sm font-bold text-slate-500 mb-6">종합 창업 ?�합??/h2>
+              <CircleGauge score={result.totalScore} />
+              
+              <div className="mt-6">
+                <span className={`inline-block px-4 py-1.5 rounded-full text-sm font-black border ${
+                  result.grade === 'S' || result.grade === 'A' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                  result.grade === 'B' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                  result.grade === 'C' ? 'bg-amber-50 text-amber-600 border-amber-200' :
+                  'bg-rose-50 text-rose-600 border-rose-200'
+                }`}>
+                  {result.grade}?�급 ({result.gradeLabel})
+                </span>
+              </div>
+              <p className="mt-4 text-sm text-slate-600 font-medium">
+                ?�력?�신 조건�?<strong className="text-blue-600">[{formData.industry}]</strong> ?�종??매칭 결과�?분석?�습?�다.
+              </p>
+            </div>
+    
+            {/* Diagnostic Comments (Top Penalties) */}
+            {result.topPenalties.length > 0 && (
+              <div className="bg-rose-50/50 rounded-3xl p-6 sm:p-8 border border-rose-100">
+                <h3 className="text-lg font-black text-rose-800 mb-4 flex items-center gap-2">
+                  <span>?�️</span> 주요 보완 ?�요 ??�� TOP 3
+                </h3>
+                <div className="space-y-4">
+                  {result.topPenalties.map((penalty, idx) => (
+                    <div key={idx} className="bg-white rounded-2xl p-4 border border-rose-100 shadow-sm flex gap-4">
+                      <div className="w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-black flex-shrink-0">
+                        {idx + 1}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-800 mb-1">{penalty.name}</h4>
+                        <p className="text-xs text-slate-600 leading-relaxed">{penalty.tip}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+    
+            {/* Detailed Scores */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+              <h3 className="text-lg font-black text-slate-900 mb-6">?��? ??���?진단 ?�수</h3>
+              <div className="grid sm:grid-cols-2 gap-x-8 gap-y-2">
+                <BarChartItem label="?�금 ?�합?? score={result.scores.capital} maxScore={25} rationale={result.rationales.capital} />
+                <BarChartItem label="지???�합?? score={result.scores.region} maxScore={20} rationale={result.rationales.region} />
+                <BarChartItem label="?�종 ?�합?? score={result.scores.industry} maxScore={20} rationale={result.rationales.industry} />
+                <BarChartItem label="?�기 ?�합?? score={result.scores.timing} maxScore={10} rationale={result.rationales.timing} />
+                <BarChartItem label="?�영???�합?? score={result.scores.operator} maxScore={10} rationale={result.rationales.operator} />
+                <BarChartItem label="?�종 ?�성 기반 ?�장??경쟁?�경 ?��?" score={result.scores.market} maxScore={10} rationale={result.rationales.market} />
+                <BarChartItem label="?�험??(??��)" score={result.scores.risk} maxScore={5} rationale={result.rationales.risk} />
+              </div>
+            </div>
+    
+            {/* Recommended Industries */}
+            <div className="bg-blue-600 rounded-3xl p-6 sm:p-8 text-white shadow-lg">
+              <div className="mb-6">
+                <h3 className="text-lg font-black mb-1">?�� ?�재 조건????맞는 추천 ?�종</h3>
+                <p className="text-blue-200 text-xs sm:text-sm">?�력?�신 ?�산, ?�권, ?�영방식??분석?�여 가???�합?��? ?��? ?�종??추천?�니??</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {recommendations.map((rec, idx) => (
+                  <div key={idx} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 flex flex-col justify-between">
+                    <div className="text-blue-100 text-xs font-bold mb-2">추천 {idx + 1}??/div>
+                    <div className="text-xl font-black mb-1">{rec.name}</div>
+                    <div className="text-emerald-300 font-bold text-sm">?�합??{rec.score}??/div>
+                  </div>
+                ))}
+              </div>
+            </div>
+    
+            {/* CTA */}
+            <div className="pt-4 pb-8">
+              <button onClick={() => setView('consultation')} className="w-full bg-slate-900 hover:bg-slate-800 text-white text-lg font-black py-5 rounded-2xl shadow-xl transition-all">
+                ?�문가?� 1:1 창업 ?�담 ?�약?�기 ??          </button>
+            </div>
+    
+          </div>
+        </div>
+      );
+    }
+    
 
     function ConsultationPage({ setView, formData, hasCompletedDiagnosis, leads, setLeads }) {
       const [name, setName] = useState('');
       const [phone, setPhone] = useState('');
       const [prefDate, setPrefDate] = useState('2026-08-05');
-      const [prefSlot, setPrefSlot] = useState('오후 (14:00~17:00)');
+      const [prefSlot, setPrefSlot] = useState('?�후 (14:00~17:00)');
       const [privacy, setPrivacy] = useState(false);
       const [marketing, setMarketing] = useState(false);
       const [done, setDone] = useState(false);
@@ -931,18 +1311,18 @@
       const handleSubmit = async (e) => {
         e.preventDefault();
         if (!name || !phone || !privacy) {
-          alert('필수 정보 및 개인정보 수집 동의에 체크해주세요.');
+          alert('?�수 ?�보 �?개인?�보 ?�집 ?�의??체크?�주?�요.');
           return;
         }
 
         setSubmitting(true);
 
-        const finalStartupPurpose = hasCompletedDiagnosis ? (formData.startup_purpose || '미입력') : '미입력 (바로 상담 예약)';
-        const finalBudget = hasCompletedDiagnosis ? (formData.budget || '미입력') : '미입력';
+        const finalStartupPurpose = hasCompletedDiagnosis ? (formData.startup_purpose || '미입??) : '미입??(바로 ?�담 ?�약)';
+        const finalBudget = hasCompletedDiagnosis ? (formData.budget || '미입??) : '미입??;
         const finalRegionProvince = hasCompletedDiagnosis ? (formData.region_province || '') : '';
-        const finalRegionCity = hasCompletedDiagnosis ? (formData.region_city || '미입력') : '미입력';
-        const finalStartupPeriod = hasCompletedDiagnosis ? (formData.startup_period || '미입력') : '미입력';
-        const finalOperationType = hasCompletedDiagnosis ? (formData.operation_type || '미입력') : '미입력';
+        const finalRegionCity = hasCompletedDiagnosis ? (formData.region_city || '미입??) : '미입??;
+        const finalStartupPeriod = hasCompletedDiagnosis ? (formData.startup_period || '미입??) : '미입??;
+        const finalOperationType = hasCompletedDiagnosis ? (formData.operation_type || '미입??) : '미입??;
 
         const newLead = {
           created_at: new Date().toISOString(),
@@ -964,7 +1344,7 @@
           marketing_consent: marketing,
           lead_score: hasCompletedDiagnosis ? 80 : 60,
           lead_grade: hasCompletedDiagnosis ? 'A' : 'B',
-          status: '신규',
+          status: '?�규',
           first_utm_source: 'direct',
           referrer: document.referrer || '직접 방문'
         };
@@ -975,7 +1355,7 @@
               window.FirebaseSDK.collection(firebaseDb, "leads"),
               newLead
             );
-            console.log("🔥 Firestore real doc added ID:", docRef.id);
+            console.log("?�� Firestore real doc added ID:", docRef.id);
             setLeads([{ id: docRef.id, ...newLead }, ...leads]);
           } catch (err) {
             console.error("Firestore save error:", err);
@@ -993,10 +1373,10 @@
         return (
           <div className="max-w-md mx-auto px-4 py-16 text-center">
             <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 font-black text-2xl">✓</div>
-              <h2 className="text-2xl font-bold mb-2">상담 예약 완료!</h2>
-              <p className="text-slate-600 text-sm mb-6">전문 담당자가 지정하신 희망시간({prefDate} {prefSlot})에 맞춰 1:1 안내 연락을 드리겠습니다.</p>
-              <button onClick={() => setView('home')} className="w-full bg-blue-600 text-white font-bold p-3.5 rounded-xl">홈으로 돌아가기</button>
+              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 font-black text-2xl">??/div>
+              <h2 className="text-2xl font-bold mb-2">?�담 ?�약 ?�료!</h2>
+              <p className="text-slate-600 text-sm mb-6">?�문 ?�당?��? 지?�하???�망?�간({prefDate} {prefSlot})??맞춰 1:1 ?�내 ?�락???�리겠습?�다.</p>
+              <button onClick={() => setView('home')} className="w-full bg-blue-600 text-white font-bold p-3.5 rounded-xl">?�으�??�아가�?/button>
             </div>
           </div>
         );
@@ -1005,31 +1385,31 @@
       return (
         <div className="max-w-xl mx-auto px-4 py-10">
           <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-            <h2 className="text-xl font-extrabold mb-1">무료 창업 상담 예약하기</h2>
-            <p className="text-xs text-slate-500 mb-6">전문 컨설턴트가 1:1 맞춤 창업 상담을 도와드립니다.</p>
+            <h2 className="text-xl font-extrabold mb-1">무료 창업 ?�담 ?�약?�기</h2>
+            <p className="text-xs text-slate-500 mb-6">?�문 컨설?�트가 1:1 맞춤 창업 ?�담???��??�립?�다.</p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">성함 *</label>
-                <input type="text" placeholder="홍길동" value={name} onChange={(e) => setName(e.target.value)} className="w-full p-3 border border-slate-300 rounded-xl" />
+                <label className="block text-xs font-bold text-slate-700 mb-1">?�함 *</label>
+                <input type="text" placeholder="?�길?? value={name} onChange={(e) => setName(e.target.value)} className="w-full p-3 border border-slate-300 rounded-xl" />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">휴대폰 번호 *</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">?��???번호 *</label>
                 <input type="tel" placeholder="010-0000-0000" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full p-3 border border-slate-300 rounded-xl" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">상담 희망일</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">?�담 ?�망??/label>
                   <input type="date" value={prefDate} onChange={(e) => setPrefDate(e.target.value)} className="w-full p-3 border border-slate-300 rounded-xl text-sm" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">상담 희망시간대</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">?�담 ?�망?�간?�</label>
                   <select value={prefSlot} onChange={(e) => setPrefSlot(e.target.value)} className="w-full p-3 border border-slate-300 rounded-xl text-sm">
-                    <option value="오전 (10:00~12:00)">오전 (10:00~12:00)</option>
-                    <option value="오후 (14:00~17:00)">오후 (14:00~17:00)</option>
-                    <option value="저녁 (17:00~19:00)">저녁 (17:00~19:00)</option>
+                    <option value="?�전 (10:00~12:00)">?�전 (10:00~12:00)</option>
+                    <option value="?�후 (14:00~17:00)">?�후 (14:00~17:00)</option>
+                    <option value="?�??(17:00~19:00)">?�??(17:00~19:00)</option>
                   </select>
                 </div>
               </div>
@@ -1037,16 +1417,16 @@
               <div className="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200">
                 <label className="flex items-center gap-2 text-xs font-bold cursor-pointer">
                   <input type="checkbox" checked={privacy} onChange={(e) => setPrivacy(e.target.checked)} className="w-4 h-4" />
-                  <span>[필수] 개인정보 수집 및 이용 동의 ({SITE_CONFIG.privacyVer})</span>
+                  <span>[?�수] 개인?�보 ?�집 �??�용 ?�의 ({SITE_CONFIG.privacyVer})</span>
                 </label>
                 <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
                   <input type="checkbox" checked={marketing} onChange={(e) => setMarketing(e.target.checked)} className="w-4 h-4" />
-                  <span>[선택] 마케팅 활용 및 안내 수신 동의 ({SITE_CONFIG.marketingVer})</span>
+                  <span>[?�택] 마�????�용 �??�내 ?�신 ?�의 ({SITE_CONFIG.marketingVer})</span>
                 </label>
               </div>
 
               <button type="submit" disabled={submitting} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-4 rounded-xl shadow-md">
-                {submitting ? '제출 중...' : '상담 예약 제출하기'}
+                {submitting ? '?�출 �?..' : '?�담 ?�약 ?�출?�기'}
               </button>
             </form>
           </div>
@@ -1066,7 +1446,7 @@
         setErrorMsg('');
 
         if (!email.trim() || !password.trim()) {
-          setErrorMsg('이메일과 비밀번호를 입력해주세요.');
+          setErrorMsg('?�메?�과 비�?번호�??�력?�주?�요.');
           return;
         }
 
@@ -1082,7 +1462,7 @@
             return;
           } catch (err) {
             console.error("Firebase Auth Error:", err);
-            setErrorMsg('Firebase 로그인 실패: 이메일 또는 비밀번호가 올바르지 않습니다.');
+            setErrorMsg('Firebase 로그???�패: ?�메???�는 비�?번호가 ?�바르�? ?�습?�다.');
             setLoading(false);
             return;
           }
@@ -1097,26 +1477,26 @@
       return (
         <div className="max-w-md mx-auto px-4 py-20">
           <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-md">
-            <h2 className="text-xl font-extrabold text-center mb-2">영업자 CRM 로그인 (관리자 전용)</h2>
-            <p className="text-xs text-slate-500 text-center mb-6">Firebase 콘솔에서 직접 생성하신 관리자 계정으로 로그인하세요.</p>
+            <h2 className="text-xl font-extrabold text-center mb-2">?�업??CRM 로그??(관리자 ?�용)</h2>
+            <p className="text-xs text-slate-500 text-center mb-6">Firebase 콘솔?�서 직접 ?�성?�신 관리자 계정?�로 로그?�하?�요.</p>
 
             {errorMsg && (
               <div className="bg-rose-50 text-rose-600 border border-rose-100 p-3 rounded-xl text-xs mb-4 font-semibold">
-                ⚠️ {errorMsg}
+                ?�️ {errorMsg}
               </div>
             )}
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">이메일 계정</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">?�메??계정</label>
                 <input type="email" placeholder="admin@domain.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-3 border border-slate-300 rounded-xl text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">비밀번호</label>
-                <input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-3 border border-slate-300 rounded-xl text-sm" />
+                <label className="block text-xs font-bold text-slate-700 mb-1">비�?번호</label>
+                <input type="password" placeholder="?�••••••�? value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-3 border border-slate-300 rounded-xl text-sm" />
               </div>
               <button type="submit" disabled={loading} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold p-3.5 rounded-xl shadow-md">
-                {loading ? '인증 처리 중...' : 'CRM 접속하기'}
+                {loading ? '?�증 처리 �?..' : 'CRM ?�속?�기'}
               </button>
             </form>
           </div>
@@ -1130,38 +1510,36 @@
           <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
             <div className="flex items-center gap-4 sm:gap-6">
               <div className="flex items-center gap-3">
-                <span className="font-extrabold text-lg">영업자 CRM</span>
+                <span className="font-extrabold text-lg">?�업??CRM</span>
                 <button 
                   onClick={() => setView('home')} 
                   className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow-sm transition transform active:scale-95"
-                  title="메인 홈페이지로 이동"
+                  title="메인 ?�페?��?�??�동"
                 >
-                  🏠 홈페이지로
-                </button>
+                  ?�� ?�페?��?�?                </button>
               </div>
               <nav className="flex flex-wrap gap-1.5 text-xs font-bold">
-                <button onClick={() => setView('admin_dashboard')} className={`px-2.5 py-1.5 rounded transition ${currentView === 'admin_dashboard' ? 'bg-slate-700 text-white' : 'hover:bg-slate-800 text-slate-300'}`}>대시보드</button>
-                <button onClick={() => setView('admin_leads')} className={`px-2.5 py-1.5 rounded transition ${currentView === 'admin_leads' ? 'bg-slate-700 text-white' : 'hover:bg-slate-800 text-slate-300'}`}>고객 DB 관리</button>
-                <button onClick={() => setView('admin_funnel')} className={`px-2.5 py-1.5 rounded transition ${currentView === 'admin_funnel' ? 'bg-slate-700 text-white' : 'hover:bg-slate-800 text-slate-300'}`}>퍼널 분석</button>
-                <button onClick={() => setView('admin_seoul_cmrcl')} className={`px-2.5 py-1.5 rounded flex items-center gap-1 transition ${currentView === 'admin_seoul_cmrcl' ? 'bg-blue-600 text-white font-black' : 'bg-slate-800 text-slate-200 hover:bg-slate-700'}`}>🗺️ 상권분석</button>
+                <button onClick={() => setView('admin_dashboard')} className={`px-2.5 py-1.5 rounded transition ${currentView === 'admin_dashboard' ? 'bg-slate-700 text-white' : 'hover:bg-slate-800 text-slate-300'}`}>?�?�보??/button>
+                <button onClick={() => setView('admin_leads')} className={`px-2.5 py-1.5 rounded transition ${currentView === 'admin_leads' ? 'bg-slate-700 text-white' : 'hover:bg-slate-800 text-slate-300'}`}>고객 DB 관�?/button>
+                <button onClick={() => setView('admin_funnel')} className={`px-2.5 py-1.5 rounded transition ${currentView === 'admin_funnel' ? 'bg-slate-700 text-white' : 'hover:bg-slate-800 text-slate-300'}`}>?�널 분석</button>
+                <button onClick={() => setView('admin_seoul_cmrcl')} className={`px-2.5 py-1.5 rounded flex items-center gap-1 transition ${currentView === 'admin_seoul_cmrcl' ? 'bg-blue-600 text-white font-black' : 'bg-slate-800 text-slate-200 hover:bg-slate-700'}`}>?���??�권분석</button>
                 <a 
                   href="https://data.seoul.go.kr/SeoulRtd/list" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="px-2.5 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1 transition"
                 >
-                  🏛️ 주요상권 실시간 바로가기 ↗
-                </a>
+                  ?���?주요?�권 ?�시�?바로가�???                </a>
               </nav>
             </div>
             <div className="flex items-center gap-3 text-xs">
               {refreshLeads && (
                 <button onClick={refreshLeads} className="bg-blue-600 hover:bg-blue-700 px-2.5 py-1.5 rounded text-white font-bold flex items-center gap-1 transition">
-                  🔄 DB 새로고침
+                  ?�� DB ?�로고침
                 </button>
               )}
-              <span className="text-slate-400 hidden sm:inline">{adminUser} 님</span>
-              <button onClick={handleLogout} className="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300">로그아웃</button>
+              <span className="text-slate-400 hidden sm:inline">{adminUser} ??/span>
+              <button onClick={handleLogout} className="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300">로그?�웃</button>
             </div>
           </div>
         </header>
@@ -1169,9 +1547,9 @@
     }
 
     const getRowBgClass = (status) => {
-      if (status === '계약완료') return 'bg-emerald-50/90 hover:bg-emerald-100/90 border-emerald-200';
-      if (status === '이탈/거절') return 'bg-rose-50/90 hover:bg-rose-100/90 border-rose-200';
-      if (!status || status === '신규') return 'bg-blue-50/60 hover:bg-blue-100/60 font-semibold border-blue-200';
+      if (status === '계약?�료') return 'bg-emerald-50/90 hover:bg-emerald-100/90 border-emerald-200';
+      if (status === '?�탈/거절') return 'bg-rose-50/90 hover:bg-rose-100/90 border-rose-200';
+      if (!status || status === '?�규') return 'bg-blue-50/60 hover:bg-blue-100/60 font-semibold border-blue-200';
       return 'border-b hover:bg-slate-50';
     };
 
@@ -1183,44 +1561,43 @@
           <AdminNav setView={setView} adminUser={adminUser} refreshLeads={refreshLeads} handleLogout={handleLogout} />
           <div className="max-w-6xl mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-black">영업 현황 종합 대시보드</h1>
+              <h1 className="text-2xl font-black">?�업 ?�황 종합 ?�?�보??/h1>
               <span className="text-xs text-emerald-600 font-bold bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-                🟢 실시간 DB 수신 중
-              </span>
+                ?�� ?�시�?DB ?�신 �?              </span>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <span className="text-xs font-bold text-slate-400 block mb-1">오늘 신규 DB</span>
-                <span className="text-3xl font-black text-slate-900">{leads.length} 건</span>
+                <span className="text-xs font-bold text-slate-400 block mb-1">?�늘 ?�규 DB</span>
+                <span className="text-3xl font-black text-slate-900">{leads.length} �?/span>
               </div>
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <span className="text-xs font-bold text-slate-400 block mb-1">A급 Hot Lead</span>
-                <span className="text-3xl font-black text-emerald-600">{countA} 명</span>
+                <span className="text-xs font-bold text-slate-400 block mb-1">A�?Hot Lead</span>
+                <span className="text-3xl font-black text-emerald-600">{countA} �?/span>
               </div>
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <span className="text-xs font-bold text-slate-400 block mb-1">총 누적 DB</span>
-                <span className="text-3xl font-black text-blue-600">{leads.length} 명</span>
+                <span className="text-xs font-bold text-slate-400 block mb-1">�??�적 DB</span>
+                <span className="text-3xl font-black text-blue-600">{leads.length} �?/span>
               </div>
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <span className="text-xs font-bold text-slate-400 block mb-1">상담 진행률</span>
+                <span className="text-xs font-bold text-slate-400 block mb-1">?�담 진행�?/span>
                 <span className="text-3xl font-black text-slate-900">100%</span>
               </div>
             </div>
 
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <h2 className="font-bold text-base mb-4">최근 접수 리드 목록 (실시간 반영)</h2>
+              <h2 className="font-bold text-base mb-4">최근 ?�수 리드 목록 (?�시�?반영)</h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 text-slate-500 border-b">
                     <tr>
-                      <th className="p-3">이름</th>
-                      <th className="p-3">연락처</th>
-                      <th className="p-3">지역</th>
-                      <th className="p-3">예산</th>
-                      <th className="p-3">리드등급</th>
-                      <th className="p-3">진행단계</th>
-                      <th className="p-3 text-center">관리</th>
+                      <th className="p-3">?�름</th>
+                      <th className="p-3">?�락�?/th>
+                      <th className="p-3">지??/th>
+                      <th className="p-3">?�산</th>
+                      <th className="p-3">리드?�급</th>
+                      <th className="p-3">진행?�계</th>
+                      <th className="p-3 text-center">관�?/th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1228,17 +1605,17 @@
                       <tr key={l.id} className={`border-b transition ${getRowBgClass(l.status)}`}>
                         <td className="p-3 font-bold cursor-pointer text-blue-600 hover:underline" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.name}</td>
                         <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.phone}</td>
-                        <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.region_province || ''} {l.region_city || '미입력'}</td>
+                        <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.region_province || ''} {l.region_city || '미입??}</td>
                         <td className="p-3 cursor-pointer font-bold" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>
-                          {l.budget === '미입력' ? <span className="text-rose-500 bg-rose-50 px-2 py-0.5 rounded text-xs">미입력 (직접수정)</span> : l.budget}
+                          {l.budget === '미입?? ? <span className="text-rose-500 bg-rose-50 px-2 py-0.5 rounded text-xs">미입??(직접?�정)</span> : l.budget}
                         </td>
-                        <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}><span className={`px-2 py-0.5 rounded text-xs font-bold badge-${l.lead_grade ? l.lead_grade.toLowerCase() : 'a'}`}>{l.lead_grade || 'A'}급 ({l.lead_score || 80}점)</span></td>
+                        <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}><span className={`px-2 py-0.5 rounded text-xs font-bold badge-${l.lead_grade ? l.lead_grade.toLowerCase() : 'a'}`}>{l.lead_grade || 'A'}�?({l.lead_score || 80}??</span></td>
                         <td className="p-3">
                           <StatusSelect value={l.status} onChange={(e) => updateLeadStatus(l.id, e.target.value)} />
                         </td>
                         <td className="p-3 text-center">
                           <button onClick={(e) => deleteLead(l.id, e)} className="bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold px-2.5 py-1 rounded text-xs">
-                            🗑️ 삭제
+                            ?���???��
                           </button>
                         </td>
                       </tr>
@@ -1257,18 +1634,18 @@
         <div className="bg-slate-50 min-h-screen">
           <AdminNav setView={setView} adminUser={adminUser} refreshLeads={refreshLeads} handleLogout={handleLogout} />
           <div className="max-w-6xl mx-auto px-4 py-8">
-            <h1 className="text-2xl font-black mb-6">고객 DB 통합 관리</h1>
+            <h1 className="text-2xl font-black mb-6">고객 DB ?�합 관�?/h1>
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
               <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 text-slate-500 border-b">
                   <tr>
-                    <th className="p-3">이름</th>
-                    <th className="p-3">전화번호</th>
-                    <th className="p-3">지역</th>
-                    <th className="p-3">예산</th>
-                    <th className="p-3">리드등급</th>
-                    <th className="p-3">진행단계</th>
-                    <th className="p-3 text-center">삭제</th>
+                    <th className="p-3">?�름</th>
+                    <th className="p-3">?�화번호</th>
+                    <th className="p-3">지??/th>
+                    <th className="p-3">?�산</th>
+                    <th className="p-3">리드?�급</th>
+                    <th className="p-3">진행?�계</th>
+                    <th className="p-3 text-center">??��</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1276,17 +1653,17 @@
                     <tr key={l.id} className={`border-b transition ${getRowBgClass(l.status)}`}>
                       <td className="p-3 font-bold cursor-pointer text-blue-600 hover:underline" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.name}</td>
                       <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.phone}</td>
-                      <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.region_province || ''} {l.region_city || '미입력'}</td>
+                      <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.region_province || ''} {l.region_city || '미입??}</td>
                       <td className="p-3 cursor-pointer font-bold" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>
-                        {l.budget === '미입력' ? <span className="text-rose-500 bg-rose-50 px-2 py-0.5 rounded text-xs">미입력 (직접수정)</span> : l.budget}
+                        {l.budget === '미입?? ? <span className="text-rose-500 bg-rose-50 px-2 py-0.5 rounded text-xs">미입??(직접?�정)</span> : l.budget}
                       </td>
-                      <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}><span className={`px-2 py-0.5 rounded text-xs font-bold badge-${l.lead_grade ? l.lead_grade.toLowerCase() : 'a'}`}>{l.lead_grade || 'A'}급 ({l.lead_score || 80}점)</span></td>
+                      <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}><span className={`px-2 py-0.5 rounded text-xs font-bold badge-${l.lead_grade ? l.lead_grade.toLowerCase() : 'a'}`}>{l.lead_grade || 'A'}�?({l.lead_score || 80}??</span></td>
                       <td className="p-3">
                         <StatusSelect value={l.status} onChange={(e) => updateLeadStatus(l.id, e.target.value)} />
                       </td>
                       <td className="p-3 text-center">
                         <button onClick={(e) => deleteLead(l.id, e)} className="bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold px-2.5 py-1 rounded text-xs">
-                          🗑️ 삭제
+                          ?���???��
                         </button>
                       </td>
                     </tr>
@@ -1311,24 +1688,24 @@
 
       useEffect(() => {
         if (lead) {
-          const rawBudget = lead.budget || '미입력';
+          const rawBudget = lead.budget || '미입??;
           setEditBudget(rawBudget.replace('만원', '').trim());
-          setEditPurpose(lead.startup_purpose || '미입력');
-          setEditPeriod(lead.startup_period || '미입력');
-          setEditOpType(lead.operation_type || '미입력');
-          setEditCity(lead.region_city || '미입력');
+          setEditPurpose(lead.startup_purpose || '미입??);
+          setEditPeriod(lead.startup_period || '미입??);
+          setEditOpType(lead.operation_type || '미입??);
+          setEditCity(lead.region_city || '미입??);
         }
       }, [lead]);
 
       const [history, setHistory] = useState([
-        { id: 1, author: '이영업 대리', content: '1차 전화 완료. 은평구 무인 매장 창업 관심도 높음.', date: '2026-08-02 11:30' }
+        { id: 1, author: '?�영???��?, content: '1�??�화 ?�료. ?�?�구 무인 매장 창업 관?�도 ?�음.', date: '2026-08-02 11:30' }
       ]);
       const [note, setNote] = useState('');
 
       const addNote = (e) => {
         e.preventDefault();
         if (!note) return;
-        setHistory([{ id: Date.now(), author: adminUser || '영업자', content: note, date: new Date().toISOString().slice(0, 16).replace('T', ' ') }, ...history]);
+        setHistory([{ id: Date.now(), author: adminUser || '?�업??, content: note, date: new Date().toISOString().slice(0, 16).replace('T', ' ') }, ...history]);
         setNote('');
       };
 
@@ -1336,19 +1713,19 @@
         e.preventDefault();
 
         let formattedBudget = editBudget.trim();
-        if (formattedBudget && formattedBudget !== '미입력' && !formattedBudget.includes('만원') && !formattedBudget.includes('억원')) {
+        if (formattedBudget && formattedBudget !== '미입?? && !formattedBudget.includes('만원') && !formattedBudget.includes('?�원')) {
           formattedBudget = `${formattedBudget}만원`;
         }
 
         updateLeadDetails(lead.id, {
-          budget: formattedBudget || '미입력',
+          budget: formattedBudget || '미입??,
           startup_purpose: editPurpose,
           startup_period: editPeriod,
           operation_type: editOpType,
           region_city: editCity
         });
         setIsEditing(false);
-        alert('고객 창업 정보가 저장되었습니다.');
+        alert('고객 창업 ?�보가 ?�?�되?�습?�다.');
       };
 
       if (!lead) {
@@ -1356,10 +1733,9 @@
           <div className="bg-slate-50 min-h-screen">
             <AdminNav setView={setView} adminUser={adminUser} handleLogout={handleLogout} />
             <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-              <p className="text-slate-600 font-bold mb-4">선택된 고객 정보가 없습니다.</p>
+              <p className="text-slate-600 font-bold mb-4">?�택??고객 ?�보가 ?�습?�다.</p>
               <button onClick={() => setView('admin_leads')} className="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-xs">
-                고객 목록으로 돌아가기
-              </button>
+                고객 목록?�로 ?�아가�?              </button>
             </div>
           </div>
         );
@@ -1370,9 +1746,9 @@
           <AdminNav setView={setView} adminUser={adminUser} handleLogout={handleLogout} />
           <div className="max-w-4xl mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-4">
-              <button onClick={() => setView('admin_leads')} className="text-xs font-bold text-slate-500">← 고객 목록으로</button>
+              <button onClick={() => setView('admin_leads')} className="text-xs font-bold text-slate-500">??고객 목록?�로</button>
               <button onClick={() => { deleteLead(lead.id); setView('admin_leads'); }} className="bg-rose-600 text-white font-bold text-xs px-3 py-1.5 rounded-lg hover:bg-rose-700">
-                🗑️ 이 고객 DB 삭제
+                ?���???고객 DB ??��
               </button>
             </div>
 
@@ -1381,19 +1757,19 @@
                 <h1 className="text-2xl font-black flex items-center gap-3">
                   {lead.name}
                   <span className={`text-xs px-2.5 py-1 rounded-full badge-${lead.lead_grade ? lead.lead_grade.toLowerCase() : 'a'}`}>
-                    {lead.lead_grade || 'A'}급 ({lead.lead_score || 80}점)
+                    {lead.lead_grade || 'A'}�?({lead.lead_score || 80}??
                   </span>
                 </h1>
-                <p className="text-slate-500 text-sm mt-1">연락처: {lead.phone} | 지역: {lead.region_province || ''} {lead.region_city || '미입력'}</p>
+                <p className="text-slate-500 text-sm mt-1">?�락�? {lead.phone} | 지?? {lead.region_province || ''} {lead.region_city || '미입??}</p>
               </div>
 
               <div className="flex items-center gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-400 mb-0.5">진행단계</label>
+                  <label className="block text-[11px] font-bold text-slate-400 mb-0.5">진행?�계</label>
                   <StatusSelect value={lead.status} onChange={(e) => updateLeadStatus(lead.id, e.target.value)} />
                 </div>
                 <div className="flex gap-1.5 mt-4">
-                  <a href={`tel:${lead.phone ? lead.phone.replace(/-/g,'') : ''}`} className="bg-blue-600 text-white text-xs font-bold px-3 py-2 rounded-lg">전화</a>
+                  <a href={`tel:${lead.phone ? lead.phone.replace(/-/g,'') : ''}`} className="bg-blue-600 text-white text-xs font-bold px-3 py-2 rounded-lg">?�화</a>
                   <a href={`sms:${lead.phone ? lead.phone.replace(/-/g,'') : ''}`} className="bg-slate-700 text-white text-xs font-bold px-3 py-2 rounded-lg">문자</a>
                 </div>
               </div>
@@ -1402,31 +1778,31 @@
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 text-sm">
                 <div className="flex justify-between items-center border-b pb-2">
-                  <h3 className="font-bold text-base">진단 및 예약 정보</h3>
+                  <h3 className="font-bold text-base">진단 �??�약 ?�보</h3>
                   <button onClick={() => setIsEditing(!isEditing)} className="text-xs text-blue-600 font-bold bg-blue-50 px-2.5 py-1 rounded-lg hover:bg-blue-100">
-                    {isEditing ? '취소' : '✏️ 영업자 직접 입력/수정'}
+                    {isEditing ? '취소' : '?�️ ?�업??직접 ?�력/?�정'}
                   </button>
                 </div>
 
                 {!isEditing ? (
                   <div className="space-y-3">
                     <div>
-                      <span className="text-slate-400 block text-xs">예상 투자금 (예산):</span>
-                      <strong className={lead.budget === '미입력' ? 'text-rose-500 font-bold' : 'text-slate-800'}>
-                        {lead.budget || '미입력'}
+                      <span className="text-slate-400 block text-xs">?�상 ?�자�?(?�산):</span>
+                      <strong className={lead.budget === '미입?? ? 'text-rose-500 font-bold' : 'text-slate-800'}>
+                        {lead.budget || '미입??}
                       </strong>
                     </div>
-                    <div><span className="text-slate-400 block text-xs">창업 목적:</span> <strong className="text-slate-800">{lead.startup_purpose || '미입력'}</strong></div>
-                    <div><span className="text-slate-400 block text-xs">창업 희망시기:</span> <strong className="text-slate-800">{lead.startup_period || '미입력'}</strong></div>
-                    <div><span className="text-slate-400 block text-xs">희망 운영방식:</span> <strong className="text-slate-800">{lead.operation_type || '미입력'}</strong></div>
-                    <div><span className="text-slate-400 block text-xs">희망 상담일:</span> <strong className="text-blue-600">{lead.preferred_consultation_date} {lead.preferred_consultation_time_slot}</strong></div>
-                    <div><span className="text-slate-400 block text-xs">유입 경로:</span> <strong>{lead.first_utm_source || '직접 방문'}</strong></div>
+                    <div><span className="text-slate-400 block text-xs">창업 목적:</span> <strong className="text-slate-800">{lead.startup_purpose || '미입??}</strong></div>
+                    <div><span className="text-slate-400 block text-xs">창업 ?�망?�기:</span> <strong className="text-slate-800">{lead.startup_period || '미입??}</strong></div>
+                    <div><span className="text-slate-400 block text-xs">?�망 ?�영방식:</span> <strong className="text-slate-800">{lead.operation_type || '미입??}</strong></div>
+                    <div><span className="text-slate-400 block text-xs">?�망 ?�담??</span> <strong className="text-blue-600">{lead.preferred_consultation_date} {lead.preferred_consultation_time_slot}</strong></div>
+                    <div><span className="text-slate-400 block text-xs">?�입 경로:</span> <strong>{lead.first_utm_source || '직접 방문'}</strong></div>
                   </div>
                 ) : (
                   <form onSubmit={handleSaveDetails} className="space-y-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">
-                        예상 투자금 (예산) <span className="text-blue-600 font-semibold">(단위: 만원 또는 억원)</span>
+                        ?�상 ?�자�?(?�산) <span className="text-blue-600 font-semibold">(?�위: 만원 ?�는 ?�원)</span>
                       </label>
                       <div className="flex items-center gap-2">
                         <input
@@ -1434,43 +1810,42 @@
                           value={editBudget}
                           onChange={(e) => setEditBudget(e.target.value)}
                           className="flex-1 p-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-900"
-                          placeholder="예: 5000 또는 1.5"
+                          placeholder="?? 5000 ?�는 1.5"
                         />
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">창업 목적</label>
-                      <input type="text" value={editPurpose} onChange={(e) => setEditPurpose(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="예: 은퇴 후 창업, 부업 등" />
+                      <input type="text" value={editPurpose} onChange={(e) => setEditPurpose(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="?? ?�????창업, 부???? />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">창업 시기</label>
-                      <input type="text" value={editPeriod} onChange={(e) => setEditPeriod(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="예: 1개월 이내, 3개월 이내" />
+                      <label className="block text-xs font-bold text-slate-700 mb-1">창업 ?�기</label>
+                      <input type="text" value={editPeriod} onChange={(e) => setEditPeriod(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="?? 1개월 ?�내, 3개월 ?�내" />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">운영 방식</label>
-                      <input type="text" value={editOpType} onChange={(e) => setEditOpType(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="예: 무인 운영, 직접 운영" />
+                      <label className="block text-xs font-bold text-slate-700 mb-1">?�영 방식</label>
+                      <input type="text" value={editOpType} onChange={(e) => setEditOpType(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="?? 무인 ?�영, 직접 ?�영" />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">희망 세부 지역</label>
-                      <input type="text" value={editCity} onChange={(e) => setEditCity(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="예: 서울시 강남구 논현동" />
+                      <label className="block text-xs font-bold text-slate-700 mb-1">?�망 ?��? 지??/label>
+                      <input type="text" value={editCity} onChange={(e) => setEditCity(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="?? ?�울??강남�??�현?? />
                     </div>
 
                     <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-xs shadow-md">
-                      💾 수정 정보 저장하기
-                    </button>
+                      ?�� ?�정 ?�보 ?�?�하�?                    </button>
                   </form>
                 )}
               </div>
 
               <div className="bg-white p-6 rounded-2xl border border-slate-200">
-                <h3 className="font-bold text-base border-b pb-2 mb-4">상담 이력 타임라인</h3>
+                <h3 className="font-bold text-base border-b pb-2 mb-4">?�담 ?�력 ?�?�라??/h3>
                 <form onSubmit={addNote} className="mb-4">
-                  <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="상담 내용을 작성하세요..." className="w-full p-2.5 border text-xs rounded-xl mb-2"></textarea>
-                  <button type="submit" className="w-full bg-blue-600 text-white text-xs font-bold p-2.5 rounded-xl">상담 기록 작성</button>
+                  <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="?�담 ?�용???�성?�세??.." className="w-full p-2.5 border text-xs rounded-xl mb-2"></textarea>
+                  <button type="submit" className="w-full bg-blue-600 text-white text-xs font-bold p-2.5 rounded-xl">?�담 기록 ?�성</button>
                 </form>
                 <div className="space-y-3">
                   {history.map(h => (
@@ -1489,11 +1864,11 @@
 
     function AdminFunnelPage({ setView, leads, adminUser, handleLogout }) {
       const totalLeads = leads.length;
-      const consultationLeads = leads.filter(l => ['상담예정', '상담완료', '미팅예정', '미팅완료', '계약진행', '계약완료'].includes(l.status)).length;
-      const meetingLeads = leads.filter(l => ['미팅예정', '미팅완료', '계약진행', '계약완료'].includes(l.status)).length;
-      const contractLeads = leads.filter(l => ['계약진행', '계약완료'].includes(l.status)).length;
-      const completedLeads = leads.filter(l => l.status === '계약완료').length;
-      const droppedLeads = leads.filter(l => ['비가망', '유예/보류', '이탈/거절'].includes(l.status)).length;
+      const consultationLeads = leads.filter(l => ['?�담?�정', '?�담?�료', '미팅?�정', '미팅?�료', '계약진행', '계약?�료'].includes(l.status)).length;
+      const meetingLeads = leads.filter(l => ['미팅?�정', '미팅?�료', '계약진행', '계약?�료'].includes(l.status)).length;
+      const contractLeads = leads.filter(l => ['계약진행', '계약?�료'].includes(l.status)).length;
+      const completedLeads = leads.filter(l => l.status === '계약?�료').length;
+      const droppedLeads = leads.filter(l => ['비�?�?, '?�예/보류', '?�탈/거절'].includes(l.status)).length;
 
       const getRatio = (count) => (totalLeads > 0 ? Math.round((count / totalLeads) * 100) : 0);
 
@@ -1501,41 +1876,41 @@
         <div className="bg-slate-50 min-h-screen">
           <AdminNav setView={setView} adminUser={adminUser} handleLogout={handleLogout} />
           <div className="max-w-4xl mx-auto px-4 py-8">
-            <h1 className="text-2xl font-black mb-6">마케팅 유입 & 실시간 영업 퍼널 분석</h1>
+            <h1 className="text-2xl font-black mb-6">마�????�입 & ?�시�??�업 ?�널 분석</h1>
             <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
               <div className="flex justify-between items-center border-b pb-3 mb-2">
-                <h2 className="font-bold text-slate-800">실시간 고객 진행 퍼널 (총 DB: {totalLeads}명)</h2>
-                <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">🟢 실시간 자동집계 중</span>
+                <h2 className="font-bold text-slate-800">?�시�?고객 진행 ?�널 (�?DB: {totalLeads}�?</h2>
+                <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">?�� ?�시�??�동집계 �?/span>
               </div>
 
               <div className="p-4 bg-blue-50 text-blue-900 rounded-xl flex justify-between items-center font-bold text-sm border border-blue-100">
-                <span>1. 전체 접수 고객 DB (신규 포함)</span>
-                <span className="text-blue-600 font-black">{totalLeads}명 (100%)</span>
+                <span>1. ?�체 ?�수 고객 DB (?�규 ?�함)</span>
+                <span className="text-blue-600 font-black">{totalLeads}�?(100%)</span>
               </div>
 
               <div className="p-4 bg-indigo-50 text-indigo-900 rounded-xl flex justify-between items-center font-bold text-sm border border-indigo-100">
-                <span>2. [통화 단계] 전화 상담 진행/완료</span>
-                <span>{consultationLeads}명 ({getRatio(consultationLeads)}%)</span>
+                <span>2. [?�화 ?�계] ?�화 ?�담 진행/?�료</span>
+                <span>{consultationLeads}�?({getRatio(consultationLeads)}%)</span>
               </div>
 
               <div className="p-4 bg-purple-50 text-purple-900 rounded-xl flex justify-between items-center font-bold text-sm border border-purple-100">
-                <span>3. [대면 단계] 대면 미팅 진행/완료</span>
-                <span>{meetingLeads}명 ({getRatio(meetingLeads)}%)</span>
+                <span>3. [?��??�계] ?��?미팅 진행/?�료</span>
+                <span>{meetingLeads}�?({getRatio(meetingLeads)}%)</span>
               </div>
 
               <div className="p-4 bg-amber-50 text-amber-900 rounded-xl flex justify-between items-center font-bold text-sm border border-amber-100">
-                <span>4. [계약 단계] 계약 검토/진행</span>
-                <span>{contractLeads}명 ({getRatio(contractLeads)}%)</span>
+                <span>4. [계약 ?�계] 계약 검??진행</span>
+                <span>{contractLeads}�?({getRatio(contractLeads)}%)</span>
               </div>
 
               <div className="p-4 bg-emerald-600 text-white rounded-xl flex justify-between items-center font-black text-sm shadow-md">
-                <span>5. 🎯 최종 창업 계약 성공 (계약완료)</span>
-                <span className="text-base">{completedLeads}명 ({getRatio(completedLeads)}%)</span>
+                <span>5. ?�� 최종 창업 계약 ?�공 (계약?�료)</span>
+                <span className="text-base">{completedLeads}�?({getRatio(completedLeads)}%)</span>
               </div>
 
               <div className="p-4 bg-rose-50 text-rose-800 rounded-xl flex justify-between items-center font-bold text-sm border border-rose-200">
-                <span>6. [비대상] 비가망 / 유예 / 이탈 및 거절</span>
-                <span>{droppedLeads}명 ({getRatio(droppedLeads)}%)</span>
+                <span>6. [비�??? 비�?�?/ ?�예 / ?�탈 �?거절</span>
+                <span>{droppedLeads}�?({getRatio(droppedLeads)}%)</span>
               </div>
             </div>
           </div>
@@ -1543,43 +1918,43 @@
       );
     }
     const REGION_COORDS = {
-      '서울': { lat: 37.5665, lng: 126.9780 },
-      '부산': { lat: 35.1796, lng: 129.0756 },
-      '대구': { lat: 35.8714, lng: 128.6014 },
-      '인천': { lat: 37.4563, lng: 126.7052 },
+      '?�울': { lat: 37.5665, lng: 126.9780 },
+      '부??: { lat: 35.1796, lng: 129.0756 },
+      '?��?: { lat: 35.8714, lng: 128.6014 },
+      '?�천': { lat: 37.4563, lng: 126.7052 },
       '광주': { lat: 35.1595, lng: 126.8526 },
-      '대전': { lat: 36.3504, lng: 127.3845 },
-      '울산': { lat: 35.5384, lng: 129.3114 },
-      '세종': { lat: 36.4800, lng: 127.2890 },
+      '?�??: { lat: 36.3504, lng: 127.3845 },
+      '?�산': { lat: 35.5384, lng: 129.3114 },
+      '?�종': { lat: 36.4800, lng: 127.2890 },
       '경기': { lat: 37.2752, lng: 127.0095 },
       '강원': { lat: 37.8854, lng: 127.7298 },
       '충북': { lat: 36.6358, lng: 127.4914 },
       '충남': { lat: 36.6588, lng: 126.6728 },
-      '전북': { lat: 35.8203, lng: 127.1087 },
-      '전남': { lat: 34.8161, lng: 126.4629 },
+      '?�북': { lat: 35.8203, lng: 127.1087 },
+      '?�남': { lat: 34.8161, lng: 126.4629 },
       '경북': { lat: 36.5760, lng: 128.5056 },
       '경남': { lat: 35.2383, lng: 128.6922 },
-      '제주': { lat: 33.4996, lng: 126.5312 }
+      '?�주': { lat: 33.4996, lng: 126.5312 }
     };
 
     const DUMMY_FRANCHISE_DATA = [
-      { ctprvnNm: '서울', frcsCnt: 1450, drtmsCnt: 42, totCnt: 1492 },
+      { ctprvnNm: '?�울', frcsCnt: 1450, drtmsCnt: 42, totCnt: 1492 },
       { ctprvnNm: '경기', frcsCnt: 2130, drtmsCnt: 15, totCnt: 2145 },
-      { ctprvnNm: '인천', frcsCnt: 480, drtmsCnt: 5, totCnt: 485 },
+      { ctprvnNm: '?�천', frcsCnt: 480, drtmsCnt: 5, totCnt: 485 },
       { ctprvnNm: '강원', frcsCnt: 210, drtmsCnt: 0, totCnt: 210 },
       { ctprvnNm: '충남', frcsCnt: 320, drtmsCnt: 2, totCnt: 322 },
       { ctprvnNm: '충북', frcsCnt: 280, drtmsCnt: 1, totCnt: 281 },
-      { ctprvnNm: '대전', frcsCnt: 260, drtmsCnt: 3, totCnt: 263 },
-      { ctprvnNm: '세종', frcsCnt: 80, drtmsCnt: 1, totCnt: 81 },
+      { ctprvnNm: '?�??, frcsCnt: 260, drtmsCnt: 3, totCnt: 263 },
+      { ctprvnNm: '?�종', frcsCnt: 80, drtmsCnt: 1, totCnt: 81 },
       { ctprvnNm: '경북', frcsCnt: 410, drtmsCnt: 0, totCnt: 410 },
-      { ctprvnNm: '대구', frcsCnt: 390, drtmsCnt: 4, totCnt: 394 },
+      { ctprvnNm: '?��?, frcsCnt: 390, drtmsCnt: 4, totCnt: 394 },
       { ctprvnNm: '경남', frcsCnt: 520, drtmsCnt: 2, totCnt: 522 },
-      { ctprvnNm: '울산', frcsCnt: 150, drtmsCnt: 1, totCnt: 151 },
-      { ctprvnNm: '부산', frcsCnt: 580, drtmsCnt: 8, totCnt: 588 },
-      { ctprvnNm: '전북', frcsCnt: 290, drtmsCnt: 0, totCnt: 290 },
+      { ctprvnNm: '?�산', frcsCnt: 150, drtmsCnt: 1, totCnt: 151 },
+      { ctprvnNm: '부??, frcsCnt: 580, drtmsCnt: 8, totCnt: 588 },
+      { ctprvnNm: '?�북', frcsCnt: 290, drtmsCnt: 0, totCnt: 290 },
       { ctprvnNm: '광주', frcsCnt: 230, drtmsCnt: 2, totCnt: 232 },
-      { ctprvnNm: '전남', frcsCnt: 270, drtmsCnt: 0, totCnt: 270 },
-      { ctprvnNm: '제주', frcsCnt: 110, drtmsCnt: 1, totCnt: 111 }
+      { ctprvnNm: '?�남', frcsCnt: 270, drtmsCnt: 0, totCnt: 270 },
+      { ctprvnNm: '?�주', frcsCnt: 110, drtmsCnt: 1, totCnt: 111 }
     ];
 
     function AdminSeoulCmrclPage({ setView, adminUser, handleLogout, refreshLeads }) {
@@ -1599,7 +1974,7 @@
       const [groupedStores, setGroupedStores] = useState({});
       const [collapsedCategories, setCollapsedCategories] = useState({});
       const [collapsedSubCategories, setCollapsedSubCategories] = useState({});
-      const [currentAddress, setCurrentAddress] = useState('서울 중심점');
+      const [currentAddress, setCurrentAddress] = useState('?�울 중심??);
       const [selectedBizesId, setSelectedBizesId] = useState(null);
       const [isApiPanelOpen, setIsApiPanelOpen] = useState(true);
       const [isResultPanelOpen, setIsResultPanelOpen] = useState(true);
@@ -1613,7 +1988,7 @@
 
       const SERVICE_KEY = 'BahaUoW8jiYD6HVMXVBRJEpafXTnR%2FVHFkUWR0WwW%2BOzXumYn3YlV8oqDnoc8PYSg0vcwp3qT%2FalQ7707m0fKA%3D%3D';
 
-      // 1단계 (대분류) 접기/펼치기 토글
+      // 1?�계 (?�분류) ?�기/?�치�??��?
       const toggleCategory = (cat) => {
         setCollapsedCategories(prev => ({
           ...prev,
@@ -1621,7 +1996,7 @@
         }));
       };
 
-      // 2단계 (소분류) 접기/펼치기 토글
+      // 2?�계 (?�분�? ?�기/?�치�??��?
       const toggleSubCategory = (mainCat, subCat) => {
         const key = `${mainCat}::${subCat}`;
         setCollapsedSubCategories(prev => ({
@@ -1648,7 +2023,7 @@
         setCollapsedSubCategories(collapsedSub);
       };
 
-      // 마커 이미지 정의 (기본 마커 vs 하이라이트 마커)
+      // 마커 ?��?지 ?�의 (기본 마커 vs ?�이?�이??마커)
       const getMarkerImages = () => {
         if (!window.kakao) return { defaultImg: null, highlightImg: null };
 
@@ -1681,8 +2056,7 @@
         return { defaultImg, highlightImg };
       };
 
-      // 300m 반경 내 소상공인 상가업소 조회 API 호출 및 지도 마커 렌더링
-      const fetchStoresInRadius = async (lat, lng) => {
+      // 300m 반경 ???�상공인 ?��??�소 조회 API ?�출 �?지??마커 ?�더�?      const fetchStoresInRadius = async (lat, lng) => {
         if (!mapObjRef.current || !window.kakao) return;
         setIsLoading(true);
         setSelectedBizesId(null);
@@ -1691,8 +2065,7 @@
         const centerLatLng = new window.kakao.maps.LatLng(lat, lng);
         const { defaultImg } = getMarkerImages();
 
-        // 1. 기존 마커 및 300m 반경 원, 맵핑 객체 초기화
-        Object.values(storeMarkerMapRef.current).forEach(item => {
+        // 1. 기존 마커 �?300m 반경 ?? 맵핑 객체 초기??        Object.values(storeMarkerMapRef.current).forEach(item => {
           if (item.marker) item.marker.setMap(null);
         });
         storeMarkerMapRef.current = {};
@@ -1701,7 +2074,7 @@
         if (centerMarkerRef.current) centerMarkerRef.current.setMap(null);
         if (radiusCircleRef.current) radiusCircleRef.current.setMap(null);
 
-        // 2. 중심점 마커 표시 (붉은색 핀 마커)
+        // 2. 중심??마커 ?�시 (붉�????� 마커)
         const redPinSvg = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
           <svg xmlns="http://www.w3.org/2000/svg" width="36" height="42" viewBox="0 0 36 42">
             <path fill="#ef4444" stroke="#ffffff" stroke-width="2.5" d="M18 0C8.059 0 0 8.059 0 18c0 13.5 18 24 18 24s18-10.5 18-24C36 8.059 27.941 0 18 0z"/>
@@ -1722,7 +2095,7 @@
         });
         centerMarkerRef.current.setMap(map);
 
-        // 3. 반경 300m 원(Circle) 시각화 (strokeColor: #00a0e9, strokeOpacity: 0.8, fillColor: #00a0e9, fillOpacity: 0.2)
+        // 3. 반경 300m ??Circle) ?�각??(strokeColor: #00a0e9, strokeOpacity: 0.8, fillColor: #00a0e9, fillOpacity: 0.2)
         radiusCircleRef.current = new window.kakao.maps.Circle({
           center: centerLatLng,
           radius: 300,
@@ -1735,15 +2108,14 @@
         });
         radiusCircleRef.current.setMap(map);
 
-        // Geocoder로 현재 주소 변환
-        const geocoder = new window.kakao.maps.services.Geocoder();
+        // Geocoder�??�재 주소 변??        const geocoder = new window.kakao.maps.services.Geocoder();
         geocoder.coord2Address(lng, lat, (result, status) => {
           if (status === window.kakao.maps.services.Status.OK && result[0]) {
-            setCurrentAddress(result[0].address ? result[0].address.address_name : '선택 위치');
+            setCurrentAddress(result[0].address ? result[0].address.address_name : '?�택 ?�치');
           }
         });
 
-        // 4. 소상공인시장진흥공단 반경내 상가업소 조회 API 요청 (radius=300)
+        // 4. ?�상공인?�장진흥공단 반경???��??�소 조회 API ?�청 (radius=300)
         const targetUrl = `https://apis.data.go.kr/B553077/api/open/sdsc2/storeListInRadius?radius=300&cx=${lng}&cy=${lat}&type=json&numOfRows=100&ServiceKey=${SERVICE_KEY}`;
         const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
 
@@ -1756,8 +2128,7 @@
             if (data && data.body && data.body.items) {
               const rawItems = Array.isArray(data.body.items) ? data.body.items : [data.body.items];
               
-              // 카카오맵 Polyline을 사용하여 실제 반경 300m 이내의 상가만 필터링
-              items = rawItems.filter(store => {
+              // 카카?�맵 Polyline???�용?�여 ?�제 반경 300m ?�내???��?�??�터�?              items = rawItems.filter(store => {
                 const storeLat = parseFloat(store.lat);
                 const storeLng = parseFloat(store.lon);
                 if (!storeLat || !storeLng) return false;
@@ -1772,10 +2143,9 @@
 
           setStoreCount(items.length);
 
-          // 5. 업종 대분류(indsLclsNm) -> 소분류(indsSclsNm / indsMclsNm) 2단계 데이터 그룹화
-          const groups = items.reduce((acc, store) => {
-            const mainCat = store.indsLclsNm || '기타 서비스';
-            const subCat = store.indsSclsNm || store.indsMclsNm || '기타 업종';
+          // 5. ?�종 ?�분류(indsLclsNm) -> ?�분�?indsSclsNm / indsMclsNm) 2?�계 ?�이??그룹??          const groups = items.reduce((acc, store) => {
+            const mainCat = store.indsLclsNm || '기�? ?�비??;
+            const subCat = store.indsSclsNm || store.indsMclsNm || '기�? ?�종';
 
             if (!acc[mainCat]) acc[mainCat] = {};
             if (!acc[mainCat][subCat]) acc[mainCat][subCat] = [];
@@ -1787,7 +2157,7 @@
           setCollapsedCategories({});
           setCollapsedSubCategories({});
 
-          // 6. 상가업소 마커 렌더링 및 markerMapRef 맵핑
+          // 6. ?��??�소 마커 ?�더�?�?markerMapRef 맵핑
           items.forEach(store => {
             const storeLat = parseFloat(store.lat);
             const storeLng = parseFloat(store.lon);
@@ -1805,13 +2175,13 @@
             const contentHtml = `
               <div style="padding: 12px; min-width: 200px; font-family: 'Pretendard', sans-serif; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);">
                 <div style="font-weight: 800; font-size: 13px; color: #0f172a; margin-bottom: 4px; line-height: 1.3;">
-                  🏢 ${store.bizesNm || '상가업소'}
+                  ?�� ${store.bizesNm || '?��??�소'}
                 </div>
                 <div style="display: inline-block; font-size: 10px; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 2px 6px; border-radius: 4px; margin-bottom: 6px;">
-                  ${store.indsLclsNm || ''} > ${store.indsSclsNm || store.indsMclsNm || '업종'}
+                  ${store.indsLclsNm || ''} > ${store.indsSclsNm || store.indsMclsNm || '?�종'}
                 </div>
                 <div style="font-size: 11px; color: #64748b; line-height: 1.4;">
-                  📍 ${store.rdnmAdr || store.lnoAdr || '주소 정보 없음'}
+                  ?�� ${store.rdnmAdr || store.lnoAdr || '주소 ?�보 ?�음'}
                 </div>
               </div>
             `;
@@ -1821,15 +2191,13 @@
               removable: true
             });
 
-            // 마커 맵핑 저장
-            storeMarkerMapRef.current[bId] = {
+            // 마커 맵핑 ?�??            storeMarkerMapRef.current[bId] = {
               marker: storeMarker,
               infowindow: infowindow,
               store: store
             };
 
-            // 마커 클릭 이벤트: 해당 리포트 하이라이트
-            window.kakao.maps.event.addListener(storeMarker, 'click', () => {
+            // 마커 ?�릭 ?�벤?? ?�당 리포???�이?�이??            window.kakao.maps.event.addListener(storeMarker, 'click', () => {
               highlightStoreMarker(bId);
             });
           });
@@ -1840,15 +2208,14 @@
         }
       };
 
-      // 프랜차이즈 오버레이 초기화
-      const clearFranchiseLayers = () => {
+      // ?�랜차이�??�버?�이 초기??      const clearFranchiseLayers = () => {
         franchiseOverlayRefs.current.forEach(overlay => {
           if (overlay) overlay.setMap(null);
         });
         franchiseOverlayRefs.current = [];
       };
 
-      // 공정위 가맹정보 API 조회
+      // 공정??가맹정�?API 조회
       const fetchFranchiseData = async () => {
         if (!mapObjRef.current || !window.kakao) return;
         setIsFranchiseLoading(true);
@@ -1864,9 +2231,8 @@
             resultType: 'json'
           });
           if (franchiseYear) params.append('yr', franchiseYear);
-          // if (franchiseBrandNo) params.append('brandNo', franchiseBrandNo); // 브랜드 번호 적용 가능
-
-          // 오퍼레이션 명은 가이드라인 표준 형태 (실패 시 catch 블록에서 데모 데이터로 Fallback)
+          // if (franchiseBrandNo) params.append('brandNo', franchiseBrandNo); // 브랜??번호 ?�용 가??
+          // ?�퍼?�이??명�? 가?�드?�인 ?��? ?�태 (?�패 ??catch 블록?�서 ?�모 ?�이?�로 Fallback)
           const targetUrl = `https://apis.data.go.kr/1130000/FftcBrandFrcsDropInfo3_Service/getBrandFrcsDropInfo?${params.toString()}`;
           const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
 
@@ -1882,11 +2248,11 @@
                 items = data.items;
                 if (!Array.isArray(items)) items = [items];
               } else {
-                // 응답은 성공했지만 예상되는 데이터 구조가 아님 (예: API 서비스 키 에러가 JSON으로 반환됨)
+                // ?�답?� ?�공?��?�??�상?�는 ?�이??구조가 ?�님 (?? API ?�비?????�러가 JSON?�로 반환??
                 throw new Error("Invalid API response format");
               }
             } catch(e) {
-              // JSON 파싱 에러 (예: XML 에러 메시지 반환)
+              // JSON ?�싱 ?�러 (?? XML ?�러 메시지 반환)
               throw new Error("Response is not valid JSON");
             }
           } else {
@@ -1894,14 +2260,13 @@
           }
         } catch (err) {
           console.warn("Franchise API fetch error. Using dummy data.", err);
-          // API 에러 시 임시 데모 데이터 사용
+          // API ?�러 ???�시 ?�모 ?�이???�용
           items = [...DUMMY_FRANCHISE_DATA];
           isDummy = true;
         }
 
-        // 데모 모드일 때 사용자가 검색어를 입력했다면 결과가 비어보이지 않게 숫자만 무작위로 줄여서 '검색된 척' 함
-        if (franchiseBrandNo && isDummy) {
-          // 검색어 길이에 따라 임의의 시드 생성
+        // ?�모 모드?????�용?��? 검?�어�??�력?�다�?결과가 비어보이지 ?�게 ?�자�?무작?�로 줄여??'검?�된 �? ??        if (franchiseBrandNo && isDummy) {
+          // 검?�어 길이???�라 ?�의???�드 ?�성
           const seed = franchiseBrandNo.length; 
           items = items.map(d => ({
             ...d,
@@ -1918,10 +2283,8 @@
 
         const map = mapObjRef.current;
 
-        // 결과 지도 렌더링
-        items.forEach((item, idx) => {
-          const region = item.ctprvnNm; // 서울, 경기 등
-          const coords = REGION_COORDS[region];
+        // 결과 지???�더�?        items.forEach((item, idx) => {
+          const region = item.ctprvnNm; // ?�울, 경기 ??          const coords = REGION_COORDS[region];
           if (!coords) return;
 
           const frcsCnt = parseInt(item.frcsCnt) || 0;
@@ -1931,7 +2294,7 @@
 
           const pos = new window.kakao.maps.LatLng(coords.lat, coords.lng);
 
-          // 버블 크기 (가맹점 수 비례)
+          // 버블 ?�기 (가맹점 ??비�?)
           const size = Math.max(30, Math.min(80, 20 + Math.sqrt(frcsCnt) * 1.5));
 
           const overlayContent = `
@@ -1970,14 +2333,13 @@
         setIsFranchiseLoading(false);
       };
 
-      // 리스트 항목 클릭 시 마커 하이라이트 & 지도 이동 & 인포윈도우 오픈
+      // 리스????�� ?�릭 ??마커 ?�이?�이??& 지???�동 & ?�포?�도???�픈
       const highlightStoreMarker = (bizesId) => {
         if (!mapObjRef.current || !window.kakao) return;
         const map = mapObjRef.current;
         const { defaultImg, highlightImg } = getMarkerImages();
 
-        // 1. 모든 마커 이미지 기본 초기화
-        Object.values(storeMarkerMapRef.current).forEach(item => {
+        // 1. 모든 마커 ?��?지 기본 초기??        Object.values(storeMarkerMapRef.current).forEach(item => {
           if (item.marker && defaultImg) {
             item.marker.setImage(defaultImg);
             item.marker.setZIndex(1);
@@ -1988,8 +2350,7 @@
           activeInfoWindowRef.current.close();
         }
 
-        // 2. 선택된 상가 마커 하이라이트
-        const targetItem = storeMarkerMapRef.current[bizesId];
+        // 2. ?�택???��? 마커 ?�이?�이??        const targetItem = storeMarkerMapRef.current[bizesId];
         if (targetItem && targetItem.marker) {
           if (highlightImg) {
             targetItem.marker.setImage(highlightImg);
@@ -2002,8 +2363,8 @@
           setSelectedBizesId(bizesId);
 
           if (targetItem.store) {
-            const mainCat = targetItem.store.indsLclsNm || '기타 서비스';
-            const subCat = targetItem.store.indsSclsNm || targetItem.store.indsMclsNm || '기타 업종';
+            const mainCat = targetItem.store.indsLclsNm || '기�? ?�비??;
+            const subCat = targetItem.store.indsSclsNm || targetItem.store.indsMclsNm || '기�? ?�종';
             setCollapsedCategories(prev => ({ ...prev, [mainCat]: false }));
             setCollapsedSubCategories(prev => ({ ...prev, [`${mainCat}::${subCat}`]: false }));
           }
@@ -2039,7 +2400,7 @@
         if (activeApi === 'nearby_stores') {
           setActiveApi(null);
           activeApiRef.current = null;
-          // 기존 맵 레이어 지우기 등 처리가 필요하다면 추가
+          // 기존 �??�이??지?�기 ??처리가 ?�요?�다�?추�?
         } else {
           setActiveApi('nearby_stores');
           activeApiRef.current = 'nearby_stores';
@@ -2082,11 +2443,11 @@
 
             drawCenterMarker(centerPos, mapObjRef.current);
 
-            // 초기 위치 지오코딩 주소 확인
+            // 초기 ?�치 지?�코??주소 ?�인
             const geocoder = new window.kakao.maps.services.Geocoder();
             geocoder.coord2Address(initialLng, initialLat, (result, status) => {
               if (status === window.kakao.maps.services.Status.OK && result[0]) {
-                setCurrentAddress(result[0].address ? result[0].address.address_name : '서울 중구 태평로1가');
+                setCurrentAddress(result[0].address ? result[0].address.address_name : '?�울 중구 ?�평�?가');
               }
             });
 
@@ -2107,8 +2468,7 @@
 
             window.addEventListener('resize', triggerRelayout);
 
-            // 지도 클릭 이벤트: 중심점 이동 및 API가 활성화되어 있으면 데이터 재조회
-            window.kakao.maps.event.addListener(mapObjRef.current, 'click', (mouseEvent) => {
+            // 지???�릭 ?�벤?? 중심???�동 �?API가 ?�성?�되???�으�??�이???�조??            window.kakao.maps.event.addListener(mapObjRef.current, 'click', (mouseEvent) => {
               const latlng = mouseEvent.latLng;
               const lat = latlng.getLat();
               const lng = latlng.getLng();
@@ -2119,7 +2479,7 @@
 
               geocoder.coord2Address(lng, lat, (result, status) => {
                 if (status === window.kakao.maps.services.Status.OK && result[0]) {
-                  setCurrentAddress(result[0].address ? result[0].address.address_name : '선택 위치');
+                  setCurrentAddress(result[0].address ? result[0].address.address_name : '?�택 ?�치');
                 }
               });
 
@@ -2157,13 +2517,13 @@
             
             mapObjRef.current.panTo(targetPos);
             drawCenterMarker(targetPos, mapObjRef.current);
-            setCurrentAddress(data[0].address_name || data[0].place_name || '검색 위치');
+            setCurrentAddress(data[0].address_name || data[0].place_name || '검???�치');
 
             if (activeApiRef.current === 'nearby_stores') {
               fetchStoresInRadius(targetLat, targetLng);
             }
           } else {
-            alert('검색한 위치를 찾을 수 없습니다.');
+            alert('검?�한 ?�치�?찾을 ???�습?�다.');
           }
         });
       };
@@ -2173,16 +2533,16 @@
           <AdminNav setView={setView} currentView="admin_seoul_cmrcl" adminUser={adminUser} refreshLeads={refreshLeads} handleLogout={handleLogout} />
           
           <div className="flex-1 w-full relative overflow-hidden">
-            {/* 좌측 상단 패널: 위치 검색 + 현재 지도 위치 (항상 고정) */}
+            {/* 좌측 ?�단 ?�널: ?�치 검??+ ?�재 지???�치 (??�� 고정) */}
             <div className="absolute top-4 left-4 z-10 w-80 sm:w-96 bg-slate-900/95 border border-slate-700/90 backdrop-blur-xl rounded-2xl shadow-2xl p-4 text-white space-y-3.5 flex flex-col transition-all duration-300">
               
-              {/* 상단 위치 검색 폼 */}
+              {/* ?�단 ?�치 검????*/}
               <form onSubmit={handleSearchSubmit} className="flex gap-2 flex-shrink-0">
                 <input
                   type="text"
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
-                  placeholder="위치/주소 검색 (예: 강남역, 명동)"
+                  placeholder="?�치/주소 검??(?? 강남?? 명동)"
                   className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-medium text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
                 />
                 <button
@@ -2190,34 +2550,33 @@
                   disabled={isLoading}
                   className="bg-blue-600 hover:bg-blue-500 font-extrabold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-md whitespace-nowrap"
                 >
-                  {isLoading ? '⏳' : '🔍'} 검색
-                </button>
+                  {isLoading ? '?? : '?��'} 검??                </button>
               </form>
 
-              {/* 중심 위치 안내 카드 */}
+              {/* 중심 ?�치 ?�내 카드 */}
               <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/80 space-y-1.5 text-xs flex-shrink-0">
                 <div className="flex justify-between items-center">
-                  <span className="text-[11px] font-bold text-slate-400">📍 현재 지도 위치</span>
+                  <span className="text-[11px] font-bold text-slate-400">?�� ?�재 지???�치</span>
                   <span className="text-xs font-black text-emerald-400 truncate max-w-[190px]">{currentAddress}</span>
                 </div>
               </div>
             </div>
 
-            {/* 좌측 하단 패널: 사용 가능한 API 기능 선택 섹션 (토글 가능) */}
+            {/* 좌측 ?�단 ?�널: ?�용 가?�한 API 기능 ?�택 ?�션 (?��? 가?? */}
             <div className={`absolute top-48 z-10 transition-all duration-300 ${isApiPanelOpen ? 'left-4' : '-left-80 sm:-left-96'}`}>
               <div className="w-80 sm:w-96 bg-slate-900/95 border border-slate-700/90 backdrop-blur-xl rounded-2xl shadow-2xl p-4 text-white flex flex-col relative">
-                {/* 토글 버튼 */}
+                {/* ?��? 버튼 */}
                 <button 
                   onClick={() => setIsApiPanelOpen(!isApiPanelOpen)} 
                   className="absolute top-1/2 -translate-y-1/2 -right-8 w-8 h-16 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 border-l-0 rounded-r-xl shadow-lg flex items-center justify-center cursor-pointer transition-colors"
                 >
-                  {isApiPanelOpen ? '◀' : '▶'}
+                  {isApiPanelOpen ? '?�' : '??}
                 </button>
 
                 <div className="bg-slate-800/80 rounded-xl p-3 border border-slate-700/80 space-y-2 flex-shrink-0">
                   <div className="flex justify-between items-center text-xs font-extrabold text-blue-300">
-                    <span>⚡ 상권 분석 API 기능 선택</span>
-                    <span className="text-[10px] bg-blue-950/80 text-blue-300 px-2 py-0.5 rounded-md border border-blue-800/60 font-bold">1개 연동됨</span>
+                    <span>???�권 분석 API 기능 ?�택</span>
+                    <span className="text-[10px] bg-blue-950/80 text-blue-300 px-2 py-0.5 rounded-md border border-blue-800/60 font-bold">1�??�동??/span>
                   </div>
 
                   <div className="grid grid-cols-1 gap-2 pt-0.5">
@@ -2232,18 +2591,18 @@
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-base">🏪</span>
+                        <span className="text-base">?��</span>
                         <div className="text-left">
-                          <div className="font-extrabold text-xs">근처 상가 (300m)</div>
+                          <div className="font-extrabold text-xs">근처 ?��? (300m)</div>
                           <div className={`text-[10px] ${activeApi === 'nearby_stores' ? 'text-blue-100' : 'text-slate-400'}`}>
-                            소상공인시장진흥공단 API
+                            ?�상공인?�장진흥공단 API
                           </div>
                         </div>
                       </div>
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
                         activeApi === 'nearby_stores' ? 'bg-white text-blue-700' : 'bg-slate-900 text-slate-400'
                       }`}>
-                        {activeApi === 'nearby_stores' ? 'ON (조회 완료)' : '선택 실행'}
+                        {activeApi === 'nearby_stores' ? 'ON (조회 ?�료)' : '?�택 ?�행'}
                       </span>
                     </button>
                     
@@ -2258,18 +2617,18 @@
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-base">📊</span>
+                        <span className="text-base">?��</span>
                         <div className="text-left">
-                          <div className="font-extrabold text-xs">프랜차이즈 지역 분포</div>
+                          <div className="font-extrabold text-xs">?�랜차이�?지??분포</div>
                           <div className={`text-[10px] ${activeApi === 'franchise' ? 'text-blue-100' : 'text-slate-400'}`}>
-                            공정거래위원회 API
+                            공정거래?�원??API
                           </div>
                         </div>
                       </div>
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
                         activeApi === 'franchise' ? 'bg-white text-blue-700' : 'bg-slate-900 text-slate-400'
                       }`}>
-                        {activeApi === 'franchise' ? 'ON (조회 완료)' : '선택 실행'}
+                        {activeApi === 'franchise' ? 'ON (조회 ?�료)' : '?�택 ?�행'}
                       </span>
                     </button>
                   </div>
@@ -2277,56 +2636,55 @@
               </div>
             </div>
 
-            {/* 우측 패널: API 결과 표시 영역 (토글 가능) */}
+            {/* ?�측 ?�널: API 결과 ?�시 ?�역 (?��? 가?? */}
             {activeApi === 'nearby_stores' && (
               <div className={`absolute top-4 z-10 transition-all duration-300 ${isResultPanelOpen ? 'right-4' : '-right-80 sm:-right-96'}`}>
                 <div className="w-80 sm:w-96 bg-slate-900/95 border border-slate-700/90 backdrop-blur-xl rounded-2xl shadow-2xl p-4 text-white space-y-3.5 max-h-[calc(100vh-80px)] flex flex-col relative">
-                  {/* 토글 버튼 */}
+                  {/* ?��? 버튼 */}
                   <button 
                     onClick={() => setIsResultPanelOpen(!isResultPanelOpen)} 
                     className="absolute top-1/2 -translate-y-1/2 -left-8 w-8 h-16 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 border-r-0 rounded-l-xl shadow-lg flex items-center justify-center cursor-pointer transition-colors"
                   >
-                    {isResultPanelOpen ? '▶' : '◀'}
+                    {isResultPanelOpen ? '?? : '?�'}
                   </button>
                   
                   <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
-                  {/* 반경 300m 요약 바 */}
+                  {/* 반경 300m ?�약 �?*/}
                   <div className="bg-slate-800/90 rounded-xl p-2.5 border border-slate-700/80 flex justify-between items-center text-xs flex-shrink-0 mb-1">
-                    <span className="text-[11px] font-bold text-blue-300">⭕ 반경: <strong className="text-sky-400">300m</strong></span>
+                    <span className="text-[11px] font-bold text-blue-300">�?반경: <strong className="text-sky-400">300m</strong></span>
                     <span className="text-xs font-black text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-700/80">
-                      🏪 상가업소: <strong>{storeCount}개</strong>
+                      ?�� ?��??�소: <strong>{storeCount}�?/strong>
                     </span>
                   </div>
 
                   {isLoading ? (
                     <div className="py-8 text-center text-xs text-slate-400 space-y-2">
-                      <div className="animate-spin text-lg">⏳</div>
-                      <p>반경 300m 상가업소를 불러오는 중...</p>
+                      <div className="animate-spin text-lg">??/div>
+                      <p>반경 300m ?��??�소�?불러?�는 �?..</p>
                     </div>
                   ) : Object.keys(groupedStores).length === 0 ? (
                     <div className="py-8 text-center text-xs text-slate-400">
-                      반경 300m 이내에 검색된 상가가 없습니다.
+                      반경 300m ?�내??검?�된 ?��?가 ?�습?�다.
                     </div>
                   ) : (
                     <>
-                    {/* 전체 펼치기 / 접기 버튼 Bar */}
+                    {/* ?�체 ?�치�?/ ?�기 버튼 Bar */}
                     <div className="flex justify-between items-center pb-1 text-[11px] text-slate-400 border-b border-slate-700/50 mb-2">
-                      <span className="font-bold text-slate-300">업종 분류 ({Object.keys(groupedStores).length}개)</span>
+                      <span className="font-bold text-slate-300">?�종 분류 ({Object.keys(groupedStores).length}�?</span>
                       <div className="flex gap-2 text-[10px]">
                         <button
                           type="button"
                           onClick={expandAllCategories}
                           className="text-blue-400 hover:text-blue-300 transition cursor-pointer font-bold"
                         >
-                          📂 전체 펼치기
-                        </button>
+                          ?�� ?�체 ?�치�?                        </button>
                         <span className="text-slate-600">|</span>
                         <button
                           type="button"
                           onClick={collapseAllCategories}
                           className="text-slate-400 hover:text-amber-300 transition cursor-pointer font-bold"
                         >
-                          📁 전체 접기
+                          ?�� ?�체 ?�기
                         </button>
                       </div>
                     </div>
@@ -2337,25 +2695,23 @@
 
                       return (
                         <div key={mainCategory} className="space-y-1.5">
-                          {/* 1단계: 대분류 카테고리 헤더 */}
+                          {/* 1?�계: ?�분류 카테고리 ?�더 */}
                           <div
                             onClick={() => toggleCategory(mainCategory)}
                             className="flex justify-between items-center sticky top-0 bg-slate-800/95 py-1.5 px-2.5 rounded-xl border-l-4 border-blue-500 backdrop-blur-md cursor-pointer hover:bg-slate-700/90 transition select-none shadow-sm z-10"
                           >
                             <div className="flex items-center gap-1.5 min-w-0">
                               <span className={`text-[10px] text-blue-400 transition-transform duration-200 inline-block ${isMainCollapsed ? '' : 'rotate-90'}`}>
-                                ▶
-                              </span>
+                                ??                              </span>
                               <span className="text-xs font-black text-blue-200 truncate">
-                                📁 {mainCategory}
+                                ?�� {mainCategory}
                               </span>
                             </div>
                             <span className="text-[10px] bg-slate-900 text-slate-300 font-bold px-2 py-0.5 rounded-full border border-slate-700/80 flex-shrink-0">
-                              {mainStoreCount}개
-                            </span>
+                              {mainStoreCount}�?                            </span>
                           </div>
 
-                          {/* 2단계: 소분류 카테고리 그룹 (대분류가 펼쳐져 있을 때만) */}
+                          {/* 2?�계: ?�분�?카테고리 그룹 (?�분류가 ?�쳐???�을 ?�만) */}
                           {!isMainCollapsed && (
                             <div className="pl-2 space-y-1.5 pt-0.5">
                               {Object.entries(subMap).map(([subCategory, stores]) => {
@@ -2364,25 +2720,23 @@
 
                                 return (
                                   <div key={subCategory} className="space-y-1">
-                                    {/* 소분류 카테고리 헤더 */}
+                                    {/* ?�분�?카테고리 ?�더 */}
                                     <div
                                       onClick={() => toggleSubCategory(mainCategory, subCategory)}
                                       className="flex justify-between items-center bg-slate-800/80 py-1 px-2.5 rounded-lg border-l-2 border-sky-400 cursor-pointer hover:bg-slate-750 transition select-none text-xs"
                                     >
                                       <div className="flex items-center gap-1.5 min-w-0">
                                         <span className={`text-[9px] text-sky-400 transition-transform duration-200 inline-block ${isSubCollapsed ? '' : 'rotate-90'}`}>
-                                          ▶
-                                        </span>
+                                          ??                                        </span>
                                         <span className="text-xs font-bold text-sky-300 truncate">
-                                          🏷️ {subCategory}
+                                          ?���?{subCategory}
                                         </span>
                                       </div>
                                       <span className="text-[9px] bg-slate-900/80 text-sky-200 font-bold px-1.5 py-0.5 rounded-md border border-slate-700/60 flex-shrink-0">
-                                        {stores.length}개
-                                      </span>
+                                        {stores.length}�?                                      </span>
                                     </div>
 
-                                    {/* 3단계: 세부 상가 업소 리스트 (소분류가 펼쳐져 있을 때만) */}
+                                    {/* 3?�계: ?��? ?��? ?�소 리스??(?�분류�? ?�쳐???�을 ?�만) */}
                                     {!isSubCollapsed && (
                                       <ul className="space-y-1 pl-1.5 pt-0.5">
                                         {stores.map((store) => {
@@ -2409,7 +2763,7 @@
                                                 </span>
                                               </div>
                                               <p className="text-[10px] text-slate-400 truncate">
-                                                📍 {store.rdnmAdr || store.lnoAdr || '주소 미상'}
+                                                ?�� {store.rdnmAdr || store.lnoAdr || '주소 미상'}
                                               </p>
                                             </li>
                                           );
@@ -2429,34 +2783,34 @@
                 </div>
 
                 <div className="text-[9px] text-slate-400 text-center pt-1 border-t border-slate-800 flex-shrink-0">
-                  💡 목록 클릭 시 해당 마커로 지도 이동 및 황금색 핀 하이라이트 표시
+                  ?�� 목록 ?�릭 ???�당 마커�?지???�동 �??�금???� ?�이?�이???�시
                 </div>
               </div>
               </div>
             )}
 
-            {/* 우측 패널 2: 프랜차이즈 API 결과 표시 영역 (토글 가능) */}
+            {/* ?�측 ?�널 2: ?�랜차이�?API 결과 ?�시 ?�역 (?��? 가?? */}
             {activeApi === 'franchise' && (
               <div className={`absolute top-4 z-10 transition-all duration-300 ${isResultPanelOpen ? 'right-4' : '-right-80 sm:-right-96'}`}>
                 <div className="w-80 sm:w-96 bg-slate-900/95 border border-slate-700/90 backdrop-blur-xl rounded-2xl shadow-2xl p-4 text-white space-y-3.5 max-h-[calc(100vh-80px)] flex flex-col relative">
-                  {/* 토글 버튼 */}
+                  {/* ?��? 버튼 */}
                   <button 
                     onClick={() => setIsResultPanelOpen(!isResultPanelOpen)} 
                     className="absolute top-1/2 -translate-y-1/2 -left-8 w-8 h-16 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 border-r-0 rounded-l-xl shadow-lg flex items-center justify-center cursor-pointer transition-colors"
                   >
-                    {isResultPanelOpen ? '▶' : '◀'}
+                    {isResultPanelOpen ? '?? : '?�'}
                   </button>
                   
                   <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 pr-1">
                     <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/80 flex flex-col gap-2">
-                      <div className="text-[11px] font-bold text-blue-300">📊 프랜차이즈 매장 검색</div>
+                      <div className="text-[11px] font-bold text-blue-300">?�� ?�랜차이�?매장 검??/div>
                       
                       <div className="flex gap-2">
                         <input
                           type="text"
                           value={franchiseBrandNo}
                           onChange={(e) => setFranchiseBrandNo(e.target.value)}
-                          placeholder="브랜드명 검색 (데모)"
+                          placeholder="브랜?�명 검??(?�모)"
                           className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
                         />
                         <button
@@ -2464,23 +2818,23 @@
                           disabled={isFranchiseLoading}
                           className="bg-blue-600 hover:bg-blue-500 font-bold text-xs px-3 py-1.5 rounded-lg transition"
                         >
-                          {isFranchiseLoading ? '⏳' : '검색'}
+                          {isFranchiseLoading ? '?? : '검??}
                         </button>
                       </div>
                     </div>
 
                     {isFranchiseLoading ? (
-                      <div className="py-8 text-center text-xs text-slate-400">데이터를 불러오는 중...</div>
+                      <div className="py-8 text-center text-xs text-slate-400">?�이?��? 불러?�는 �?..</div>
                     ) : (
                       <>
                         <div className="grid grid-cols-2 gap-2">
                           <div className="bg-slate-800/90 p-3 rounded-xl border border-slate-700/80 text-center">
-                            <div className="text-[10px] text-slate-400 mb-1">총 매장 수</div>
-                            <div className="text-sm font-black text-amber-400">{franchiseSummary.totalStores.toLocaleString()}개</div>
+                            <div className="text-[10px] text-slate-400 mb-1">�?매장 ??/div>
+                            <div className="text-sm font-black text-amber-400">{franchiseSummary.totalStores.toLocaleString()}�?/div>
                           </div>
                           <div className="bg-slate-800/90 p-3 rounded-xl border border-slate-700/80 text-center">
-                            <div className="text-[10px] text-slate-400 mb-1">총 가맹점 수</div>
-                            <div className="text-sm font-black text-blue-400">{franchiseSummary.totalFrcs.toLocaleString()}개</div>
+                            <div className="text-[10px] text-slate-400 mb-1">�?가맹점 ??/div>
+                            <div className="text-sm font-black text-blue-400">{franchiseSummary.totalFrcs.toLocaleString()}�?/div>
                           </div>
                         </div>
 
@@ -2492,8 +2846,8 @@
                               <div key={idx} className="bg-slate-800/50 p-2.5 rounded-xl border border-slate-700/60 flex justify-between items-center text-xs">
                                 <span className="font-bold text-slate-200">{item.ctprvnNm}</span>
                                 <div className="text-right">
-                                  <div className="text-amber-300 font-bold">매장 {frcs + drtms}개</div>
-                                  <div className="text-[9px] text-slate-400">가맹 {frcs} / 직영 {drtms}</div>
+                                  <div className="text-amber-300 font-bold">매장 {frcs + drtms}�?/div>
+                                  <div className="text-[9px] text-slate-400">가�?{frcs} / 직영 {drtms}</div>
                                 </div>
                               </div>
                             );
@@ -2506,7 +2860,7 @@
               </div>
             )}
 
-            {/* Kakao Map 지도 영역 100% */}
+            {/* Kakao Map 지???�역 100% */}
             <div ref={mapContainerRef} className="w-full h-[calc(100vh-64px)] z-0" />
           </div>
         </div>
@@ -2518,3 +2872,5 @@
   </script>
 </body>
 </html>
+
+

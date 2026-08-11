@@ -80,6 +80,8 @@
       document.body.innerHTML += '<div style="color: red; padding: 20px; font-size: 16px; position: fixed; top: 0; left: 0; z-index: 9999; background: white; border: 2px solid red;"><b>Error:</b> ' + message + '<br>' + source + ':' + lineno + '<br>' + (error && error.stack ? error.stack.replace(/\n/g, '<br>') : '') + '</div>';
     };
   </script>
+  <script src="src/industryDatabase.js"></script>
+  <script src="src/DiagnosisScoringEngine.js"></script>
   <amp-auto-ads type="adsense" data-ad-client="ca-pub-6279787169395705"></amp-auto-ads>
   <div id="root"></div>
 
@@ -118,294 +120,30 @@
 
     const INITIAL_LEADS = [];
 
-const INDUSTRY_MASTER = {
-  "외식": ["한식", "고기집", "치킨", "분식", "카페", "베이커리", "주점", "배달전문점"],
-  "무인/소매": ["무인 아이스크림", "무인편의점", "무인문구점", "무인과자점", "무인판매점", "편의점", "소형 슈퍼", "반려동물용품점"],
-  "서비스": ["미용실", "네일샵", "세탁소", "셀프빨래방", "세차장", "사진관", "부동산", "휴대폰 판매점"],
-  "교육": ["공부방", "보습학원", "영어학원", "수학학원", "독서실", "스터디카페"],
-  "스포츠/여가": ["파크골프장", "골프연습장", "스크린골프", "키즈카페", "체육시설", "애견유치원", "애견카페"],
-  "대형/시설형": ["대형 음식점", "대형 카페", "펜션", "캠핑장"]
-};
+    // Data adapters for new scoring engine
+    const DB = window.industryDatabase;
+    const ScoringEngine = window.DiagnosisScoringEngine;
 
-// 모든 자금은 '만원' 단위 기준
-const INDUSTRY_PROFILES = {
-  "카페": {
-    min_capital: 3000, recommended_capital: 8000, recommended_area: 15,
-    facility_cost: 3000, equipment_cost: 2000, deposit_cost: 3000,
-    preparation_months: 2, operation_difficulty: 4, labor_intensity: 6,
-    unstaffed_possible: false, franchise_suitability: 9, land_required: false, license_required: true,
-    region_dependence: 8, residential_suitability: 7, station_suitability: 9, office_suitability: 9, tourist_suitability: 8, suburb_suitability: 5,
-    competition_intensity: 10, market_growth: 5
-  },
-  "파크골프장": {
-    min_capital: 20000, recommended_capital: 50000, recommended_area: 300,
-    facility_cost: 20000, equipment_cost: 5000, deposit_cost: 10000,
-    preparation_months: 6, operation_difficulty: 7, labor_intensity: 5,
-    unstaffed_possible: false, franchise_suitability: 4, land_required: true, license_required: true,
-    region_dependence: 4, residential_suitability: 2, station_suitability: 1, office_suitability: 1, tourist_suitability: 8, suburb_suitability: 10,
-    competition_intensity: 3, market_growth: 9
-  },
-  "무인 아이스크림": {
-    min_capital: 1500, recommended_capital: 2500, recommended_area: 10,
-    facility_cost: 1000, equipment_cost: 500, deposit_cost: 1000,
-    preparation_months: 1, operation_difficulty: 2, labor_intensity: 2,
-    unstaffed_possible: true, franchise_suitability: 10, land_required: false, license_required: false,
-    region_dependence: 9, residential_suitability: 10, station_suitability: 6, office_suitability: 4, tourist_suitability: 3, suburb_suitability: 2,
-    competition_intensity: 9, market_growth: 6
-  },
-  "셀프빨래방": {
-    min_capital: 5000, recommended_capital: 10000, recommended_area: 15,
-    facility_cost: 2000, equipment_cost: 6000, deposit_cost: 2000,
-    preparation_months: 2, operation_difficulty: 3, labor_intensity: 2,
-    unstaffed_possible: true, franchise_suitability: 8, land_required: false, license_required: true,
-    region_dependence: 8, residential_suitability: 9, station_suitability: 5, office_suitability: 6, tourist_suitability: 3, suburb_suitability: 2,
-    competition_intensity: 6, market_growth: 7
-  },
-  "스터디카페": {
-    min_capital: 10000, recommended_capital: 20000, recommended_area: 50,
-    facility_cost: 12000, equipment_cost: 3000, deposit_cost: 5000,
-    preparation_months: 2, operation_difficulty: 4, labor_intensity: 3,
-    unstaffed_possible: true, franchise_suitability: 9, land_required: false, license_required: true,
-    region_dependence: 7, residential_suitability: 9, station_suitability: 7, office_suitability: 5, tourist_suitability: 1, suburb_suitability: 3,
-    competition_intensity: 8, market_growth: 6
-  },
-  "한식": {
-    min_capital: 5000, recommended_capital: 10000, recommended_area: 25,
-    facility_cost: 4000, equipment_cost: 2000, deposit_cost: 4000,
-    preparation_months: 2, operation_difficulty: 8, labor_intensity: 9,
-    unstaffed_possible: false, franchise_suitability: 7, land_required: false, license_required: true,
-    region_dependence: 7, residential_suitability: 8, station_suitability: 8, office_suitability: 9, tourist_suitability: 7, suburb_suitability: 6,
-    competition_intensity: 9, market_growth: 5
-  },
-  "고기집": {
-    min_capital: 7000, recommended_capital: 15000, recommended_area: 35,
-    facility_cost: 6000, equipment_cost: 3000, deposit_cost: 6000,
-    preparation_months: 2, operation_difficulty: 8, labor_intensity: 9,
-    unstaffed_possible: false, franchise_suitability: 8, land_required: false, license_required: true,
-    region_dependence: 8, residential_suitability: 7, station_suitability: 9, office_suitability: 8, tourist_suitability: 7, suburb_suitability: 5,
-    competition_intensity: 9, market_growth: 5
-  },
-  "치킨": {
-    min_capital: 3000, recommended_capital: 7000, recommended_area: 15,
-    facility_cost: 2500, equipment_cost: 1500, deposit_cost: 3000,
-    preparation_months: 1, operation_difficulty: 6, labor_intensity: 8,
-    unstaffed_possible: false, franchise_suitability: 10, land_required: false, license_required: true,
-    region_dependence: 6, residential_suitability: 9, station_suitability: 7, office_suitability: 5, tourist_suitability: 4, suburb_suitability: 4,
-    competition_intensity: 10, market_growth: 4
-  },
-  "미용실": {
-    min_capital: 3000, recommended_capital: 7000, recommended_area: 15,
-    facility_cost: 3000, equipment_cost: 1000, deposit_cost: 3000,
-    preparation_months: 2, operation_difficulty: 7, labor_intensity: 7,
-    unstaffed_possible: false, franchise_suitability: 5, land_required: false, license_required: true,
-    region_dependence: 8, residential_suitability: 8, station_suitability: 8, office_suitability: 6, tourist_suitability: 3, suburb_suitability: 4,
-    competition_intensity: 8, market_growth: 5
-  },
-  "영어학원": {
-    min_capital: 4000, recommended_capital: 8000, recommended_area: 30,
-    facility_cost: 3000, equipment_cost: 1000, deposit_cost: 4000,
-    preparation_months: 2, operation_difficulty: 7, labor_intensity: 6,
-    unstaffed_possible: false, franchise_suitability: 8, land_required: false, license_required: true,
-    region_dependence: 9, residential_suitability: 10, station_suitability: 4, office_suitability: 2, tourist_suitability: 1, suburb_suitability: 5,
-    competition_intensity: 8, market_growth: 5
-  },
-  "스크린골프": {
-    min_capital: 15000, recommended_capital: 30000, recommended_area: 80,
-    facility_cost: 10000, equipment_cost: 15000, deposit_cost: 5000,
-    preparation_months: 3, operation_difficulty: 5, labor_intensity: 4,
-    unstaffed_possible: false, franchise_suitability: 9, land_required: false, license_required: true,
-    region_dependence: 6, residential_suitability: 7, station_suitability: 6, office_suitability: 8, tourist_suitability: 3, suburb_suitability: 8,
-    competition_intensity: 7, market_growth: 7
-  },
-  "대형 카페": {
-    min_capital: 20000, recommended_capital: 50000, recommended_area: 150,
-    facility_cost: 25000, equipment_cost: 5000, deposit_cost: 20000,
-    preparation_months: 4, operation_difficulty: 7, labor_intensity: 7,
-    unstaffed_possible: false, franchise_suitability: 4, land_required: true, license_required: true,
-    region_dependence: 5, residential_suitability: 4, station_suitability: 3, office_suitability: 3, tourist_suitability: 9, suburb_suitability: 10,
-    competition_intensity: 8, market_growth: 6
-  }
-};
-
-// 미정의 업종인 경우 기본값
-const DEFAULT_PROFILE = {
-  min_capital: 5000, recommended_capital: 10000, recommended_area: 20,
-  facility_cost: 3000, equipment_cost: 2000, deposit_cost: 5000,
-  preparation_months: 2, operation_difficulty: 5, labor_intensity: 5,
-  unstaffed_possible: false, franchise_suitability: 5, land_required: false, license_required: true,
-  region_dependence: 7, residential_suitability: 5, station_suitability: 5, office_suitability: 5, tourist_suitability: 5, suburb_suitability: 5,
-  competition_intensity: 5, market_growth: 5
-};
-
-const DiagnosisScoringEngine = {
-  evaluate: function(formData) {
-    const industryName = formData.industry || '기타';
-    const profile = INDUSTRY_PROFILES[industryName] || DEFAULT_PROFILE;
-    
-    // 예산 파싱
-    let userCapital = 0;
-    if (formData.budget === '2,000만원 미만') userCapital = 1500;
-    else if (formData.budget === '2,000~3,000만원') userCapital = 2500;
-    else if (formData.budget === '3,000~5,000만원') userCapital = 4000;
-    else if (formData.budget === '5,000~7,000만원') userCapital = 6000;
-    else if (formData.budget === '7,000만원~1억원') userCapital = 8500;
-    else if (formData.budget === '1~2억원') userCapital = 15000;
-    else if (formData.budget === '2억원 이상') userCapital = 30000;
-    else userCapital = 5000; // 미정 시 중간값 적용
-    
-    let scores = {};
-    let rationales = {};
-
-    // 1. 자금 적합도 (25점)
-    if (userCapital < profile.min_capital) {
-      scores.capital = Math.max(0, 25 - ((profile.min_capital - userCapital) / 1000) * 5);
-      rationales.capital = `해당 업종 최소 투자금(${profile.min_capital}만원) 대비 가용 자금이 부족합니다.`;
-    } else if (userCapital >= profile.recommended_capital) {
-      scores.capital = 25;
-      rationales.capital = `해당 업종 권장 투자금(${profile.recommended_capital}만원) 대비 자금 운용이 매우 안정적입니다.`;
-    } else {
-      scores.capital = 15 + ((userCapital - profile.min_capital) / (profile.recommended_capital - profile.min_capital)) * 10;
-      rationales.capital = `초기 자금은 확보되었으나, 운영 자금 여유를 위해 세밀한 예산 계획이 필요합니다.`;
+    // Group industry_master by major_name -> middle_name -> small_name (or just major_name -> small_name)
+    const groupedIndustries = {};
+    if (DB && DB.industry_master) {
+      DB.industry_master.forEach(item => {
+        if (!groupedIndustries[item.major_name]) {
+          groupedIndustries[item.major_name] = [];
+        }
+        groupedIndustries[item.major_name].push({ id: item.small_code, name: item.small_name });
+      });
+      
+      // Add extended items as a separate group
+      const extendedItems = DB.extended_diagnosis_items.map(extId => {
+        const profile = DB.industry_profile.find(p => p.industry_id === extId);
+        return { id: extId, name: profile ? profile.industry_name : extId };
+      });
+      if (extendedItems.length > 0) {
+        groupedIndustries["창업진단 특별분류"] = extendedItems;
+      }
     }
 
-    // 2. 지역/상권 적합도 (20점)
-    const regionType = formData.region_type || '상관없음';
-    let regionScoreMap = {
-      '주거밀집': profile.residential_suitability,
-      '역세권': profile.station_suitability,
-      '오피스': profile.office_suitability,
-      '관광지': profile.tourist_suitability,
-      '교외': profile.suburb_suitability,
-    };
-    
-    let matchScore = regionScoreMap[regionType];
-    if (!matchScore) {
-      scores.region = 14;
-      rationales.region = `선택한 업종의 보편적인 상권 의존도를 반영하였습니다.`;
-    } else {
-      scores.region = matchScore * 2; // 10점 만점을 20점으로 스케일링
-      if (matchScore >= 8) rationales.region = `선택하신 상권 유형과 업종의 궁합이 매우 우수합니다.`;
-      else if (matchScore >= 5) rationales.region = `해당 상권에서 무난한 운영이 예상됩니다.`;
-      else rationales.region = `해당 상권 특성과 업종 특성이 다소 맞지 않을 수 있습니다.`;
-    }
-
-    // 3. 업종/규모 적합도 (20점)
-    const storeSize = formData.store_size || '10평 이하';
-    let requiredAreaScore = 20;
-    if (profile.land_required && storeSize !== '토지/대형시설 필요') {
-      requiredAreaScore = 5;
-      rationales.industry = `선택한 업종은 대규모 토지나 특수 시설이 필수적이나, 소규모 시설을 선택하셨습니다.`;
-    } else if (storeSize === '10평 이하' && profile.recommended_area > 15) {
-      requiredAreaScore = 12;
-      rationales.industry = `해당 업종은 최소 ${profile.recommended_area}평 이상이 권장됩니다. 공간이 다소 협소합니다.`;
-    } else {
-      rationales.industry = `희망하시는 매장 규모가 업종 특성 및 권장 면적과 적절히 부합합니다.`;
-    }
-    scores.industry = requiredAreaScore;
-
-    // 4. 창업 시기 적합도 (10점)
-    const prepMonths = formData.startup_period === '1개월 이내' ? 1 :
-                       formData.startup_period === '3개월 이내' ? 3 :
-                       formData.startup_period === '6개월 이내' ? 6 :
-                       formData.startup_period === '6개월~1년' ? 9 :
-                       formData.startup_period === '1년 이후' ? 12 : 3;
-    if (prepMonths < profile.preparation_months) {
-      scores.timing = 5;
-      rationales.timing = `해당 업종은 인허가 및 공사에 최소 ${profile.preparation_months}개월이 필요하여 준비 일정이 빠듯합니다.`;
-    } else {
-      scores.timing = 10;
-      rationales.timing = `안정적으로 매장을 오픈하기에 충분한 준비 기간을 확보하셨습니다.`;
-    }
-
-    // 5. 운영자 적합도 (10점)
-    const opType = formData.operation_type || '직접 운영';
-    if (profile.unstaffed_possible === false && opType === '무인 운영') {
-      scores.operator = 2;
-      rationales.operator = `해당 업종은 완전 무인 운영이 불가능하거나 매우 어렵습니다.`;
-    } else if (profile.labor_intensity > 7 && opType === '부업') {
-      scores.operator = 4;
-      rationales.operator = `노동 강도가 매우 높은 업종으로 부업 형태의 운영은 리스크가 높습니다.`;
-    } else {
-      scores.operator = Math.max(10 - (profile.operation_difficulty * 0.3), 5);
-      rationales.operator = `선택하신 운영 방식과 본 업종의 운영 난이도가 조화롭습니다.`;
-    }
-
-    // 6. 업종 특성 기반 시장성/경쟁환경 평가 (10점)
-    scores.market = Math.max(10 - (profile.competition_intensity * 0.5) + (profile.market_growth * 0.2), 0);
-    scores.market = Math.min(10, scores.market);
-    rationales.market = `전반적인 업종 경쟁 강도와 최근 시장 트렌드 성장성을 반영한 지표입니다.`;
-
-    // 7. 위험도 (5점)
-    scores.risk = 5 - (profile.operation_difficulty * 0.2) - (profile.competition_intensity * 0.1);
-    scores.risk = Math.max(0, scores.risk);
-    rationales.risk = `업종 자체의 폐업률, 초기 투자금 회수 기간 등을 고려한 운영 리스크입니다.`;
-
-    // 총점
-    let totalScore = Math.round(scores.capital + scores.region + scores.industry + scores.timing + scores.operator + scores.market + scores.risk);
-    totalScore = Math.max(0, Math.min(100, totalScore));
-
-    let grade = 'E';
-    let gradeLabel = '위험/재검토 요망';
-    if (totalScore >= 90) { grade = 'S'; gradeLabel = '최적합'; }
-    else if (totalScore >= 80) { grade = 'A'; gradeLabel = '우수/매우 적합'; }
-    else if (totalScore >= 70) { grade = 'B'; gradeLabel = '조건부 적합'; }
-    else if (totalScore >= 60) { grade = 'C'; gradeLabel = '보통/주의 필요'; }
-    else if (totalScore >= 50) { grade = 'D'; gradeLabel = '부적합/리스크 높음'; }
-
-    // 가장 큰 감점 요인 TOP 3 추출
-    const maxScores = { capital: 25, region: 20, industry: 20, timing: 10, operator: 10, market: 10, risk: 5 };
-    const lossArr = Object.keys(scores).map(key => ({
-      key,
-      loss: maxScores[key] - scores[key],
-      ratio: (maxScores[key] - scores[key]) / maxScores[key]
-    })).sort((a, b) => b.ratio - a.ratio);
-
-    const improvementTips = {
-      capital: "예산에 맞춰 평수를 줄이거나, 초기 권리금이 없는 외곽 지역, 또는 소형 특화 업종으로 변경을 검토해 보세요.",
-      region: "선택한 업종의 주 고객층이 방문하기 쉬운 타 상권(예: 역세권, 주거밀집 등)으로 입지를 변경하는 것을 권장합니다.",
-      industry: "희망하는 매장 규모에 맞춰 시설비용 부담이 적은 다른 업종을 선택하거나, 규모를 늘릴 수 있도록 자금을 추가 확보해 보세요.",
-      timing: "상가 계약, 인테리어, 인허가 등 물리적인 준비 시간이 더 필요합니다. 오픈 목표일을 1~2개월 늦추는 것을 권장합니다.",
-      operator: "초기 운영 안정화를 위해 부업/무인보다는 직접 운영 비중을 높이거나, 시스템이 잘 갖춰진 프랜차이즈 브랜드를 선택하세요.",
-      market: "경쟁이 매우 치열한 업종입니다. 명확한 차별화 전략(마케팅, 특화 메뉴 등)을 세우거나 틈새 시장을 노려보세요.",
-      risk: "운영 난이도가 높고 리스크가 있는 편입니다. 관련 업종에서의 근무 경험을 먼저 쌓거나 전문가의 자문을 구하세요."
-    };
-
-    const topPenalties = lossArr.slice(0, 3).filter(i => i.loss > 0).map(i => ({
-      name: i.key === 'capital' ? '운용자금 부족' :
-            i.key === 'region' ? '상권 특성 불일치' :
-            i.key === 'industry' ? '업종과 매장 규모 불일치' :
-            i.key === 'timing' ? '예상 준비기간 부족' :
-            i.key === 'operator' ? '운영 난이도 대비 경험/운영방식 리스크' :
-            i.key === 'market' ? '치열한 경쟁 및 시장 환경' : '구조적 운영 리스크',
-      tip: improvementTips[i.key]
-    }));
-
-    return {
-      totalScore, grade, gradeLabel,
-      scores: {
-        capital: Math.round(scores.capital),
-        region: Math.round(scores.region),
-        industry: Math.round(scores.industry),
-        timing: Math.round(scores.timing),
-        operator: Math.round(scores.operator),
-        market: Math.round(scores.market),
-        risk: Math.round(scores.risk)
-      },
-      rationales,
-      topPenalties
-    };
-  },
-
-  recommendIndustries: function(formData) {
-    const results = [];
-    for (const industry in INDUSTRY_PROFILES) {
-      const mockData = { ...formData, industry: industry };
-      const evaluation = this.evaluate(mockData);
-      results.push({ name: industry, score: evaluation.totalScore });
-    }
-    return results.sort((a, b) => b.score - a.score).slice(0, 3);
-  }
-};
 
 
     const STATUS_OPTIONS = [
@@ -1102,7 +840,7 @@ const DiagnosisScoringEngine = {
                   <div>
                     <label className="block text-xs font-bold text-slate-500 mb-2">대분류 (업종 카테고리)</label>
                     <div className="flex flex-wrap gap-2">
-                      {Object.keys(INDUSTRY_MASTER).map((cat) => (
+                      {Object.keys(groupedIndustries).map((cat) => (
                         <button
                           key={cat}
                           onClick={() => { setCategory(cat); setFormData({...formData, industry_category: cat, industry: ''}); }}
@@ -1116,12 +854,12 @@ const DiagnosisScoringEngine = {
                     </div>
                   </div>
     
-                  {category && (
+                  {category && groupedIndustries[category] && (
                     <div className="pt-4 border-t border-slate-100">
                       <label className="block text-xs font-bold text-slate-500 mb-2">소분류 (상세 업종)</label>
                       <div className="grid grid-cols-2 gap-2.5">
-                        {INDUSTRY_MASTER[category].map((ind) => (
-                          <OptionCard key={ind} label={ind} value={ind} field="industry" />
+                        {groupedIndustries[category].map((ind) => (
+                          <OptionCard key={ind.id} label={ind.name} value={ind.id} field="industry" />
                         ))}
                       </div>
                     </div>
@@ -1169,8 +907,109 @@ const DiagnosisScoringEngine = {
     
 
     function ResultPage({ setView, formData }) {
-      const result = DiagnosisScoringEngine.evaluate(formData);
-      const recommendations = DiagnosisScoringEngine.recommendIndustries(formData);
+      let profile = null;
+      if (DB && DB.industry_profile) {
+        profile = DB.industry_profile.find(p => p.industry_id === formData.industry);
+      }
+      if (!profile) {
+        profile = {
+          industry_name: formData.industry,
+          min_capital: 5000, recommended_capital: 10000, recommended_area: 20,
+          preparation_months: 3, operation_difficulty: 5, labor_intensity: 5,
+          unstaffed_possible: false, franchise_suitability: 7, land_required: false, license_required: false, license_permit_level: 0,
+          commercial_dependency: 50, growth_screening: 50
+        };
+      }
+
+      const parseBudget = (str) => {
+        if (!str) return 5000;
+        if (str.includes('2,000만원 미만')) return 1500;
+        if (str.includes('2,000~3,000')) return 2500;
+        if (str.includes('3,000~5,000')) return 4000;
+        if (str.includes('5,000~7,000')) return 6000;
+        if (str.includes('7,000만원~1억')) return 8500;
+        if (str.includes('1~2억')) return 15000;
+        if (str.includes('2억')) return 25000;
+        return 5000;
+      };
+
+      const parseMonths = (str) => {
+        if (!str) return 3;
+        if (str.includes('1개월')) return 1;
+        if (str.includes('3개월')) return 3;
+        if (str.includes('6개월')) return 6;
+        if (str.includes('12개월 이내')) return 9;
+        if (str.includes('12개월 이상')) return 12;
+        return 3;
+      };
+
+      const parseRegionType = (str) => {
+        if (str === '주거밀집') return 'residential';
+        if (str === '역세권') return 'station';
+        if (str === '교외/농촌' || str === '교외') return 'suburban';
+        if (str === '관광지') return 'tourist';
+        if (str === '오피스') return 'office';
+        if (str === '전통시장') return 'traditional';
+        if (str === '신도시') return 'new_town';
+        if (str === '산업단지') return 'industrial';
+        return 'mixed_commercial'; 
+      };
+
+      const parseArea = (str) => {
+        if (!str) return 15;
+        if (str.includes('10평 이하')) return 8;
+        if (str.includes('10~20평')) return 15;
+        if (str.includes('20~30평')) return 25;
+        if (str.includes('30~50평')) return 40;
+        if (str.includes('50평 이상')) return 60;
+        return 20;
+      };
+
+      const input = {
+        budget: parseBudget(formData.budget),
+        monthsAvailable: parseMonths(formData.startup_period),
+        regionType: parseRegionType(formData.region_type),
+        areaPyeong: parseArea(formData.store_size),
+        experience: formData.experience,
+        operationType: formData.operation_type
+      };
+
+      const rawResult = ScoringEngine.diagnose(input, profile);
+      const recommendationsData = ScoringEngine.rankIndustries(input, DB.industry_profile, 3);
+      
+      const recommendations = recommendationsData.map(item => ({
+        name: item.profile.industry_name,
+        score: item.result.total
+      }));
+
+      // Adapt to old format
+      const result = {
+        totalScore: rawResult.total,
+        grade: rawResult.grade.grade,
+        gradeLabel: rawResult.grade.label,
+        scores: {
+          capital: Math.round(rawResult.capital),
+          region: Math.round(rawResult.region),
+          industry: Math.round(rawResult.industry),
+          timing: Math.round(rawResult.timing),
+          operator: Math.round(rawResult.operator),
+          market: Math.round(rawResult.market),
+          risk: Math.round(rawResult.risk)
+        },
+        rationales: {
+          capital: "투자금 대비 필요 자금을 분석했습니다.",
+          region: "선택하신 상권 특성과 업종 궁합을 반영했습니다.",
+          industry: "희망 규모와 업종의 권장 요건을 비교했습니다.",
+          timing: "준비 기간과 업종별 개점 소요시간을 비교했습니다.",
+          operator: "운영 난이도 및 방식이 목표에 부합하는지 평가했습니다.",
+          market: "해당 업종의 경쟁 강도와 시장 성장성을 고려했습니다.",
+          risk: "인허가 및 난이도 등 리스크 요소를 반영했습니다."
+        },
+        topPenalties: rawResult.deductions.map(d => ({
+          name: d.category,
+          tip: d.reason
+        }))
+      };
     
       const CircleGauge = ({ score }) => {
         const radius = 60;
@@ -1241,7 +1080,7 @@ const DiagnosisScoringEngine = {
                 </span>
               </div>
               <p className="mt-4 text-sm text-slate-600 font-medium">
-                입력하신 조건과 <strong className="text-blue-600">[{formData.industry}]</strong> 업종의 매칭 결과를 분석했습니다.
+                입력하신 조건과 <strong className="text-blue-600">[{profile.industry_name}]</strong> 업종의 매칭 결과를 분석했습니다.
               </p>
             </div>
     

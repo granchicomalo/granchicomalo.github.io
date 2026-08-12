@@ -2855,8 +2855,7 @@
 
         setLoading(true);
         setHasSearched(true);
-        setCurrentPage(1); // 검색 시 1페이지로 초기화
-        setItems([]);
+        setCurrentPage(1);
 
         try {
           // 공정위 가맹점 매출 현황 API (FftcBrandFrcsStatsService/getBrandFrcsStats)
@@ -2894,20 +2893,16 @@
             return [];
           };
 
-          // 광범위한 브랜드 데이터 병렬 확보 (페이지 1~6 멀티 페치, 총 3,000개 브랜드 데이터 확보하여 전 성씨/정렬범위 커버)
-          const [p1, p2, p3, p4, p5, p6] = await Promise.all([
-            fetchPage(1, 500),
-            fetchPage(2, 500),
-            fetchPage(3, 500),
-            fetchPage(4, 500),
-            fetchPage(5, 500),
-            fetchPage(6, 500)
-          ]);
+          // 전 브랜드 병렬 로딩 (페이지 1~12, 각 1,000개씩 = 총 12,000개 브랜드 확보하여 DB 전체 데이터 100% 커버)
+          const fetchPromises = [];
+          for (let p = 1; p <= 12; p++) {
+            fetchPromises.push(fetchPage(p, 1000));
+          }
 
-          const combinedList = [...p1, ...p2, ...p3, ...p4, ...p5, ...p6];
+          const pageResults = await Promise.all(fetchPromises);
+          const combinedList = pageResults.flat();
 
           if (combinedList.length > 0) {
-            // 검색어 입력 시 브랜드명, 상호명, 업종에서 키워드 필터링
             if (targetBrandName) {
               const kw = targetBrandName.toLowerCase();
               const filtered = combinedList.filter(item => 
@@ -3021,7 +3016,7 @@
                     type="text"
                     value={brandName}
                     onChange={(e) => setBrandName(e.target.value)}
-                    placeholder="브랜드명 또는 상호명 입력 (예: 돼지, 치킨, 피자, 커피 등)"
+                    placeholder="브랜드명 또는 상호명 입력 (예: 메가, 치킨, 피자, 커피 등)"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
                   />
                 </div>
@@ -3041,14 +3036,14 @@
               <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 space-y-2 text-[11px] text-slate-400">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-extrabold text-blue-400 flex items-center gap-1">
-                    ⚡ 인기 키워드 검색:
+                    ⚡ 인기 키워드 원클릭 검색:
                   </span>
                   <button
                     type="button"
-                    onClick={(e) => handleSearch(e, '돼지')}
-                    className="bg-slate-800 hover:bg-blue-600 text-slate-200 hover:text-white px-2.5 py-1 rounded-lg border border-slate-700 transition text-[11px]"
+                    onClick={(e) => handleSearch(e, '메가')}
+                    className="bg-slate-800 hover:bg-blue-600 text-slate-200 hover:text-white px-2.5 py-1 rounded-lg border border-slate-700 font-bold transition text-[11px]"
                   >
-                    돼지
+                    ☕ 메가 (메가MGC커피)
                   </button>
                   <button
                     type="button"
@@ -3066,6 +3061,13 @@
                   </button>
                   <button
                     type="button"
+                    onClick={(e) => handleSearch(e, '돼지')}
+                    className="bg-slate-800 hover:bg-blue-600 text-slate-200 hover:text-white px-2.5 py-1 rounded-lg border border-slate-700 transition text-[11px]"
+                  >
+                    돼지
+                  </button>
+                  <button
+                    type="button"
                     onClick={(e) => handleSearch(e, '')}
                     className="bg-slate-800 hover:bg-emerald-600 text-slate-200 hover:text-white px-2.5 py-1 rounded-lg border border-slate-700 font-bold transition text-[11px]"
                   >
@@ -3076,15 +3078,15 @@
                   <div className="flex items-start gap-1.5">
                     <span className="text-blue-400">💡</span>
                     <div>
-                      공정거래위원회 브랜드별 가맹점 현황 API(<code className="text-sky-400">getBrandFrcsStats</code>) 실시간 공공데이터를 검색하며, 선택하신 기준년도({year}년)의 브랜드 3,000개를 다중 로딩하여 검색합니다.
+                      공정거래위원회 브랜드별 가맹점 현황 API(<code className="text-sky-400">getBrandFrcsStats</code>) {year}년 전 데이터(12,000여개)를 실시간 검색하며, 한 페이지당 50개씩 레이아웃 흔들림 없이 보여줍니다.
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* 데이터 목록 표 (Table) 영역 */}
-            <div className="bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-xl space-y-4">
+            {/* 데이터 목록 표 (Table) 영역 - 높이 고정(min-h-[640px])으로 화면 흔들림 방지 */}
+            <div className="bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-xl space-y-4 min-h-[640px] relative flex flex-col justify-between">
               <div className="flex items-center justify-between border-b border-slate-800 pb-4">
                 <h2 className="text-sm font-black text-white flex items-center gap-2">
                   📊 브랜드별 가맹점 현황 및 매출 정보 목록 ({year}년 기준)
@@ -3097,24 +3099,25 @@
               </div>
 
               {loading ? (
-                <div className="py-16 text-center text-slate-400 space-y-2">
-                  <div className="text-2xl animate-spin">⏳</div>
-                  <p className="text-xs font-bold">공정거래위원회 {year}년 가맹점 매출 API 데이터를 불러오는 중입니다...</p>
+                <div className="flex-1 flex flex-col items-center justify-center py-20 text-slate-400 space-y-3">
+                  <div className="text-3xl animate-spin">⏳</div>
+                  <p className="text-xs font-bold text-slate-200">공정거래위원회 {year}년 전체 가맹점 매출 API 데이터(12,000여개)를 실시간 검색 중입니다...</p>
+                  <p className="text-[11px] text-slate-500">잠시만 기다려주세요 (화면 흔들림 방지 처리 적용)</p>
                 </div>
               ) : !hasSearched ? (
-                <div className="py-16 text-center text-slate-400 space-y-2">
+                <div className="flex-1 flex flex-col items-center justify-center py-20 text-slate-400 space-y-2">
                   <div className="text-3xl">🔎</div>
                   <p className="text-xs font-semibold">위 검색 조건 입력 후 '매출정보 검색' 버튼을 누르면 통계 표가 표시됩니다.</p>
                 </div>
               ) : items.length === 0 ? (
-                <div className="py-16 text-center text-slate-400 space-y-2 bg-slate-950/50 rounded-xl border border-slate-800/80">
+                <div className="flex-1 flex flex-col items-center justify-center py-20 text-slate-400 space-y-2 bg-slate-950/50 rounded-xl border border-slate-800/80 my-auto">
                   <div className="text-3xl">⚠️</div>
                   <p className="text-xs font-bold text-amber-400">해당 조건에 맞는 {year}년도 프랜차이즈 가맹/매출 정보가 존재하지 않습니다.</p>
                   <p className="text-[11px] text-slate-500">검색어 '{brandName}' 에 일치하는 브랜드가 없습니다. 단어를 축소하거나 다른 키워드로 검색해 주세요.</p>
                 </div>
               ) : (
-                <>
-                  <div className="overflow-x-auto custom-scrollbar">
+                <div className="flex-1 flex flex-col justify-between space-y-4">
+                  <div className="overflow-x-auto custom-scrollbar flex-1">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
                         <tr className="bg-slate-800/90 text-slate-300 font-extrabold border-b border-slate-700">
@@ -3171,7 +3174,7 @@
 
                   {/* 50개 단위 하단 페이지 네비게이션 버튼 UI */}
                   {totalPages > 1 && (
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-800 text-xs">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-800 text-xs mt-auto">
                       <div className="text-slate-400 text-xs">
                         페이지 <strong className="text-white">{currentPage}</strong> / <strong>{totalPages}</strong> (총 {items.length}개 중 {startIndex + 1}~{Math.min(endIndex, items.length)}개 표시)
                       </div>
@@ -3212,7 +3215,7 @@
                       </div>
                     </div>
                   )}
-                </>
+                </div>
               )}
             </div>
           </main>

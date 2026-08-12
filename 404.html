@@ -69,6 +69,14 @@
     .badge-a { background-color: #dcfce7; color: #15803d; }
     .badge-b { background-color: #fef9c3; color: #a16207; }
     .badge-c { background-color: #f1f5f9; color: #64748b; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+    .animate-shake {
+      animation: shake 0.2s ease-in-out 3;
+    }
   </style>
 
   <!-- Google AMP Auto Ads -->
@@ -715,6 +723,7 @@
 
     function DiagnosisPage({ setView, formData, setFormData, setHasCompletedDiagnosis }) {
       const [step, setStep] = useState(1);
+      const [regionError, setRegionError] = useState(false);
     
       const [category, setCategory] = useState(formData.industry_category || '');
     
@@ -729,6 +738,11 @@
       ];
     
       const handleNext = () => {
+        if (step === 1 && (!formData.region_province || formData.region_province.trim() === '')) {
+          setRegionError(true);
+          setTimeout(() => setRegionError(false), 600);
+          return;
+        }
         if (step === 1 && !formData.region_type) { alert('상권 유형을 선택해주세요.'); return; }
         if (step === 2 && !formData.budget) { alert('운용 가능 자금을 선택해주세요.'); return; }
         if (step === 3 && !formData.startup_period) { alert('창업 예정 시기를 선택해주세요.'); return; }
@@ -785,27 +799,20 @@
             <div className="flex-1 space-y-3">
               {step === 1 && (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1.5">시/도</label>
-                      <input
-                        type="text"
-                        value={formData.region_province || ''}
-                        onChange={(e) => setFormData({...formData, region_province: e.target.value})}
-                        placeholder="예: 서울특별시"
-                        className="w-full p-3.5 border border-slate-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1.5">시/군/구 (동)</label>
-                      <input
-                        type="text"
-                        value={formData.region_city || ''}
-                        onChange={(e) => setFormData({...formData, region_city: e.target.value})}
-                        placeholder="예: 강남구 역삼동"
-                        className="w-full p-3.5 border border-slate-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">지역/주소</label>
+                    <input
+                      type="text"
+                      value={formData.region_province || ''}
+                      onChange={(e) => setFormData({...formData, region_province: e.target.value})}
+                      placeholder="예: 서울시 강남구 역삼동"
+                      className={`w-full p-3.5 border rounded-xl text-sm font-semibold outline-none transition-all ${
+                        regionError 
+                          ? 'border-red-500 ring-2 ring-red-500 animate-shake' 
+                          : 'border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                      }`}
+                    />
+                    {regionError && <p className="text-red-500 text-xs font-bold mt-1.5">지역/주소를 입력해주세요.</p>}
                   </div>
                   
                   <div>
@@ -922,15 +929,15 @@
       }
 
       const parseBudget = (str) => {
-        if (!str) return 5000;
-        if (str.includes('2,000만원 미만')) return 1500;
-        if (str.includes('2,000~3,000')) return 2500;
-        if (str.includes('3,000~5,000')) return 4000;
-        if (str.includes('5,000~7,000')) return 6000;
-        if (str.includes('7,000만원~1억')) return 8500;
-        if (str.includes('1~2억')) return 15000;
-        if (str.includes('2억')) return 25000;
-        return 5000;
+        if (!str) return 50000000;
+        if (str.includes('2,000만원 미만')) return 15000000;
+        if (str.includes('2,000~3,000')) return 25000000;
+        if (str.includes('3,000~5,000')) return 40000000;
+        if (str.includes('5,000~7,000')) return 60000000;
+        if (str.includes('7,000만원~1억')) return 85000000;
+        if (str.includes('1~2억')) return 150000000;
+        if (str.includes('2억')) return 250000000;
+        return 50000000;
       };
 
       const parseMonths = (str) => {

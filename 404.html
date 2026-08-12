@@ -412,12 +412,12 @@
             {view === 'consultation' && <ConsultationPage setView={changeView} formData={formData} hasCompletedDiagnosis={hasCompletedDiagnosis} leads={leads} setLeads={setLeads} />}
             
             {view === 'admin_login' && <AdminLoginPage setView={changeView} setAdminUser={setAdminUser} />}
-            {view === 'admin_dashboard' && <AdminDashboardPage setView={changeView} leads={leads} setSelectedLeadId={setSelectedLeadId} adminUser={adminUser} refreshLeads={refreshLeads} updateLeadStatus={updateLeadStatus} deleteLead={deleteLead} handleLogout={handleLogout} />}
-            {view === 'admin_leads' && <AdminLeadsPage setView={changeView} leads={leads} setSelectedLeadId={setSelectedLeadId} adminUser={adminUser} refreshLeads={refreshLeads} updateLeadStatus={updateLeadStatus} deleteLead={deleteLead} handleLogout={handleLogout} />}
-            {view === 'admin_detail' && <AdminDetailPage setView={changeView} leads={leads} setLeads={setLeads} selectedLeadId={selectedLeadId} adminUser={adminUser} updateLeadStatus={updateLeadStatus} updateLeadDetails={updateLeadDetails} deleteLead={deleteLead} handleLogout={handleLogout} />}
-            {view === 'admin_funnel' && <AdminFunnelPage setView={changeView} leads={leads} adminUser={adminUser} handleLogout={handleLogout} />}
-            {view === 'admin_seoul_cmrcl' && <AdminSeoulCmrclPage setView={changeView} adminUser={adminUser} handleLogout={handleLogout} refreshLeads={refreshLeads} />}
-            {view === 'admin_franchise' && <AdminFranchisePage setView={changeView} adminUser={adminUser} handleLogout={handleLogout} refreshLeads={refreshLeads} />}
+            {view === 'admin_dashboard' && <AdminDashboardPage setView={changeView} leads={leads} setSelectedLeadId={setSelectedLeadId} adminUser={adminUser} refreshLeads={refreshLeads} updateLeadStatus={updateLeadStatus} deleteLead={deleteLead} handleLogout={handleLogout} handleGoHome={handleGoHome} />}
+            {view === 'admin_leads' && <AdminLeadsPage setView={changeView} leads={leads} setSelectedLeadId={setSelectedLeadId} adminUser={adminUser} refreshLeads={refreshLeads} updateLeadStatus={updateLeadStatus} deleteLead={deleteLead} handleLogout={handleLogout} handleGoHome={handleGoHome} />}
+            {view === 'admin_detail' && <AdminDetailPage setView={changeView} leads={leads} setLeads={setLeads} selectedLeadId={selectedLeadId} adminUser={adminUser} updateLeadStatus={updateLeadStatus} updateLeadDetails={updateLeadDetails} deleteLead={deleteLead} handleLogout={handleLogout} handleGoHome={handleGoHome} />}
+            {view === 'admin_funnel' && <AdminFunnelPage setView={changeView} leads={leads} adminUser={adminUser} handleLogout={handleLogout} handleGoHome={handleGoHome} />}
+            {view === 'admin_seoul_cmrcl' && <AdminSeoulCmrclPage setView={changeView} adminUser={adminUser} handleLogout={handleLogout} refreshLeads={refreshLeads} handleGoHome={handleGoHome} />}
+            {view === 'admin_franchise' && <AdminFranchisePage setView={changeView} adminUser={adminUser} handleLogout={handleLogout} refreshLeads={refreshLeads} handleGoHome={handleGoHome} />}
           </main>
 
           {!view.startsWith('admin_') && (
@@ -1378,7 +1378,15 @@
       );
     }
 
-    function AdminNav({ setView, currentView, adminUser, refreshLeads, handleLogout }) {
+    function AdminNav({ setView, currentView, adminUser, refreshLeads, handleLogout, handleGoHome }) {
+      const onGoHome = () => {
+        if (typeof handleGoHome === 'function') {
+          handleGoHome();
+        } else if (typeof setView === 'function') {
+          setView('home');
+        }
+      };
+
       return (
         <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50">
           <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -1386,7 +1394,7 @@
               <div className="flex items-center gap-3">
                 <span className="font-extrabold text-lg">영업자 CRM</span>
                 <button 
-                  onClick={() => handleGoHome()} 
+                  onClick={onGoHome} 
                   className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow-sm transition transform active:scale-95"
                   title="메인 홈페이지로 이동"
                 >

@@ -1,4 +1,4 @@
-// DiagnosisScoringEngine.js
+﻿// DiagnosisScoringEngine.js
 // UI와 분리된 순수 함수 기반 scoring engine.
 // 모든 점수는 0~100으로 clamp하며, 항목별 배점을 합산해 최종 100점으로 환산합니다.
 
@@ -126,3 +126,4 @@ function rankIndustries(input, profiles, limit=3) {
 
 
 window.DiagnosisScoringEngine = { scoreCapital, scoreRegion, scoreIndustry, scoreTiming, scoreOperator, scoreMarket, scoreRisk, gradeFor, diagnose, rankIndustries };
+

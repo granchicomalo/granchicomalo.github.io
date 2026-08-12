@@ -1,4 +1,4 @@
-window.industryDatabase = {
+﻿window.industryDatabase = {
     "version":  "1.0.0",
     "source":  {
                    "file":  "소상공인시장진흥공단_상가(상권)정보_업종분류(2302)_및_연계표_v1.xlsx",

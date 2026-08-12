@@ -2828,12 +2828,20 @@
 
       const SERVICE_KEY = 'BahaUoW8jiYD6HVMXVBRJEpafXTnR%2FVHFkUWR0WwW%2BOzXumYn3YlV8oqDnoc8PYSg0vcwp3qT%2FalQ7707m0fKA%3D%3D';
 
-      const handleSearch = async (e) => {
+      const handleSearch = async (e, customBrandNo = null) => {
         if (e) e.preventDefault();
 
-        if (!year.trim() && !brandNo.trim()) {
-          alert("기준년도 또는 브랜드관리번호를 입력해 주세요.");
-          return;
+        const searchYr = year.trim() || '2023';
+        let rawBrand = customBrandNo !== null ? customBrandNo : brandNo.trim();
+
+        if (customBrandNo !== null) {
+          setBrandNo(customBrandNo);
+        }
+
+        // 숫자만 입력된 경우 자동으로 BRD_ 접두사 부여
+        let formattedBrandNo = rawBrand;
+        if (formattedBrandNo && !formattedBrandNo.startsWith('BRD_') && /^\d+$/.test(formattedBrandNo)) {
+          formattedBrandNo = `BRD_${formattedBrandNo}`;
         }
 
         setLoading(true);
@@ -2841,21 +2849,17 @@
         setItems([]);
 
         try {
+          // 공공데이터포털 표준 파라미터 serviceKey (소문자 s)
           const params = new URLSearchParams({
-            ServiceKey: decodeURIComponent(SERVICE_KEY),
+            serviceKey: decodeURIComponent(SERVICE_KEY),
+            jngBizCrtraYr: searchYr,
             pageNo: '1',
             numOfRows: '100',
             resultType: 'json'
           });
 
-          if (year.trim()) {
-            params.append('jngBizCrtraYr', year.trim());
-            params.append('yr', year.trim());
-          }
-          if (brandNo.trim()) {
-            params.append('brandMnno', brandNo.trim());
-            params.append('brandNo', brandNo.trim());
-            params.append('brandNm', brandNo.trim());
+          if (formattedBrandNo) {
+            params.append('brandMnno', formattedBrandNo);
           }
 
           const targetUrl = `https://apis.data.go.kr/1130000/FftcBrandFrcsDropInfo3_Service/getbrandFrcsDmsstus2?${params.toString()}`;
@@ -2929,7 +2933,7 @@
             </div>
 
             <div className="bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-xl space-y-4">
-              <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+              <form onSubmit={(e) => handleSearch(e)} className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
                 <div className="sm:col-span-4 space-y-1.5">
                   <label className="block text-xs font-extrabold text-slate-300">
                     📅 가맹사업 기준년도 <span className="text-blue-400">(jngBizCrtraYr)</span>
@@ -2945,13 +2949,13 @@
 
                 <div className="sm:col-span-5 space-y-1.5">
                   <label className="block text-xs font-extrabold text-slate-300">
-                    🏢 브랜드관리번호 / 브랜드명 <span className="text-blue-400">(brandMnno)</span>
+                    🏢 브랜드관리번호 <span className="text-blue-400">(brandMnno: BRD_로 시작)</span>
                   </label>
                   <input
                     type="text"
                     value={brandNo}
                     onChange={(e) => setBrandNo(e.target.value)}
-                    placeholder="브랜드관리번호(예: 2020010001) 또는 브랜드명 입력"
+                    placeholder="예: BRD_20080100006 또는 숫자(20080100006) 입력"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
                   />
                 </div>
@@ -2967,10 +2971,39 @@
                 </div>
               </form>
 
-              <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 text-[11px] text-slate-400 flex items-start gap-2">
-                <span className="text-blue-400 text-xs">💡</span>
-                <div>
-                  <strong className="text-slate-300">이용 가이드:</strong> 공정거래위원회 가맹사업정보시스템에 등록된 기준년도(jngBizCrtraYr)와 브랜드관리번호(brandMnno)를 기반으로 조회합니다. (예: 기준년도 2023, 브랜드관리번호 2020010001 등)
+              {/* 샘플 브랜드번호 테스트 버튼 및 이용 가이드 */}
+              <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 space-y-2 text-[11px] text-slate-400">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-extrabold text-blue-400 flex items-center gap-1">
+                    ⚡ 원클릭 샘플 조회:
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => handleSearch(e, 'BRD_20080100006')}
+                    className="bg-slate-800 hover:bg-blue-600 text-slate-200 hover:text-white px-2.5 py-1 rounded-lg border border-slate-700 font-mono transition text-[11px]"
+                  >
+                    BRD_20080100006
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => handleSearch(e, 'BRD_20080100007')}
+                    className="bg-slate-800 hover:bg-blue-600 text-slate-200 hover:text-white px-2.5 py-1 rounded-lg border border-slate-700 font-mono transition text-[11px]"
+                  >
+                    BRD_20080100007
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => handleSearch(e, '')}
+                    className="bg-slate-800 hover:bg-emerald-600 text-slate-200 hover:text-white px-2.5 py-1 rounded-lg border border-slate-700 font-bold transition text-[11px]"
+                  >
+                    📋 2023 전체목록 보기
+                  </button>
+                </div>
+                <div className="flex items-start gap-1.5 pt-1 text-slate-400 border-t border-slate-800/80">
+                  <span className="text-blue-400">💡</span>
+                  <div>
+                    <strong className="text-slate-300">이용 가이드:</strong> 공정거래위원회 공공데이터 API 규격상 브랜드명이 아닌 <strong>고유 브랜드관리번호(BRD_로 시작)</strong>로만 조회가 가능합니다. 숫자만 입력하셔도(예: 20080100006) 자동으로 `BRD_`가 추가되어 바로 조회됩니다.
+                  </div>
                 </div>
               </div>
             </div>

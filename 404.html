@@ -2828,7 +2828,7 @@
     }
 
     function AdminFranchisePage({ setView, adminUser, handleLogout, refreshLeads }) {
-      const [year, setYear] = useState('2024');
+      const [year, setYear] = useState('2025');
       const [brandName, setBrandName] = useState('');
       const [items, setItems] = useState([]);
       const [loading, setLoading] = useState(false);
@@ -2843,7 +2843,7 @@
       const handleSearch = async (e, customBrandName = null, customYear = null) => {
         if (e) e.preventDefault();
 
-        const searchYr = customYear !== null ? customYear : (year.trim() || '2024');
+        const searchYr = customYear !== null ? customYear : (year.trim() || '2025');
         const targetBrandName = customBrandName !== null ? customBrandName : brandName.trim();
 
         if (customBrandName !== null) {
@@ -3004,7 +3004,8 @@
                     }}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition cursor-pointer font-bold"
                   >
-                    <option value="2024">2024년 (최신 가맹점/매출 현황)</option>
+                    <option value="2025">2025년 (최신 가맹점/매출 현황)</option>
+                    <option value="2024">2024년</option>
                     <option value="2023">2023년</option>
                     <option value="2022">2022년</option>
                     <option value="2021">2021년</option>

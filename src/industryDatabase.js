@@ -1,7 +1,7 @@
 // 3분 창업진단용 업종 DB
 // 공식 247개 업종 + 창업진단용 확장 아이템.
 // 투자금/난이도/준비기간 등은 내부 초기 스크리닝 추정값이므로 실제 데이터로 보정하세요.
-export const industryDatabase = {
+window.industryDatabase = {
   "version": "1.0.0",
   "source": {
     "file": "소상공인시장진흥공단_상가(상권)정보_업종분류(2302)_및_연계표_v1.xlsx",
@@ -14928,6 +14928,6 @@ export const industryDatabase = {
     }
   ]
 };
-export const industryProfiles = industryDatabase.industry_profile;
-export const industryMaster = industryDatabase.industry_master;
-export const industryRegionRules = industryDatabase.industry_region_rule;
+window.industryProfiles = window.industryDatabase.industry_profile;
+window.industryMaster = window.industryDatabase.industry_master;
+window.industryRegionRules = window.industryDatabase.industry_region_rule;

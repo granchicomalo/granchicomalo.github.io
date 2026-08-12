@@ -5,7 +5,7 @@
 const clamp = (n, min=0, max=100) => Math.max(min, Math.min(max, n));
 const won = n => Number(n || 0);
 
-export function scoreCapital(budget, profile) {
+function scoreCapital(budget, profile) {
   const b = won(budget);
   const min = won(profile.capital_min_krw);
   const rec = won(profile.capital_recommended_krw);
@@ -15,7 +15,7 @@ export function scoreCapital(budget, profile) {
   return clamp(16.25 + 8.75 * ((b - min) / Math.max(1, rec - min)));
 }
 
-export function scoreRegion(regionType, profile) {
+function scoreRegion(regionType, profile) {
   const rec = new Set(profile.recommended_region_types || []);
   const avoid = new Set(profile.avoid_region_types || []);
   if (avoid.has(regionType)) return 6;
@@ -23,7 +23,7 @@ export function scoreRegion(regionType, profile) {
   return 12;
 }
 
-export function scoreIndustry(profile, desiredAreaPyeong) {
+function scoreIndustry(profile, desiredAreaPyeong) {
   let score = 12;
   const area = won(desiredAreaPyeong);
   if (profile.land_required) score -= 2;
@@ -34,7 +34,7 @@ export function scoreIndustry(profile, desiredAreaPyeong) {
   return clamp(score, 0, 20);
 }
 
-export function scoreTiming(monthsAvailable, profile) {
+function scoreTiming(monthsAvailable, profile) {
   const m = won(monthsAvailable);
   const need = won(profile.preparation_months);
   if (!need || !m) return 5;
@@ -42,7 +42,7 @@ export function scoreTiming(monthsAvailable, profile) {
   return clamp(10 * (m / need) * 0.7);
 }
 
-export function scoreOperator({experienceLevel="first", operationMode="direct"}, profile) {
+function scoreOperator({experienceLevel="first", operationMode="direct"}, profile) {
   let score = 5;
   const difficulty = won(profile.operation_difficulty);
   const labor = won(profile.labor_intensity);
@@ -60,7 +60,7 @@ export function scoreOperator({experienceLevel="first", operationMode="direct"},
   return clamp(score, 0, 10);
 }
 
-export function scoreMarket(profile, regionType) {
+function scoreMarket(profile, regionType) {
   let score = 5;
   if (profile.commercial_dependency >= 80 && ["residential","station","mixed_commercial"].includes(regionType)) score += 3;
   if (profile.commercial_dependency <= 40 && ["suburban","rural"].includes(regionType)) score += 2;
@@ -68,7 +68,7 @@ export function scoreMarket(profile, regionType) {
   return clamp(score, 0, 10);
 }
 
-export function scoreRisk(profile) {
+function scoreRisk(profile) {
   // 위험도가 높을수록 감점되는 구조가 아니라, 5점 만점의 "위험관리 적합도"로 표현.
   let score = 5;
   if (profile.operation_difficulty >= 5) score -= 2;
@@ -78,7 +78,7 @@ export function scoreRisk(profile) {
   return clamp(score, 0, 5);
 }
 
-export function gradeFor(total) {
+function gradeFor(total) {
   if (total >= 90) return { grade:"S", label:"매우 적합" };
   if (total >= 80) return { grade:"A", label:"창업 적합" };
   if (total >= 70) return { grade:"B", label:"조건부 적합" };
@@ -87,7 +87,7 @@ export function gradeFor(total) {
   return { grade:"E", label:"현재 조건 부적합" };
 }
 
-export function diagnose(input, profile) {
+function diagnose(input, profile) {
   const capital = scoreCapital(input.budget, profile);
   const region = scoreRegion(input.regionType, profile);
   const industry = scoreIndustry(profile, input.areaPyeong);
@@ -117,9 +117,12 @@ export function diagnose(input, profile) {
   };
 }
 
-export function rankIndustries(input, profiles, limit=3) {
+function rankIndustries(input, profiles, limit=3) {
   return profiles
     .map(profile => ({ profile, result: diagnose(input, profile) }))
     .sort((a,b)=>b.result.total-a.result.total)
     .slice(0,limit);
 }
+
+
+window.DiagnosisScoringEngine = { scoreCapital, scoreRegion, scoreIndustry, scoreTiming, scoreOperator, scoreMarket, scoreRisk, gradeFor, diagnose, rankIndustries };

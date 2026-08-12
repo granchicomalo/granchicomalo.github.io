@@ -985,16 +985,16 @@
       // Adapt to old format
       const result = {
         totalScore: rawResult.total,
-        grade: rawResult.grade.grade,
-        gradeLabel: rawResult.grade.label,
+        grade: rawResult.grade,
+        gradeLabel: rawResult.label,
         scores: {
-          capital: Math.round(rawResult.capital),
-          region: Math.round(rawResult.region),
-          industry: Math.round(rawResult.industry),
-          timing: Math.round(rawResult.timing),
-          operator: Math.round(rawResult.operator),
-          market: Math.round(rawResult.market),
-          risk: Math.round(rawResult.risk)
+          capital: Math.round(rawResult.scores.capital),
+          region: Math.round(rawResult.scores.region),
+          industry: Math.round(rawResult.scores.industry),
+          timing: Math.round(rawResult.scores.timing),
+          operator: Math.round(rawResult.scores.operator),
+          market: Math.round(rawResult.scores.market),
+          risk: Math.round(rawResult.scores.risk)
         },
         rationales: {
           capital: "투자금 대비 필요 자금을 분석했습니다.",
@@ -1005,9 +1005,9 @@
           market: "해당 업종의 경쟁 강도와 시장 성장성을 고려했습니다.",
           risk: "인허가 및 난이도 등 리스크 요소를 반영했습니다."
         },
-        topPenalties: rawResult.deductions.map(d => ({
-          name: d.category,
-          tip: d.reason
+        topPenalties: rawResult.topDeductions.map(d => ({
+          name: d.label,
+          tip: d.text
         }))
       };
     

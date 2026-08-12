@@ -106,7 +106,8 @@
       brandName: "프랜차이즈 창업 진단센터",
       privacyVer: "v1.0 (2026.08.01)",
       marketingVer: "v1.0 (2026.08.01)",
-      govSupportLink: "https://www.sbiz24.kr/#/combinePbancList"
+      govSupportLink: "https://www.sbiz24.kr/#/combinePbancList",
+      ftcDisclosureLink: "https://franchise.ftc.go.kr/mnu/00013/program/userRqst/list.do"
     };
 
     const firebaseConfig = {
@@ -650,11 +651,6 @@
             </div>
           </section>
 
-          {/* Kakao Map Commercial Area Analysis Section */}
-          <div className="max-w-6xl mx-auto px-4">
-            <KakaoMapAnalysisSection setView={setView} setFormData={setFormData} />
-          </div>
-
           {/* Section 2: Data Analysis Visual & Value Proposition */}
           <section className="py-16 bg-white">
             <div className="max-w-6xl mx-auto px-4">
@@ -698,6 +694,26 @@
                   className="whitespace-nowrap bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-sm shadow transition"
                 >
                   지원사업 공고 조회 ↗
+                </a>
+              </div>
+
+              {/* FTC Information Disclosure Document Query Banner Box */}
+              <div className="bg-sky-50 border border-sky-200 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm mt-4">
+                <div className="space-y-1 text-left">
+                  <div className="flex items-center gap-2 text-sky-950 font-extrabold text-base sm:text-lg">
+                    <span>⚖️ 공정거래위원회 가맹사업거래 정보공개서 조회</span>
+                  </div>
+                  <p className="text-slate-600 text-xs sm:text-sm">
+                    공정거래위원회 가맹사업거래 공식 시스템에서 브랜드별 정식 정보공개서를 실시간으로 검색 및 확인해 보세요.
+                  </p>
+                </div>
+                <a
+                  href={SITE_CONFIG.ftcDisclosureLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="whitespace-nowrap bg-sky-600 hover:bg-sky-700 text-white font-bold px-6 py-3 rounded-xl text-sm shadow transition"
+                >
+                  정보공개서 조회 ↗
                 </a>
               </div>
             </div>

@@ -417,6 +417,7 @@
             {view === 'admin_detail' && <AdminDetailPage setView={changeView} leads={leads} setLeads={setLeads} selectedLeadId={selectedLeadId} adminUser={adminUser} updateLeadStatus={updateLeadStatus} updateLeadDetails={updateLeadDetails} deleteLead={deleteLead} handleLogout={handleLogout} />}
             {view === 'admin_funnel' && <AdminFunnelPage setView={changeView} leads={leads} adminUser={adminUser} handleLogout={handleLogout} />}
             {view === 'admin_seoul_cmrcl' && <AdminSeoulCmrclPage setView={changeView} adminUser={adminUser} handleLogout={handleLogout} refreshLeads={refreshLeads} />}
+            {view === 'admin_franchise' && <AdminFranchisePage setView={changeView} adminUser={adminUser} handleLogout={handleLogout} refreshLeads={refreshLeads} />}
           </main>
 
           {!view.startsWith('admin_') && (
@@ -1397,6 +1398,7 @@
                 <button onClick={() => setView('admin_leads')} className={`px-2.5 py-1.5 rounded transition ${currentView === 'admin_leads' ? 'bg-slate-700 text-white' : 'hover:bg-slate-800 text-slate-300'}`}>고객 DB 관리</button>
                 <button onClick={() => setView('admin_funnel')} className={`px-2.5 py-1.5 rounded transition ${currentView === 'admin_funnel' ? 'bg-slate-700 text-white' : 'hover:bg-slate-800 text-slate-300'}`}>퍼널 분석</button>
                 <button onClick={() => setView('admin_seoul_cmrcl')} className={`px-2.5 py-1.5 rounded flex items-center gap-1 transition ${currentView === 'admin_seoul_cmrcl' ? 'bg-blue-600 text-white font-black' : 'bg-slate-800 text-slate-200 hover:bg-slate-700'}`}>🗺️ 상권분석</button>
+                <button onClick={() => setView('admin_franchise')} className={`px-2.5 py-1.5 rounded flex items-center gap-1 transition ${currentView === 'admin_franchise' ? 'bg-blue-600 text-white font-black' : 'bg-slate-800 text-slate-200 hover:bg-slate-700'}`}>🔍 프랜차이즈 검색</button>
                 <a 
                   href="https://data.seoul.go.kr/SeoulRtd/list" 
                   target="_blank" 
@@ -2647,32 +2649,6 @@
                         {activeApi === 'nearby_stores' ? 'ON (조회 완료)' : '선택 실행'}
                       </span>
                     </button>
-                    
-                    <button
-                      type="button"
-                      onClick={handleToggleFranchise}
-                      disabled={isFranchiseLoading}
-                      className={`w-full p-2.5 rounded-xl border text-xs font-bold transition flex items-center justify-between cursor-pointer ${
-                        activeApi === 'franchise'
-                          ? 'bg-blue-600 border-blue-400 text-white shadow-lg ring-2 ring-blue-400/50'
-                          : 'bg-slate-800 border-slate-700/80 hover:bg-slate-750 text-slate-200 hover:border-slate-600'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-base">📊</span>
-                        <div className="text-left">
-                          <div className="font-extrabold text-xs">프랜차이즈 지역 분포</div>
-                          <div className={`text-[10px] ${activeApi === 'franchise' ? 'text-blue-100' : 'text-slate-400'}`}>
-                            공정거래위원회 API
-                          </div>
-                        </div>
-                      </div>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
-                        activeApi === 'franchise' ? 'bg-white text-blue-700' : 'bg-slate-900 text-slate-400'
-                      }`}>
-                        {activeApi === 'franchise' ? 'ON (조회 완료)' : '선택 실행'}
-                      </span>
-                    </button>
                   </div>
                 </div>
               </div>
@@ -2836,148 +2812,256 @@
               </div>
             )}
 
-            {/* 우측 패널 2: 프랜차이즈 API 결과 표시 영역 (토글 가능) */}
-            {activeApi === 'franchise' && (
-              <div className={`absolute top-4 z-10 transition-all duration-300 ${isResultPanelOpen ? 'right-4' : '-right-80 sm:-right-96'}`}>
-                <div className="w-80 sm:w-96 bg-slate-900/95 border border-slate-700/90 backdrop-blur-xl rounded-2xl shadow-2xl p-4 text-white space-y-3.5 max-h-[calc(100vh-80px)] flex flex-col relative">
-                  {/* 토글 버튼 */}
-                  <button 
-                    onClick={() => setIsResultPanelOpen(!isResultPanelOpen)} 
-                    className="absolute top-1/2 -translate-y-1/2 -left-8 w-8 h-16 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 border-r-0 rounded-l-xl shadow-lg flex items-center justify-center cursor-pointer transition-colors"
-                  >
-                    {isResultPanelOpen ? '▶' : '◀'}
-                  </button>
-                  
-                  <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 pr-1">
-                    <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/80 flex flex-col gap-2">
-                      <div className="text-[11px] font-bold text-blue-300">📊 프랜차이즈 매장 검색</div>
-                      
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={franchiseBrandNo}
-                          onChange={(e) => setFranchiseBrandNo(e.target.value)}
-                          onKeyDown={(e) => { if (e.key === 'Enter') fetchFranchiseData(); }}
-                          placeholder="브랜드명 검색 (예: 스타벅스)"
-                          className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
-                        />
-                        <button
-                          onClick={fetchFranchiseData}
-                          disabled={isFranchiseLoading}
-                          className="bg-blue-600 hover:bg-blue-500 font-bold text-xs px-3 py-1.5 rounded-lg transition active:scale-95 flex items-center gap-1"
-                        >
-                          {isFranchiseLoading ? '⏳' : '검색'}
-                        </button>
-                      </div>
-                    </div>
-
-                    {isFranchiseLoading ? (
-                      <div className="py-8 text-center text-xs text-slate-400">데이터를 불러오는 중...</div>
-                    ) : (
-                      <>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="bg-slate-800/90 p-3 rounded-xl border border-slate-700/80 text-center">
-                            <div className="text-[10px] text-slate-400 mb-1">총 매장 수</div>
-                            <div className="text-sm font-black text-amber-400">{franchiseSummary.totalStores.toLocaleString()}개</div>
-                          </div>
-                          <div className="bg-slate-800/90 p-3 rounded-xl border border-slate-700/80 text-center">
-                            <div className="text-[10px] text-slate-400 mb-1">총 가맹점 수</div>
-                            <div className="text-sm font-black text-blue-400">{franchiseSummary.totalFrcs.toLocaleString()}개</div>
-                          </div>
-                        </div>
-
-                        {franchiseData.length > 0 && (
-                          <div className="text-[10px] text-blue-300 font-semibold px-1 pt-1 flex items-center justify-between">
-                            <span>👇 지역을 클릭하면 지도에서 실제 매장을 검색합니다</span>
-                          </div>
-                        )}
-
-                        <div className="space-y-2 mt-1">
-                          {franchiseData.map((item, idx) => {
-                            const regionName = item.ctprvnNm || item.areaNm || item.sidoNm || '기타';
-                            const frcs = parseInt(item.frcsCnt) || 0;
-                            const drtms = parseInt(item.drtmsCnt) || 0;
-                            const total = parseInt(item.totCnt) || (frcs + drtms);
-                            return (
-                              <div 
-                                key={idx}
-                                onClick={() => searchKakaoPlacesByRegion(regionName)}
-                                className="bg-slate-800/50 hover:bg-blue-900/40 p-2.5 rounded-xl border border-slate-700/60 hover:border-blue-500/60 flex justify-between items-center text-xs cursor-pointer transition active:scale-[0.98] group"
-                                title={`${regionName} 실제 매장 위치 검색`}
-                              >
-                                <span className="font-bold text-slate-200 group-hover:text-blue-300 flex items-center gap-1">
-                                  📍 {regionName}
-                                </span>
-                                <div className="text-right">
-                                  <div className="text-amber-300 font-bold">매장 {total}개</div>
-                                  <div className="text-[9px] text-slate-400">가맹 {frcs} / 직영 {drtms}</div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* 하단 패널: 카카오 로컬 API 검색 결과 매장 목록 */}
-            {activeApi === 'franchise' && isKakaoPanelOpen && kakaoStores.length > 0 && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 w-11/12 sm:w-[540px] max-h-56 bg-slate-900/95 border border-slate-700/90 backdrop-blur-xl rounded-2xl shadow-2xl p-3 text-white flex flex-col transition-all">
-                <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-amber-400">📍 {searchedRegion} {franchiseBrandNo || '매장'} 검색 결과</span>
-                    <span className="text-[10px] bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full font-bold border border-blue-800/60">
-                      실제 매장 {kakaoStores.length}개
-                    </span>
-                  </div>
-                  <button 
-                    onClick={() => setIsKakaoPanelOpen(false)}
-                    className="text-slate-400 hover:text-white text-xs px-1.5 py-0.5 rounded hover:bg-slate-800 transition cursor-pointer"
-                  >
-                    ✕ 닫기
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
-                  {kakaoStores.map((place) => {
-                    const isSelected = selectedKakaoStoreId === place.id;
-                    const address = place.road_address_name || place.address_name || '주소 정보 없음';
-                    return (
-                      <div
-                        key={place.id}
-                        onClick={() => highlightKakaoStoreMarker(place.id)}
-                        className={`p-2.5 rounded-xl border transition cursor-pointer text-xs flex justify-between items-center ${
-                          isSelected
-                            ? 'bg-amber-500/20 border-amber-400 text-amber-200 shadow-md ring-1 ring-amber-400'
-                            : 'bg-slate-800/60 border-slate-700/60 hover:bg-slate-800 hover:border-slate-600 text-slate-200'
-                        }`}
-                      >
-                        <div className="flex-1 min-w-0 pr-2">
-                          <div className="font-extrabold text-white text-xs truncate">
-                            {place.place_name}
-                          </div>
-                          <div className="text-[11px] text-slate-300 truncate mt-0.5">
-                            📍 {address}
-                          </div>
-                        </div>
-                        {place.phone && (
-                          <span className="text-[10px] text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-700/50 flex-shrink-0">
-                            📞 {place.phone}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
             {/* Kakao Map 지도 영역 100% */}
             <div ref={mapContainerRef} className="w-full h-[calc(100vh-64px)] z-0" />
           </div>
+        </div>
+      );
+    }
+
+    function AdminFranchisePage({ setView, adminUser, handleLogout, refreshLeads }) {
+      const [year, setYear] = useState('2023');
+      const [brandNo, setBrandNo] = useState('');
+      const [items, setItems] = useState([]);
+      const [loading, setLoading] = useState(false);
+      const [hasSearched, setHasSearched] = useState(false);
+
+      const SERVICE_KEY = 'BahaUoW8jiYD6HVMXVBRJEpafXTnR%2FVHFkUWR0WwW%2BOzXumYn3YlV8oqDnoc8PYSg0vcwp3qT%2FalQ7707m0fKA%3D%3D';
+
+      const handleSearch = async (e) => {
+        if (e) e.preventDefault();
+
+        if (!year.trim() && !brandNo.trim()) {
+          alert("기준년도 또는 브랜드관리번호를 입력해 주세요.");
+          return;
+        }
+
+        setLoading(true);
+        setHasSearched(true);
+        setItems([]);
+
+        try {
+          const params = new URLSearchParams({
+            ServiceKey: decodeURIComponent(SERVICE_KEY),
+            pageNo: '1',
+            numOfRows: '100',
+            resultType: 'json'
+          });
+
+          if (year.trim()) {
+            params.append('jngBizCrtraYr', year.trim());
+            params.append('yr', year.trim());
+          }
+          if (brandNo.trim()) {
+            params.append('brandMnno', brandNo.trim());
+            params.append('brandNo', brandNo.trim());
+            params.append('brandNm', brandNo.trim());
+          }
+
+          const targetUrl = `https://apis.data.go.kr/1130000/FftcBrandFrcsDropInfo3_Service/getbrandFrcsDmsstus2?${params.toString()}`;
+          const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+
+          let res = null;
+          try {
+            res = await fetch(proxyUrl);
+          } catch (err1) {
+            res = await fetch(targetUrl).catch(() => null);
+          }
+
+          if (res && res.ok) {
+            const text = await res.text();
+            let data = null;
+            try {
+              data = JSON.parse(text);
+            } catch (parseErr) {
+              data = null;
+            }
+
+            if (data) {
+              let raw = data?.response?.body?.items?.item 
+                     || data?.response?.body?.items 
+                     || data?.body?.items?.item 
+                     || data?.body?.items 
+                     || data?.items;
+              
+              if (raw) {
+                const parsedList = Array.isArray(raw) ? raw : [raw];
+                setItems(parsedList);
+              } else {
+                setItems([]);
+              }
+            } else {
+              setItems([]);
+            }
+          } else {
+            setItems([]);
+          }
+        } catch (err) {
+          console.error("Franchise API Search Error:", err);
+          setItems([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const totalFrcs = items.reduce((acc, cur) => acc + (parseInt(cur.frcsCnt || cur.frcs_cnt) || 0), 0);
+      const totalDms = items.reduce((acc, cur) => acc + (parseInt(cur.dmsCnt || cur.drtmsCnt || cur.drtms_cnt) || 0), 0);
+      const totalAll = items.reduce((acc, cur) => acc + (parseInt(cur.allFrcsDmsCnt || cur.totCnt || cur.tot_cnt) || ((parseInt(cur.frcsCnt) || 0) + (parseInt(cur.dmsCnt || cur.drtmsCnt) || 0))), 0);
+
+      return (
+        <div className="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
+          <AdminNav setView={setView} currentView="admin_franchise" adminUser={adminUser} refreshLeads={refreshLeads} handleLogout={handleLogout} />
+
+          <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-8 space-y-6">
+            <div className="bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="bg-blue-600/20 text-blue-400 text-xs font-black px-2.5 py-1 rounded-md border border-blue-500/30">
+                    공정거래위원회 API 연동
+                  </span>
+                  <span className="text-xs text-slate-400 font-bold">가맹점 및 직영점 현황 통계</span>
+                </div>
+                <h1 className="text-2xl font-black text-white tracking-tight">🔍 프랜차이즈 브랜드 가맹 정보 조회</h1>
+                <p className="text-xs text-slate-400 mt-1">
+                  기준년도 및 브랜드관리번호를 입력하여 지역별 가맹점/직영점 통계 데이터를 조회하세요.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-xl space-y-4">
+              <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+                <div className="sm:col-span-4 space-y-1.5">
+                  <label className="block text-xs font-extrabold text-slate-300">
+                    📅 가맹사업 기준년도 <span className="text-blue-400">(jngBizCrtraYr)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                    placeholder="예: 2023"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                  />
+                </div>
+
+                <div className="sm:col-span-5 space-y-1.5">
+                  <label className="block text-xs font-extrabold text-slate-300">
+                    🏢 브랜드관리번호 / 브랜드명 <span className="text-blue-400">(brandMnno)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={brandNo}
+                    onChange={(e) => setBrandNo(e.target.value)}
+                    placeholder="브랜드관리번호(예: 2020010001) 또는 브랜드명 입력"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                  />
+                </div>
+
+                <div className="sm:col-span-3">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs py-2.5 px-4 rounded-xl transition shadow-lg flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50"
+                  >
+                    {loading ? '⏳ 데이터 조회 중...' : '🔍 조회하기'}
+                  </button>
+                </div>
+              </form>
+
+              <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 text-[11px] text-slate-400 flex items-start gap-2">
+                <span className="text-blue-400 text-xs">💡</span>
+                <div>
+                  <strong className="text-slate-300">이용 가이드:</strong> 공정거래위원회 가맹사업정보시스템에 등록된 기준년도(jngBizCrtraYr)와 브랜드관리번호(brandMnno)를 기반으로 조회합니다. (예: 기준년도 2023, 브랜드관리번호 2020010001 등)
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-xl space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                <h2 className="text-sm font-black text-white flex items-center gap-2">
+                  📊 조회 결과 목록
+                  {items.length > 0 && (
+                    <span className="bg-blue-950 text-blue-300 text-[11px] px-2.5 py-0.5 rounded-full border border-blue-800/60 font-bold">
+                      총 {items.length}개 지역
+                    </span>
+                  )}
+                </h2>
+              </div>
+
+              {loading ? (
+                <div className="py-16 text-center text-slate-400 space-y-2">
+                  <div className="text-2xl animate-spin">⏳</div>
+                  <p className="text-xs font-bold">공정거래위원회 API 데이터를 불러오는 중입니다...</p>
+                </div>
+              ) : !hasSearched ? (
+                <div className="py-16 text-center text-slate-400 space-y-2">
+                  <div className="text-3xl">🔎</div>
+                  <p className="text-xs font-semibold">위 검색 조건 입력 후 '조회하기' 버튼을 누르면 통계 표가 표시됩니다.</p>
+                </div>
+              ) : items.length === 0 ? (
+                <div className="py-16 text-center text-slate-400 space-y-2 bg-slate-950/50 rounded-xl border border-slate-800/80">
+                  <div className="text-3xl">⚠️</div>
+                  <p className="text-xs font-bold text-amber-400">해당 조건에 맞는 브랜드 가맹 정보가 존재하지 않습니다.</p>
+                  <p className="text-[11px] text-slate-500">기준년도나 브랜드관리번호를 확인하신 후 다시 조회해 주세요.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto custom-scrollbar">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-slate-800/90 text-slate-300 font-extrabold border-b border-slate-700">
+                        <th className="py-3 px-4">No.</th>
+                        <th className="py-3 px-4">지역명 (areaNm)</th>
+                        <th className="py-3 px-4 text-right">가맹점 수 (frcsCnt)</th>
+                        <th className="py-3 px-4 text-right">직영점 수 (dmsCnt)</th>
+                        <th className="py-3 px-4 text-right">전체 매장 수 (allFrcsDmsCnt)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/60">
+                      {items.map((item, idx) => {
+                        const areaName = item.areaNm || item.ctprvnNm || item.sidoNm || item.area_nm || '기타';
+                        const frcs = parseInt(item.frcsCnt || item.frcs_cnt) || 0;
+                        const dms = parseInt(item.dmsCnt || item.drtmsCnt || item.drtms_cnt) || 0;
+                        const allStores = parseInt(item.allFrcsDmsCnt || item.totCnt || item.tot_cnt) || (frcs + dms);
+
+                        return (
+                          <tr key={idx} className="hover:bg-slate-800/50 transition-colors">
+                            <td className="py-3 px-4 text-slate-500">{idx + 1}</td>
+                            <td className="py-3 px-4 font-bold text-white flex items-center gap-1.5">
+                              <span>📍</span> {areaName}
+                            </td>
+                            <td className="py-3 px-4 text-right font-semibold text-blue-400">
+                              {frcs.toLocaleString()}개
+                            </td>
+                            <td className="py-3 px-4 text-right font-semibold text-emerald-400">
+                              {dms.toLocaleString()}개
+                            </td>
+                            <td className="py-3 px-4 text-right font-bold text-amber-400">
+                              {allStores.toLocaleString()}개
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-slate-800/80 font-black text-white border-t-2 border-slate-700">
+                        <td className="py-3.5 px-4 text-center" colSpan="2">
+                          합계 (Total)
+                        </td>
+                        <td className="py-3.5 px-4 text-right text-blue-300">
+                          {totalFrcs.toLocaleString()}개
+                        </td>
+                        <td className="py-3.5 px-4 text-right text-emerald-300">
+                          {totalDms.toLocaleString()}개
+                        </td>
+                        <td className="py-3.5 px-4 text-right text-amber-300">
+                          {totalAll.toLocaleString()}개
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              )}
+            </div>
+          </main>
         </div>
       );
     }

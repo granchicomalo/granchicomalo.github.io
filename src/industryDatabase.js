@@ -14928,6 +14928,6 @@ window.industryDatabase = {
     }
   ]
 };
-window.industryProfiles = window.industryDatabase.industry_profile;
-window.industryMaster = window.industryDatabase.industry_master;
-window.industryRegionRules = window.industryDatabase.industry_region_rule;
+export const industryProfiles = industryDatabase.industry_profile;
+export const industryMaster = industryDatabase.industry_master;
+export const industryRegionRules = industryDatabase.industry_region_rule;

@@ -755,8 +755,21 @@
     function DiagnosisPage({ setView, formData, setFormData, setHasCompletedDiagnosis, handleGoHome }) {
       const [step, setStep] = useState(1);
       const [regionError, setRegionError] = useState(false);
+
+      const [budgetValue, setBudgetValue] = useState('');
+      const [budgetUnit, setBudgetUnit] = useState('');
     
       const [category, setCategory] = useState(formData.industry_category || '');
+
+      useEffect(() => {
+        if (formData.budget) {
+          const match = formData.budget.match(/([0-9,]+)\s*(만원|억원)/);
+          if (match) {
+            setBudgetValue(match[1].replace(/,/g, ''));
+            setBudgetUnit(match[2]);
+          }
+        }
+      }, []);
     
       const stepTitles = [
         "어디에서 창업을 희망하시나요?",
@@ -767,6 +780,23 @@
         "이전에 창업을 해보신 경험이 있으신가요?",
         "예상하시는 매장의 규모는 어느 정도인가요?"
       ];
+
+      const isStepNextValid = () => {
+        if (step === 1) {
+          return Boolean(formData.region_province && formData.region_province.trim() !== '' && formData.region_type);
+        }
+        if (step === 2) {
+          return Boolean(budgetValue && Number(budgetValue) > 0 && budgetUnit && formData.budget);
+        }
+        if (step === 3) {
+          return Boolean(formData.startup_period && formData.startup_period.trim() !== '');
+        }
+        if (step === 4) return Boolean(formData.industry);
+        if (step === 5) return Boolean(formData.operation_type);
+        if (step === 6) return Boolean(formData.experience);
+        if (step === 7) return Boolean(formData.store_size);
+        return true;
+      };
     
       const handleNext = () => {
         if (step === 1 && (!formData.region_province || formData.region_province.trim() === '')) {
@@ -774,13 +804,7 @@
           setTimeout(() => setRegionError(false), 600);
           return;
         }
-        if (step === 1 && !formData.region_type) { alert('상권 유형을 선택해주세요.'); return; }
-        if (step === 2 && !formData.budget) { alert('운용 가능 자금을 선택해주세요.'); return; }
-        if (step === 3 && !formData.startup_period) { alert('창업 예정 시기를 선택해주세요.'); return; }
-        if (step === 4 && !formData.industry) { alert('희망 업종을 선택해주세요.'); return; }
-        if (step === 5 && !formData.operation_type) { alert('운영 형태를 선택해주세요.'); return; }
-        if (step === 6 && !formData.experience) { alert('창업 경험을 선택해주세요.'); return; }
-        if (step === 7 && !formData.store_size) { alert('예상 매장 규모를 선택해주세요.'); return; }
+        if (!isStepNextValid()) return;
     
         if (step < 7) {
           setStep(step + 1);
@@ -858,18 +882,119 @@
               )}
     
               {step === 2 && (
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {['2,000만원 미만', '2,000~3,000만원', '3,000~5,000만원', '5,000~7,000만원', '7,000만원~1억원', '1~2억원', '2억원 이상'].map((opt) => (
-                    <OptionCard key={opt} label={opt} value={opt} field="budget" />
-                  ))}
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-2">창업 예산 금액 (숫자만 입력)</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="예: 5000 (오천만원인 경우) 또는 3 (삼억원인 경우)"
+                        value={budgetValue}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, '');
+                          setBudgetValue(val);
+                          if (!val) {
+                            setBudgetUnit('');
+                            setFormData({ ...formData, budget: '' });
+                          } else if (budgetUnit) {
+                            const formatted = `${Number(val).toLocaleString()}${budgetUnit}`;
+                            setFormData({ ...formData, budget: formatted });
+                          }
+                        }}
+                        className="w-full p-4 border border-slate-300 rounded-2xl text-lg font-bold outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900 pr-20"
+                      />
+                      {budgetValue && (
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+                          {Number(budgetValue).toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-slate-400 text-xs mt-1.5">
+                      💡 예: 5천만 원인 경우 <strong>5000</strong> 입력 후 [만 원] 선택, 3억 원인 경우 <strong>3</strong> 입력 후 [억 원] 선택
+                    </p>
+                  </div>
+
+                  {budgetValue && Number(budgetValue) > 0 && (
+                    <div className="pt-2 animate-fadeIn">
+                      <label className="block text-xs font-bold text-slate-500 mb-2">예산 단위 선택 (필수 선택)</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {['만원', '억원'].map((unit) => (
+                          <button
+                            key={unit}
+                            type="button"
+                            onClick={() => {
+                              setBudgetUnit(unit);
+                              const formatted = `${Number(budgetValue).toLocaleString()}${unit}`;
+                              setFormData({ ...formData, budget: formatted });
+                            }}
+                            className={`p-4 rounded-2xl border text-base font-bold transition-all flex items-center justify-between ${
+                              budgetUnit === unit
+                                ? 'border-blue-600 bg-blue-50 text-blue-700 ring-2 ring-blue-600 shadow-sm'
+                                : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700'
+                            }`}
+                          >
+                            <span>{unit === '만원' ? '만 원' : '억 원'}</span>
+                            {budgetUnit === unit && <span className="text-blue-600 font-extrabold text-lg">✓</span>}
+                          </button>
+                        ))}
+                      </div>
+
+                      {budgetUnit && (
+                        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-2xl text-center">
+                          <span className="text-xs text-blue-600 font-bold block mb-0.5">최종 선택된 창업 예산</span>
+                          <strong className="text-xl font-black text-blue-700">
+                            {Number(budgetValue).toLocaleString()} {budgetUnit === '만원' ? '만 원' : '억 원'}
+                          </strong>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
     
               {step === 3 && (
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {['1개월 이내', '3개월 이내', '6개월 이내', '6개월~1년', '1년 이후', '미정'].map((opt) => (
-                    <OptionCard key={opt} label={opt} value={opt} field="startup_period" />
-                  ))}
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-2">창업 희망 시기 선택 (1개월~12개월 이내)</label>
+                    <select
+                      value={formData.startup_period && formData.startup_period !== '미정' ? formData.startup_period : ''}
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          setFormData({ ...formData, startup_period: e.target.value });
+                        }
+                      }}
+                      className="w-full p-4 border border-slate-300 rounded-2xl text-base font-bold outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900 bg-white cursor-pointer"
+                    >
+                      <option value="">-- 창업 시작 시기를 선택해주세요 (1~12개월 이내) --</option>
+                      {Array.from({ length: 12 }, (_, i) => `${i + 1}개월 이내`).map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-2">또는 시기가 정해지지 않은 경우</label>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, startup_period: '미정' })}
+                      className={`w-full p-4 rounded-2xl border text-base font-bold transition-all flex items-center justify-between ${
+                        formData.startup_period === '미정'
+                          ? 'border-blue-600 bg-blue-50 text-blue-700 ring-2 ring-blue-600 shadow-sm'
+                          : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700'
+                      }`}
+                    >
+                      <span>미정 (구체적인 창업 시기 미지정)</span>
+                      {formData.startup_period === '미정' && <span className="text-blue-600 font-extrabold text-lg">✓</span>}
+                    </button>
+                  </div>
+
+                  {formData.startup_period && (
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl text-center">
+                      <span className="text-xs text-blue-600 font-bold block mb-0.5">선택된 창업 시기</span>
+                      <strong className="text-xl font-black text-blue-700">{formData.startup_period}</strong>
+                    </div>
+                  )}
                 </div>
               )}
     
@@ -933,7 +1058,12 @@
             <div className="mt-8 pt-6 border-t border-slate-100">
               <button
                 onClick={handleNext}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-black py-4 rounded-2xl shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2"
+                disabled={!isStepNextValid()}
+                className={`w-full text-lg font-black py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 ${
+                  isStepNextValid()
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20 cursor-pointer'
+                    : 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed opacity-60'
+                }`}
               >
                 {step === 7 ? '진단 결과 확인하기 🚀' : '다음 단계로 →'}
               </button>
@@ -961,24 +1091,35 @@
 
       const parseBudget = (str) => {
         if (!str) return 50000000;
-        if (str.includes('2,000만원 미만')) return 15000000;
-        if (str.includes('2,000~3,000')) return 25000000;
-        if (str.includes('3,000~5,000')) return 40000000;
-        if (str.includes('5,000~7,000')) return 60000000;
-        if (str.includes('7,000만원~1억')) return 85000000;
-        if (str.includes('1~2억')) return 150000000;
-        if (str.includes('2억')) return 250000000;
+        let s = str.replace(/,/g, '').trim();
+        if (s.includes('억원') || s.includes('억')) {
+          const num = parseFloat(s.replace(/[^0-9.]/g, '')) || 1;
+          return num * 100000000;
+        }
+        if (s.includes('만원') || s.includes('만')) {
+          const num = parseFloat(s.replace(/[^0-9.]/g, '')) || 5000;
+          return num * 10000;
+        }
+        if (s.includes('2,000만원 미만')) return 15000000;
+        if (s.includes('2,000~3,000')) return 25000000;
+        if (s.includes('3,000~5,000')) return 40000000;
+        if (s.includes('5,000~7,000')) return 60000000;
+        if (s.includes('7,000만원~1억')) return 85000000;
+        if (s.includes('1~2억')) return 150000000;
+        if (s.includes('2억')) return 250000000;
         return 50000000;
       };
 
       const parseMonths = (str) => {
-        if (!str) return 3;
+        if (!str || str === '미정') return 6;
+        const match = str.match(/([0-9]+)\s*개월/);
+        if (match) {
+          return parseInt(match[1], 10);
+        }
         if (str.includes('1개월')) return 1;
         if (str.includes('3개월')) return 3;
         if (str.includes('6개월')) return 6;
-        if (str.includes('12개월 이내')) return 9;
-        if (str.includes('12개월 이상')) return 12;
-        return 3;
+        return 6;
       };
 
       const parseRegionType = (str) => {

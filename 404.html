@@ -149,14 +149,7 @@
         groupedIndustries[item.major_name].push({ id: item.small_code, name: item.small_name });
       });
       
-      // Add extended items as a separate group
-      const extendedItems = DB.extended_diagnosis_items.map(extId => {
-        const profile = DB.industry_profile.find(p => p.industry_id === extId);
-        return { id: extId, name: profile ? profile.industry_name : extId };
-      });
-      if (extendedItems.length > 0) {
-        groupedIndustries["창업진단 특별분류"] = extendedItems;
-      }
+      // Extended items group removed as requested
     }
 
 
@@ -1154,7 +1147,6 @@
                 <BarChartItem label="시기 적합도" score={result.scores.timing} maxScore={10} rationale={result.rationales.timing} />
                 <BarChartItem label="운영자 적합도" score={result.scores.operator} maxScore={10} rationale={result.rationales.operator} />
                 <BarChartItem label="업종 특성 기반 시장성/경쟁환경 평가" score={result.scores.market} maxScore={10} rationale={result.rationales.market} />
-                <BarChartItem label="위험도 (역산)" score={result.scores.risk} maxScore={5} rationale={result.rationales.risk} />
               </div>
             </div>
     

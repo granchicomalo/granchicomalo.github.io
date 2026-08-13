@@ -1656,6 +1656,19 @@
       return catKorean || indKorean || '미입력';
     }
 
+    function getIndustryParts(cat, ind) {
+      let catKorean = getKoreanIndustryName(cat);
+      let indKorean = getKoreanIndustryName(ind);
+
+      if (catKorean === '미입력') catKorean = '';
+      if (indKorean === '미입력') indKorean = '';
+
+      if (catKorean && indKorean && catKorean !== indKorean) {
+        return { major: catKorean, small: indKorean };
+      }
+      return { major: catKorean || indKorean || '미입력', small: '' };
+    }
+
     function formatRegionAddress(prov, city) {
       const p = (prov && prov !== '미입력') ? prov.trim() : '';
       const c = (city && city !== '미입력') ? city.trim() : '';
@@ -1928,7 +1941,7 @@
                       filteredLeads.map((l) => {
                         const dateStr = l.created_at ? l.created_at.slice(0, 10) : '-';
                         const regionAddr = formatRegionAddress(l.region_province, l.region_city);
-                        const industryText = formatIndustryName(l.industry_category, l.industry);
+                        const indParts = getIndustryParts(l.industry_category, l.industry);
 
                         return (
                           <tr key={l.id} className={`hover:bg-slate-800/50 transition-colors ${getRowBgClass(l.status)}`}>
@@ -1958,8 +1971,13 @@
                             <td className="py-2.5 px-2 font-bold text-emerald-400 whitespace-nowrap">
                               {l.budget === '미입력' ? <span className="text-slate-500 text-[11px]">미입력</span> : l.budget}
                             </td>
-                            <td className="py-2.5 px-2 font-semibold text-slate-300 max-w-[130px] truncate" title={industryText}>
-                              {industryText}
+                            <td className="py-2.5 px-2 text-slate-300 text-[11px] whitespace-nowrap">
+                              <div className="font-bold text-white max-w-[140px] truncate" title={indParts.major}>
+                                {indParts.major}
+                              </div>
+                              <div className="text-sky-300 font-semibold text-[10px] max-w-[140px] truncate" title={indParts.small}>
+                                {indParts.small}
+                              </div>
                             </td>
                             <td className="py-2.5 px-2 text-slate-300 text-[11px] whitespace-nowrap">
                               <div>{l.startup_period || '미입력'}</div>

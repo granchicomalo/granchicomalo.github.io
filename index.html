@@ -954,9 +954,9 @@
               )}
     
               {step === 3 && (
-                <div className="space-y-5">
+                <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-2">창업 희망 시기 선택 (1개월~12개월 이내)</label>
+                    <label className="block text-xs font-bold text-slate-500 mb-2">창업 희망 시기 선택</label>
                     <select
                       value={formData.startup_period && formData.startup_period !== '미정' ? formData.startup_period : ''}
                       onChange={(e) => {
@@ -964,27 +964,30 @@
                           setFormData({ ...formData, startup_period: e.target.value });
                         }
                       }}
-                      className="w-full p-4 border border-slate-300 rounded-2xl text-base font-bold outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900 bg-white cursor-pointer"
+                      className={`w-full p-4 border border-slate-300 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white cursor-pointer transition-all ${
+                        formData.startup_period && formData.startup_period !== '미정'
+                          ? 'text-base font-bold text-slate-900'
+                          : 'text-sm font-normal text-slate-400'
+                      }`}
                     >
-                      <option value="">-- 창업 시작 시기를 선택해주세요 (1~12개월 이내) --</option>
+                      <option value="" disabled className="text-slate-400">시기를 선택해주세요.</option>
                       {Array.from({ length: 12 }, (_, i) => `${i + 1}개월 이내`).map((opt) => (
-                        <option key={opt} value={opt}>{opt}</option>
+                        <option key={opt} value={opt} className="text-slate-900 font-bold">{opt}</option>
                       ))}
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-2">또는 시기가 정해지지 않은 경우</label>
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, startup_period: '미정' })}
-                      className={`w-full p-4 rounded-2xl border text-base font-bold transition-all flex items-center justify-between ${
+                      className={`w-full p-4 rounded-2xl border transition-all flex items-center justify-between ${
                         formData.startup_period === '미정'
-                          ? 'border-blue-600 bg-blue-50 text-blue-700 ring-2 ring-blue-600 shadow-sm'
-                          : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700'
+                          ? 'border-blue-600 bg-blue-50 text-blue-700 ring-2 ring-blue-600 shadow-sm font-bold text-base'
+                          : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm sm:text-base'
                       }`}
                     >
-                      <span>미정 (구체적인 창업 시기 미지정)</span>
+                      <span>일정이 정해지지 않았습니다.</span>
                       {formData.startup_period === '미정' && <span className="text-blue-600 font-extrabold text-lg">✓</span>}
                     </button>
                   </div>
@@ -992,7 +995,9 @@
                   {formData.startup_period && (
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl text-center">
                       <span className="text-xs text-blue-600 font-bold block mb-0.5">선택된 창업 시기</span>
-                      <strong className="text-xl font-black text-blue-700">{formData.startup_period}</strong>
+                      <strong className="text-xl font-black text-blue-700">
+                        {formData.startup_period === '미정' ? '일정이 정해지지 않았습니다.' : formData.startup_period}
+                      </strong>
                     </div>
                   )}
                 </div>

@@ -91,7 +91,14 @@
 <body>
   <script>
     window.onerror = function(message, source, lineno, colno, error) {
-      document.body.innerHTML += '<div style="color: red; padding: 20px; font-size: 16px; position: fixed; top: 0; left: 0; z-index: 9999; background: white; border: 2px solid red;"><b>Error:</b> ' + message + '<br>' + source + ':' + lineno + '<br>' + (error && error.stack ? error.stack.replace(/\n/g, '<br>') : '') + '</div>';
+      console.error("Script error caught:", message, source, lineno, colno, error);
+      if (message && message !== "Script error.") {
+        const errDiv = document.getElementById("debug-error-banner");
+        if (errDiv) {
+          errDiv.innerHTML = '<b>Error:</b> ' + message + ' (' + source + ':' + lineno + ')';
+          errDiv.style.display = "block";
+        }
+      }
     };
   </script>
   <script src="src/industryDatabase.js"></script>
@@ -2066,6 +2073,8 @@
           </main>
         </div>
       );
+    }
+
     const REGION_COORDS = {
       '서울': { lat: 37.5665, lng: 126.9780 },
       '부산': { lat: 35.1796, lng: 129.0756 },

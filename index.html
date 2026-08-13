@@ -1622,18 +1622,46 @@
       );
     }
 
-    const formatIndustryName = (cat, ind) => {
-      let indStr = (ind || '').trim();
-      let catStr = (cat || '').trim();
+    function getKoreanIndustryName(input) {
+      if (!input || input === '미입력') return '미입력';
+      const trimmed = input.trim();
 
-      indStr = indStr.replace(/\s*\/\s*[A-Z0-9]+$/i, '').replace(/^[A-Z0-9]+$/i, '').trim();
-      catStr = catStr.replace(/\s*\/\s*[A-Z0-9]+$/i, '').replace(/^[A-Z0-9]+$/i, '').trim();
-
-      if (catStr && indStr && catStr !== indStr) {
-        return `${catStr} > ${indStr}`;
+      if (window.industryDatabase && Array.isArray(window.industryDatabase.industry_master)) {
+        const codeMatch = trimmed.match(/([A-Z0-9]{4,7})/i);
+        if (codeMatch) {
+          const code = codeMatch[1].toUpperCase();
+          const item = window.industryDatabase.industry_master.find(x => 
+            x.small_code === code || x.middle_code === code || x.major_code === code
+          );
+          if (item) {
+            return item.small_name || item.middle_name || item.major_name;
+          }
+        }
       }
-      return catStr || indStr || '미입력';
-    };
+
+      let clean = trimmed.replace(/\s*\/\s*[A-Z0-9]+$/i, '').replace(/^[A-Z0-9]+$/i, '').trim();
+      return clean || trimmed;
+    }
+
+    function formatIndustryName(cat, ind) {
+      let catKorean = getKoreanIndustryName(cat);
+      let indKorean = getKoreanIndustryName(ind);
+
+      if (catKorean === '미입력') catKorean = '';
+      if (indKorean === '미입력') indKorean = '';
+
+      if (catKorean && indKorean && catKorean !== indKorean) {
+        return `${catKorean} > ${indKorean}`;
+      }
+      return catKorean || indKorean || '미입력';
+    }
+
+    function formatRegionAddress(prov, city) {
+      const p = (prov && prov !== '미입력') ? prov.trim() : '';
+      const c = (city && city !== '미입력') ? city.trim() : '';
+      if (p && c) return `${p} ${c}`;
+      return p || c || '-';
+    }
 
     const getRowBgClass = (status) => {
       if (status === '계약완료') return 'bg-emerald-950/60 hover:bg-emerald-900/60 border-emerald-800/80';
@@ -1899,8 +1927,7 @@
                     ) : (
                       filteredLeads.map((l) => {
                         const dateStr = l.created_at ? l.created_at.slice(0, 10) : '-';
-                        const regionText = (l.region_province || '') + ' ' + (l.region_city || '');
-                        const regionTypeTag = l.region_type && l.region_type !== '미입력' ? ` (${l.region_type})` : '';
+                        const regionAddr = formatRegionAddress(l.region_province, l.region_city);
                         const industryText = formatIndustryName(l.industry_category, l.industry);
 
                         return (
@@ -1920,9 +1947,13 @@
                                 <a href={`tel:${l.phone ? l.phone.replace(/-/g,'') : ''}`} className="text-[10px] bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white px-1.5 py-0.5 rounded border border-slate-700">전화</a>
                               </div>
                             </td>
-                            <td className="py-2.5 px-2 font-semibold text-slate-200 max-w-[150px] truncate" title={regionText + regionTypeTag}>
-                              {regionText || '미입력'}
-                              {l.region_type && l.region_type !== '미입력' && <span className="text-sky-400 font-bold">{regionTypeTag}</span>}
+                            <td className="py-2.5 px-2 text-slate-300 text-[11px] whitespace-nowrap">
+                              <div className="font-bold text-white max-w-[170px] truncate" title={regionAddr}>
+                                {regionAddr}
+                              </div>
+                              <div className="text-sky-400 font-bold text-[10px]">
+                                {l.region_type && l.region_type !== '미입력' ? l.region_type : ''}
+                              </div>
                             </td>
                             <td className="py-2.5 px-2 font-bold text-emerald-400 whitespace-nowrap">
                               {l.budget === '미입력' ? <span className="text-slate-500 text-[11px]">미입력</span> : l.budget}
@@ -2010,9 +2041,9 @@
           setEditPurpose(lead.startup_purpose || '미입력');
           setEditPeriod(lead.startup_period || '미입력');
           setEditOpType(lead.operation_type || '미입력');
-          setEditCity(lead.region_city || '미입력');
-          setEditRegionType(lead.region_type || '미입력');
-          setEditIndustry(lead.industry || '미입력');
+          setEditCity((lead.region_city === '미입력') ? '' : (lead.region_city || ''));
+          setEditRegionType((lead.region_type === '미입력') ? '' : (lead.region_type || ''));
+          setEditIndustry(getKoreanIndustryName(lead.industry || '미입력'));
 
           setHistory(Array.isArray(lead.history) ? lead.history : []);
         }
@@ -2067,9 +2098,9 @@
           startup_purpose: editPurpose,
           startup_period: editPeriod,
           operation_type: editOpType,
-          region_city: editCity,
-          region_type: editRegionType,
-          industry: editIndustry
+          region_city: editCity.trim() || '미입력',
+          region_type: editRegionType.trim() || '미입력',
+          industry: getKoreanIndustryName(editIndustry) || '미입력'
         });
         setIsEditing(false);
         alert('3분 창업진단 고객 정보가 업데이트되었습니다.');
@@ -2114,7 +2145,7 @@
                 </div>
                 <p className="text-slate-400 text-xs sm:text-sm">
                   연락처: <span className="text-white font-mono">{lead.phone}</span> | 
-                  희망지역: <span className="text-sky-300 font-bold">{lead.region_province || ''} {lead.region_city || '미입력'} {lead.region_type ? `(${lead.region_type})` : ''}</span>
+                  희망지역: <span className="text-sky-300 font-bold">{formatRegionAddress(lead.region_province, lead.region_city)} {lead.region_type && lead.region_type !== '미입력' ? `(${lead.region_type})` : ''}</span>
                 </p>
               </div>
 
@@ -2147,7 +2178,7 @@
                     <div className="grid grid-cols-2 gap-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
                       <div>
                         <span className="text-slate-500 block text-[11px]">희망지역 / 상권유형:</span>
-                        <strong className="text-white font-bold">{lead.region_province || ''} {lead.region_city || '미입력'} {lead.region_type ? `(${lead.region_type})` : ''}</strong>
+                        <strong className="text-white font-bold">{formatRegionAddress(lead.region_province, lead.region_city)} {lead.region_type && lead.region_type !== '미입력' ? `(${lead.region_type})` : ''}</strong>
                       </div>
                       <div>
                         <span className="text-slate-500 block text-[11px]">창업 예산 (투자금):</span>

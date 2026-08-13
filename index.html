@@ -456,12 +456,14 @@
                     🏛️ 소상공인24 정부지원사업 공고 ↗
                   </a>
                 </div>
-                <div className="flex items-center gap-4">
-                  <a href="#" onClick={(e) => { e.preventDefault(); changeView(adminUser ? 'admin_dashboard' : 'admin_login'); }} className="text-slate-400 hover:text-white">영업자 CRM 로그인 (관리자 전용)</a>
-                </div>
               </div>
-              <div className="max-w-6xl mx-auto px-4 mt-6 pt-4 border-t border-slate-800 text-xs text-slate-500 text-center">
-                © 2026 {SITE_CONFIG.brandName}. All rights reserved. 본 서비스는 수익 확정 보장 표현을 일체 사용하지 않습니다.
+              <div className="max-w-6xl mx-auto px-4 mt-6 pt-4 border-t border-slate-800 text-xs text-slate-500 text-center select-none">
+                © 2026 {SITE_CONFIG.brandName}. All rights reserved. 본 서비스는 수익 확정 보장 표현을 일체 사용하지 않습니다
+                <span
+                  onClick={(e) => { e.preventDefault(); changeView(adminUser ? 'admin_dashboard' : 'admin_login'); }}
+                  className="cursor-pointer hover:text-slate-300 transition inline-block px-0.5"
+                  title=""
+                >.</span>
               </div>
             </footer>
           )}

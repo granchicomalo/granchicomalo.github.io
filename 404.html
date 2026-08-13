@@ -1203,8 +1203,13 @@
         const finalBudget = hasCompletedDiagnosis ? (formData.budget || '미입력') : '미입력';
         const finalRegionProvince = hasCompletedDiagnosis ? (formData.region_province || '') : '';
         const finalRegionCity = hasCompletedDiagnosis ? (formData.region_city || '미입력') : '미입력';
+        const finalRegionType = hasCompletedDiagnosis ? (formData.region_type || '미입력') : '미입력';
         const finalStartupPeriod = hasCompletedDiagnosis ? (formData.startup_period || '미입력') : '미입력';
+        const finalIndustryCategory = hasCompletedDiagnosis ? (formData.industry_category || '') : '';
+        const finalIndustry = hasCompletedDiagnosis ? (formData.industry || '미입력') : '미입력';
         const finalOperationType = hasCompletedDiagnosis ? (formData.operation_type || '미입력') : '미입력';
+        const finalExperience = hasCompletedDiagnosis ? (formData.experience || '미입력') : '미입력';
+        const finalStoreSize = hasCompletedDiagnosis ? (formData.store_size || '미입력') : '미입력';
 
         const newLead = {
           created_at: new Date().toISOString(),
@@ -1214,17 +1219,22 @@
           budget: finalBudget,
           region_province: finalRegionProvince,
           region_city: finalRegionCity,
+          region_type: finalRegionType,
           startup_period: finalStartupPeriod,
+          industry_category: finalIndustryCategory,
+          industry: finalIndustry,
           operation_type: finalOperationType,
+          experience: finalExperience,
+          store_size: finalStoreSize,
           interest_types: formData.interest_types || [],
-          customer_diagnosis_score: hasCompletedDiagnosis ? 78 : 0,
+          customer_diagnosis_score: hasCompletedDiagnosis ? 85 : 0,
           preferred_consultation_date: prefDate,
           preferred_consultation_time_slot: prefSlot,
           privacy_consent: true,
           privacy_consent_at: new Date().toISOString(),
           privacy_policy_version: SITE_CONFIG.privacyVer,
           marketing_consent: marketing,
-          lead_score: hasCompletedDiagnosis ? 80 : 60,
+          lead_score: hasCompletedDiagnosis ? 85 : 60,
           lead_grade: hasCompletedDiagnosis ? 'A' : 'B',
           status: '신규',
           first_utm_source: 'direct',
@@ -1397,42 +1407,56 @@
 
       return (
         <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-4 sm:gap-6">
-              <div className="flex items-center gap-3">
-                <span className="font-extrabold text-lg">영업자 CRM</span>
+          <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-3 sm:gap-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <span className="font-black text-base sm:text-lg text-white tracking-tight">영업자 CRM</span>
                 <button 
                   onClick={onGoHome} 
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow-sm transition transform active:scale-95"
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow-sm transition transform active:scale-95 cursor-pointer"
                   title="메인 홈페이지로 이동"
                 >
                   🏠 홈페이지로
                 </button>
               </div>
               <nav className="flex flex-wrap gap-1.5 text-xs font-bold">
-                <button onClick={() => setView('admin_dashboard')} className={`px-2.5 py-1.5 rounded transition ${currentView === 'admin_dashboard' ? 'bg-slate-700 text-white' : 'hover:bg-slate-800 text-slate-300'}`}>대시보드</button>
-                <button onClick={() => setView('admin_leads')} className={`px-2.5 py-1.5 rounded transition ${currentView === 'admin_leads' ? 'bg-slate-700 text-white' : 'hover:bg-slate-800 text-slate-300'}`}>고객 DB 관리</button>
-                <button onClick={() => setView('admin_funnel')} className={`px-2.5 py-1.5 rounded transition ${currentView === 'admin_funnel' ? 'bg-slate-700 text-white' : 'hover:bg-slate-800 text-slate-300'}`}>퍼널 분석</button>
-                <button onClick={() => setView('admin_seoul_cmrcl')} className={`px-2.5 py-1.5 rounded flex items-center gap-1 transition ${currentView === 'admin_seoul_cmrcl' ? 'bg-blue-600 text-white font-black' : 'bg-slate-800 text-slate-200 hover:bg-slate-700'}`}>🗺️ 상권분석</button>
-                <button onClick={() => setView('admin_franchise')} className={`px-2.5 py-1.5 rounded flex items-center gap-1 transition ${currentView === 'admin_franchise' ? 'bg-blue-600 text-white font-black' : 'bg-slate-800 text-slate-200 hover:bg-slate-700'}`}>🔍 프랜차이즈 검색</button>
-                <a 
-                  href="https://data.seoul.go.kr/SeoulRtd/list" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="px-2.5 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1 transition"
+                <button 
+                  onClick={() => setView('admin_dashboard')} 
+                  className={`px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+                    currentView === 'admin_dashboard' || currentView === 'admin_leads' || currentView === 'admin_funnel' 
+                      ? 'bg-blue-600 text-white font-black shadow-md' 
+                      : 'hover:bg-slate-800 text-slate-300'
+                  }`}
                 >
-                  🏛️ 주요상권 실시간 바로가기 ↗
-                </a>
+                  📊 고객 DB & 퍼널 대시보드
+                </button>
+                <button 
+                  onClick={() => setView('admin_seoul_cmrcl')} 
+                  className={`px-3 py-1.5 rounded-lg flex items-center gap-1 transition cursor-pointer ${
+                    currentView === 'admin_seoul_cmrcl' ? 'bg-blue-600 text-white font-black shadow-md' : 'hover:bg-slate-800 text-slate-300'
+                  }`}
+                >
+                  🗺️ 상권분석
+                </button>
+                <button 
+                  onClick={() => setView('admin_franchise')} 
+                  className={`px-3 py-1.5 rounded-lg flex items-center gap-1 transition cursor-pointer ${
+                    currentView === 'admin_franchise' ? 'bg-blue-600 text-white font-black shadow-md' : 'hover:bg-slate-800 text-slate-300'
+                  }`}
+                >
+                  🔍 프랜차이즈 검색
+                </button>
               </nav>
             </div>
-            <div className="flex items-center gap-3 text-xs">
-              {refreshLeads && (
-                <button onClick={refreshLeads} className="bg-blue-600 hover:bg-blue-700 px-2.5 py-1.5 rounded text-white font-bold flex items-center gap-1 transition">
-                  🔄 DB 새로고침
-                </button>
-              )}
-              <span className="text-slate-400 hidden sm:inline">{adminUser} 님</span>
-              <button onClick={handleLogout} className="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300">로그아웃</button>
+            
+            <div className="flex items-center gap-3">
+              {adminUser && <span className="text-xs text-slate-400 font-bold hidden sm:inline">{adminUser}</span>}
+              <button 
+                onClick={handleLogout} 
+                className="bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer"
+              >
+                로그아웃
+              </button>
             </div>
           </div>
         </header>
@@ -1440,137 +1464,358 @@
     }
 
     const getRowBgClass = (status) => {
-      if (status === '계약완료') return 'bg-emerald-50/90 hover:bg-emerald-100/90 border-emerald-200';
-      if (status === '이탈/거절') return 'bg-rose-50/90 hover:bg-rose-100/90 border-rose-200';
-      if (!status || status === '신규') return 'bg-blue-50/60 hover:bg-blue-100/60 font-semibold border-blue-200';
-      return 'border-b hover:bg-slate-50';
+      if (status === '계약완료') return 'bg-emerald-950/60 hover:bg-emerald-900/60 border-emerald-800/80';
+      if (status === '이탈/거절' || status === '비가망') return 'bg-rose-950/50 hover:bg-rose-900/50 border-rose-800/60';
+      if (!status || status === '신규') return 'bg-blue-950/40 hover:bg-blue-900/40 border-blue-800/60 font-semibold';
+      return 'border-b border-slate-800/60 hover:bg-slate-800/50';
     };
 
-    function AdminDashboardPage({ setView, leads, setSelectedLeadId, adminUser, refreshLeads, updateLeadStatus, deleteLead, handleLogout }) {
-      const countA = leads.filter(l => (l.lead_grade || 'A') === 'A').length;
+    function AdminDashboardPage({ setView, leads, setSelectedLeadId, adminUser, refreshLeads, updateLeadStatus, deleteLead, handleLogout, handleGoHome }) {
+      const [filterStatus, setFilterStatus] = useState('ALL');
+      const [searchTerm, setSearchTerm] = useState('');
+
+      // 퍼널 단계별 수치 계산
+      const totalLeads = leads.length;
+      const newLeadsCount = leads.filter(l => l.status === '신규').length;
+      const consultCount = leads.filter(l => ['상담예정', '상담완료'].includes(l.status)).length;
+      const meetingCount = leads.filter(l => ['미팅예정', '미팅완료'].includes(l.status)).length;
+      const contractProcessCount = leads.filter(l => l.status === '계약진행').length;
+      const contractDoneCount = leads.filter(l => l.status === '계약완료').length;
+      const droppedCount = leads.filter(l => ['비가망', '유예/보류', '이탈/거절'].includes(l.status)).length;
+
+      const getRatio = (count) => (totalLeads > 0 ? Math.round((count / totalLeads) * 100) : 0);
+
+      // 필터링 적용
+      const filteredLeads = leads.filter(l => {
+        // 퍼널 단계 필터
+        if (filterStatus === 'NEW' && l.status !== '신규') return false;
+        if (filterStatus === 'CONSULT' && !['상담예정', '상담완료'].includes(l.status)) return false;
+        if (filterStatus === 'MEETING' && !['미팅예정', '미팅완료'].includes(l.status)) return false;
+        if (filterStatus === 'CONTRACT' && l.status !== '계약진행') return false;
+        if (filterStatus === 'DONE' && l.status !== '계약완료') return false;
+        if (filterStatus === 'DROPPED' && !['비가망', '유예/보류', '이탈/거절'].includes(l.status)) return false;
+        if (filterStatus !== 'ALL' && filterStatus !== 'NEW' && filterStatus !== 'CONSULT' && filterStatus !== 'MEETING' && filterStatus !== 'CONTRACT' && filterStatus !== 'DONE' && filterStatus !== 'DROPPED' && l.status !== filterStatus) return false;
+
+        // 검색어 필터 (성함, 연락처, 지역, 상권유형, 예산, 희망업종, 창업시기, 운영방식 등 3분 진단 전 항목 검색 지원)
+        if (searchTerm.trim()) {
+          const kw = searchTerm.toLowerCase();
+          const matchName = l.name && l.name.toLowerCase().includes(kw);
+          const matchPhone = l.phone && l.phone.includes(kw);
+          const matchRegion = ( (l.region_province || '') + ' ' + (l.region_city || '') + ' ' + (l.region_type || '') ).toLowerCase().includes(kw);
+          const matchBudget = l.budget && l.budget.toLowerCase().includes(kw);
+          const matchIndustry = ( (l.industry_category || '') + ' ' + (l.industry || '') ).toLowerCase().includes(kw);
+          const matchOp = l.operation_type && l.operation_type.toLowerCase().includes(kw);
+          const matchExp = l.experience && l.experience.toLowerCase().includes(kw);
+          const matchPeriod = l.startup_period && l.startup_period.toLowerCase().includes(kw);
+          return matchName || matchPhone || matchRegion || matchBudget || matchIndustry || matchOp || matchExp || matchPeriod;
+        }
+
+        return true;
+      });
 
       return (
-        <div className="bg-slate-50 min-h-screen">
-          <AdminNav setView={setView} adminUser={adminUser} refreshLeads={refreshLeads} handleLogout={handleLogout} />
-          <div className="max-w-6xl mx-auto px-4 py-8">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-black">영업 현황 종합 대시보드</h1>
-              <span className="text-xs text-emerald-600 font-bold bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-                🟢 실시간 DB 수신 중
-              </span>
-            </div>
+        <div className="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
+          <AdminNav setView={setView} currentView="admin_dashboard" adminUser={adminUser} refreshLeads={refreshLeads} handleLogout={handleLogout} handleGoHome={handleGoHome} />
+
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-8 space-y-6">
             
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <span className="text-xs font-bold text-slate-400 block mb-1">오늘 신규 DB</span>
-                <span className="text-3xl font-black text-slate-900">{leads.length} 건</span>
+            {/* 상단 타이틀 & 실시간 수신 상태 */}
+            <div className="bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="bg-blue-600/20 text-blue-400 text-xs font-black px-2.5 py-1 rounded-md border border-blue-500/30">
+                    통합 CRM 대시보드
+                  </span>
+                  <span className="text-xs text-slate-400 font-bold">3분 창업진단 DB & 영업 퍼널 파이프라인</span>
+                </div>
+                <h1 className="text-2xl font-black text-white tracking-tight">📊 고객 DB 관리 및 퍼널 분석 대시보드</h1>
               </div>
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <span className="text-xs font-bold text-slate-400 block mb-1">A급 Hot Lead</span>
-                <span className="text-3xl font-black text-emerald-600">{countA} 명</span>
-              </div>
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <span className="text-xs font-bold text-slate-400 block mb-1">총 누적 DB</span>
-                <span className="text-3xl font-black text-blue-600">{leads.length} 명</span>
-              </div>
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <span className="text-xs font-bold text-slate-400 block mb-1">상담 진행률</span>
-                <span className="text-3xl font-black text-slate-900">100%</span>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={refreshLeads}
+                  className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-3 py-2 rounded-xl border border-slate-700 transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+                >
+                  🔄 DB 새로고침
+                </button>
+                <span className="text-xs font-black text-emerald-400 bg-emerald-950/80 border border-emerald-800/80 px-3 py-2 rounded-xl flex items-center gap-1.5 shadow">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                  실시간 DB 연동 ({totalLeads}건)
+                </span>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <h2 className="font-bold text-base mb-4">최근 접수 리드 목록 (실시간 반영)</h2>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-50 text-slate-500 border-b">
-                    <tr>
-                      <th className="p-3">이름</th>
-                      <th className="p-3">연락처</th>
-                      <th className="p-3">지역</th>
-                      <th className="p-3">예산</th>
-                      <th className="p-3">리드등급</th>
-                      <th className="p-3">진행단계</th>
-                      <th className="p-3 text-center">관리</th>
+            {/* 퍼널 프로세스 파이프라인 대시보드 (최상단 통합 배치) */}
+            <div className="bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-xl space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h2 className="text-sm font-black text-white flex items-center gap-2">
+                  ⚡ 고객 영업 진행 단계별 퍼널 (Process Pipeline)
+                  <span className="text-xs text-slate-400 font-normal hidden sm:inline">(각 파이프라인 단계를 클릭하면 해당 고객만 필터링됩니다)</span>
+                </h2>
+                {filterStatus !== 'ALL' && (
+                  <button
+                    onClick={() => setFilterStatus('ALL')}
+                    className="text-xs text-sky-400 hover:text-sky-300 font-bold underline cursor-pointer"
+                  >
+                    전체 DB 보기 ({totalLeads}명)
+                  </button>
+                )}
+              </div>
+
+              {/* 퍼널 프로세스 카드 5단계 파이프라인 */}
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                {/* 1단계: 신규 접수 */}
+                <div
+                  onClick={() => setFilterStatus(filterStatus === 'NEW' ? 'ALL' : 'NEW')}
+                  className={`p-4 rounded-xl border transition cursor-pointer ${
+                    filterStatus === 'NEW'
+                      ? 'bg-blue-900/60 border-blue-500 ring-2 ring-blue-500/50 shadow-lg'
+                      : 'bg-slate-950/80 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                    <span>1. ✨ 신규 접수</span>
+                    <span className="text-[10px] bg-blue-950 text-blue-300 px-1.5 py-0.5 rounded border border-blue-800">{getRatio(newLeadsCount)}%</span>
+                  </div>
+                  <div className="text-2xl font-black text-blue-400">{newLeadsCount}<span className="text-xs font-bold text-slate-400">명</span></div>
+                  <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div className="bg-blue-500 h-full transition-all duration-500" style={{ width: `${getRatio(newLeadsCount)}%` }}></div>
+                  </div>
+                </div>
+
+                {/* 2단계: 전화 상담 */}
+                <div
+                  onClick={() => setFilterStatus(filterStatus === 'CONSULT' ? 'ALL' : 'CONSULT')}
+                  className={`p-4 rounded-xl border transition cursor-pointer ${
+                    filterStatus === 'CONSULT'
+                      ? 'bg-sky-900/60 border-sky-500 ring-2 ring-sky-500/50 shadow-lg'
+                      : 'bg-slate-950/80 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                    <span>2. 📞 전화 상담</span>
+                    <span className="text-[10px] bg-sky-950 text-sky-300 px-1.5 py-0.5 rounded border border-sky-800">{getRatio(consultCount)}%</span>
+                  </div>
+                  <div className="text-2xl font-black text-sky-400">{consultCount}<span className="text-xs font-bold text-slate-400">명</span></div>
+                  <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div className="bg-sky-500 h-full transition-all duration-500" style={{ width: `${getRatio(consultCount)}%` }}></div>
+                  </div>
+                </div>
+
+                {/* 3단계: 대면 미팅 */}
+                <div
+                  onClick={() => setFilterStatus(filterStatus === 'MEETING' ? 'ALL' : 'MEETING')}
+                  className={`p-4 rounded-xl border transition cursor-pointer ${
+                    filterStatus === 'MEETING'
+                      ? 'bg-indigo-900/60 border-indigo-500 ring-2 ring-indigo-500/50 shadow-lg'
+                      : 'bg-slate-950/80 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                    <span>3. 🤝 대면 미팅</span>
+                    <span className="text-[10px] bg-indigo-950 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-800">{getRatio(meetingCount)}%</span>
+                  </div>
+                  <div className="text-2xl font-black text-indigo-400">{meetingCount}<span className="text-xs font-bold text-slate-400">명</span></div>
+                  <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div className="bg-indigo-500 h-full transition-all duration-500" style={{ width: `${getRatio(meetingCount)}%` }}></div>
+                  </div>
+                </div>
+
+                {/* 4단계: 계약 진행 */}
+                <div
+                  onClick={() => setFilterStatus(filterStatus === 'CONTRACT' ? 'ALL' : 'CONTRACT')}
+                  className={`p-4 rounded-xl border transition cursor-pointer ${
+                    filterStatus === 'CONTRACT'
+                      ? 'bg-purple-900/60 border-purple-500 ring-2 ring-purple-500/50 shadow-lg'
+                      : 'bg-slate-950/80 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                    <span>4. 📝 계약 검토</span>
+                    <span className="text-[10px] bg-purple-950 text-purple-300 px-1.5 py-0.5 rounded border border-purple-800">{getRatio(contractProcessCount)}%</span>
+                  </div>
+                  <div className="text-2xl font-black text-purple-400">{contractProcessCount}<span className="text-xs font-bold text-slate-400">명</span></div>
+                  <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div className="bg-purple-500 h-full transition-all duration-500" style={{ width: `${getRatio(contractProcessCount)}%` }}></div>
+                  </div>
+                </div>
+
+                {/* 5단계: 최종 계약 완료 */}
+                <div
+                  onClick={() => setFilterStatus(filterStatus === 'DONE' ? 'ALL' : 'DONE')}
+                  className={`p-4 rounded-xl border transition cursor-pointer ${
+                    filterStatus === 'DONE'
+                      ? 'bg-emerald-900/60 border-emerald-500 ring-2 ring-emerald-500/50 shadow-lg'
+                      : 'bg-slate-950/80 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                    <span>5. 🎉 계약 완료</span>
+                    <span className="text-[10px] bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-800">{getRatio(contractDoneCount)}%</span>
+                  </div>
+                  <div className="text-2xl font-black text-emerald-400">{contractDoneCount}<span className="text-xs font-bold text-slate-400">명</span></div>
+                  <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div className="bg-emerald-500 h-full transition-all duration-500" style={{ width: `${getRatio(contractDoneCount)}%` }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 종합 고객 DB 표 (Customer Lead Table) */}
+            <div className="bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-xl space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-sm font-black text-white flex items-center gap-2">
+                    📋 3분 창업진단 연동 종합 고객 DB 리스트
+                    <span className="bg-blue-950 text-blue-300 text-xs px-2.5 py-0.5 rounded-full border border-blue-800 font-bold">
+                      표시: {filteredLeads.length}건 / 총 {totalLeads}건
+                    </span>
+                  </h2>
+                </div>
+
+                {/* 검색 및 필터 컨트롤 */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="성함, 연락처, 지역, 상권, 예산, 업종 검색..."
+                    className="bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 rounded-xl px-3.5 py-2 w-52 sm:w-64 focus:outline-none focus:border-blue-500"
+                  />
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="bg-slate-950 border border-slate-800 text-xs text-white rounded-xl px-3.5 py-2 focus:outline-none focus:border-blue-500 font-bold cursor-pointer"
+                  >
+                    <option value="ALL">전체 단계</option>
+                    <option value="NEW">✨ 신규</option>
+                    <option value="CONSULT">📞 전화상담 (예정/완료)</option>
+                    <option value="MEETING">🤝 대면미팅 (예정/완료)</option>
+                    <option value="CONTRACT">📝 계약진행</option>
+                    <option value="DONE">🎉 계약완료</option>
+                    <option value="DROPPED">🚫 보류/이탈 (비가망/유예)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* 고객 DB 테이블 */}
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-slate-800/90 text-slate-300 font-extrabold border-b border-slate-700">
+                      <th className="py-3.5 px-3">접수일시</th>
+                      <th className="py-3.5 px-3">성함</th>
+                      <th className="py-3.5 px-3">연락처</th>
+                      <th className="py-3.5 px-3">희망지역 & 상권유형</th>
+                      <th className="py-3.5 px-3">창업 예산</th>
+                      <th className="py-3.5 px-3">희망 업종</th>
+                      <th className="py-3.5 px-3">시기 / 운영방식</th>
+                      <th className="py-3.5 px-3">창업경험 / 규모</th>
+                      <th className="py-3.5 px-3">진단 등급</th>
+                      <th className="py-3.5 px-3">상담 예약일시</th>
+                      <th className="py-3.5 px-3">진행단계</th>
+                      <th className="py-3.5 px-3 text-center">관리</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {leads.map(l => (
-                      <tr key={l.id} className={`border-b transition ${getRowBgClass(l.status)}`}>
-                        <td className="p-3 font-bold cursor-pointer text-blue-600 hover:underline" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.name}</td>
-                        <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.phone}</td>
-                        <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.region_province || ''} {l.region_city || '미입력'}</td>
-                        <td className="p-3 cursor-pointer font-bold" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>
-                          {l.budget === '미입력' ? <span className="text-rose-500 bg-rose-50 px-2 py-0.5 rounded text-xs">미입력 (직접수정)</span> : l.budget}
-                        </td>
-                        <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}><span className={`px-2 py-0.5 rounded text-xs font-bold badge-${l.lead_grade ? l.lead_grade.toLowerCase() : 'a'}`}>{l.lead_grade || 'A'}급 ({l.lead_score || 80}점)</span></td>
-                        <td className="p-3">
-                          <StatusSelect value={l.status} onChange={(e) => updateLeadStatus(l.id, e.target.value)} />
-                        </td>
-                        <td className="p-3 text-center">
-                          <button onClick={(e) => deleteLead(l.id, e)} className="bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold px-2.5 py-1 rounded text-xs">
-                            🗑️ 삭제
-                          </button>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {filteredLeads.length === 0 ? (
+                      <tr>
+                        <td colSpan="12" className="py-12 text-center text-slate-500 font-semibold">
+                          접수된 고객 DB 정보가 없거나 검색 조건에 부합하는 리드가 없습니다.
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      filteredLeads.map((l) => {
+                        const dateStr = l.created_at ? l.created_at.slice(0, 10) : '-';
+                        const regionText = (l.region_province || '') + ' ' + (l.region_city || '');
+                        const regionTypeTag = l.region_type && l.region_type !== '미입력' ? ` (${l.region_type})` : '';
+                        const industryText = l.industry_category ? `${l.industry_category} / ${l.industry}` : (l.industry || '미입력');
+
+                        return (
+                          <tr key={l.id} className={`hover:bg-slate-800/50 transition-colors ${getRowBgClass(l.status)}`}>
+                            <td className="py-3 px-3 text-slate-500 font-mono text-[11px] whitespace-nowrap">
+                              {dateStr}
+                            </td>
+                            <td
+                              onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}
+                              className="py-3 px-3 font-bold text-white hover:text-blue-400 cursor-pointer whitespace-nowrap"
+                            >
+                              {l.name}
+                            </td>
+                            <td className="py-3 px-3 font-mono text-slate-300 whitespace-nowrap">
+                              <div className="flex items-center gap-1.5">
+                                <span>{l.phone}</span>
+                                <a href={`tel:${l.phone ? l.phone.replace(/-/g,'') : ''}`} className="text-[10px] bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white px-1.5 py-0.5 rounded border border-slate-700">전화</a>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3 font-semibold text-slate-200 max-w-[140px] truncate" title={regionText + regionTypeTag}>
+                              {regionText || '미입력'}
+                              {l.region_type && l.region_type !== '미입력' && <span className="text-sky-400 font-bold">{regionTypeTag}</span>}
+                            </td>
+                            <td className="py-3 px-3 font-bold text-emerald-400 whitespace-nowrap">
+                              {l.budget === '미입력' ? <span className="text-slate-500 text-[11px]">미입력</span> : l.budget}
+                            </td>
+                            <td className="py-3 px-3 font-semibold text-slate-300 max-w-[130px] truncate" title={industryText}>
+                              {industryText}
+                            </td>
+                            <td className="py-3 px-3 text-slate-300 text-[11px] whitespace-nowrap">
+                              <div>{l.startup_period || '미입력'}</div>
+                              <div className="text-slate-400">{l.operation_type || '미입력'}</div>
+                            </td>
+                            <td className="py-3 px-3 text-slate-300 text-[11px] whitespace-nowrap">
+                              <div>{l.experience || '미입력'}</div>
+                              <div className="text-slate-400">{l.store_size || '미입력'}</div>
+                            </td>
+                            <td className="py-3 px-3 whitespace-nowrap">
+                              <span className={`px-2 py-0.5 rounded text-[11px] font-extrabold badge-${l.lead_grade ? l.lead_grade.toLowerCase() : 'a'}`}>
+                                {l.lead_grade || 'A'}급 ({l.customer_diagnosis_score || l.lead_score || 80}점)
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-slate-300 text-[11px] whitespace-nowrap">
+                              <div>{l.preferred_consultation_date || '-'}</div>
+                              <div className="text-slate-400">{l.preferred_consultation_time_slot || ''}</div>
+                            </td>
+                            <td className="py-3 px-3 whitespace-nowrap">
+                              <StatusSelect value={l.status} onChange={(e) => updateLeadStatus(l.id, e.target.value)} />
+                            </td>
+                            <td className="py-3 px-3 text-center whitespace-nowrap">
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}
+                                  className="bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white font-bold px-2 py-1 rounded text-[11px] transition cursor-pointer"
+                                >
+                                  🔍 상세
+                                </button>
+                                <button
+                                  onClick={(e) => deleteLead(l.id, e)}
+                                  className="bg-rose-950/80 hover:bg-rose-600 text-rose-300 hover:text-white font-bold px-2 py-1 rounded text-[11px] border border-rose-800/60 transition cursor-pointer"
+                                >
+                                  🗑️ 삭제
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
-          </div>
+          </main>
         </div>
       );
     }
 
-    function AdminLeadsPage({ setView, leads, setSelectedLeadId, adminUser, refreshLeads, updateLeadStatus, deleteLead, handleLogout }) {
-      return (
-        <div className="bg-slate-50 min-h-screen">
-          <AdminNav setView={setView} adminUser={adminUser} refreshLeads={refreshLeads} handleLogout={handleLogout} />
-          <div className="max-w-6xl mx-auto px-4 py-8">
-            <h1 className="text-2xl font-black mb-6">고객 DB 통합 관리</h1>
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 text-slate-500 border-b">
-                  <tr>
-                    <th className="p-3">이름</th>
-                    <th className="p-3">전화번호</th>
-                    <th className="p-3">지역</th>
-                    <th className="p-3">예산</th>
-                    <th className="p-3">리드등급</th>
-                    <th className="p-3">진행단계</th>
-                    <th className="p-3 text-center">삭제</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leads.map(l => (
-                    <tr key={l.id} className={`border-b transition ${getRowBgClass(l.status)}`}>
-                      <td className="p-3 font-bold cursor-pointer text-blue-600 hover:underline" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.name}</td>
-                      <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.phone}</td>
-                      <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>{l.region_province || ''} {l.region_city || '미입력'}</td>
-                      <td className="p-3 cursor-pointer font-bold" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}>
-                        {l.budget === '미입력' ? <span className="text-rose-500 bg-rose-50 px-2 py-0.5 rounded text-xs">미입력 (직접수정)</span> : l.budget}
-                      </td>
-                      <td className="p-3 cursor-pointer" onClick={() => { setSelectedLeadId(l.id); setView('admin_detail'); }}><span className={`px-2 py-0.5 rounded text-xs font-bold badge-${l.lead_grade ? l.lead_grade.toLowerCase() : 'a'}`}>{l.lead_grade || 'A'}급 ({l.lead_score || 80}점)</span></td>
-                      <td className="p-3">
-                        <StatusSelect value={l.status} onChange={(e) => updateLeadStatus(l.id, e.target.value)} />
-                      </td>
-                      <td className="p-3 text-center">
-                        <button onClick={(e) => deleteLead(l.id, e)} className="bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold px-2.5 py-1 rounded text-xs">
-                          🗑️ 삭제
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      );
+    function AdminLeadsPage(props) {
+      return <AdminDashboardPage {...props} />;
     }
 
-    function AdminDetailPage({ setView, leads, setLeads, selectedLeadId, adminUser, updateLeadStatus, updateLeadDetails, deleteLead, handleLogout }) {
+    function AdminFunnelPage(props) {
+      return <AdminDashboardPage {...props} />;
+    }
+
+    function AdminDetailPage({ setView, leads, setLeads, selectedLeadId, adminUser, updateLeadStatus, updateLeadDetails, deleteLead, handleLogout, handleGoHome }) {
       const lead = leads.find(l => l.id === selectedLeadId) || leads[0];
       const [isEditing, setIsEditing] = useState(false);
       
@@ -1579,6 +1824,8 @@
       const [editPeriod, setEditPeriod] = useState('');
       const [editOpType, setEditOpType] = useState('');
       const [editCity, setEditCity] = useState('');
+      const [editRegionType, setEditRegionType] = useState('');
+      const [editIndustry, setEditIndustry] = useState('');
 
       useEffect(() => {
         if (lead) {
@@ -1588,11 +1835,13 @@
           setEditPeriod(lead.startup_period || '미입력');
           setEditOpType(lead.operation_type || '미입력');
           setEditCity(lead.region_city || '미입력');
+          setEditRegionType(lead.region_type || '미입력');
+          setEditIndustry(lead.industry || '미입력');
         }
       }, [lead]);
 
       const [history, setHistory] = useState([
-        { id: 1, author: '이영업 대리', content: '1차 전화 완료. 은평구 무인 매장 창업 관심도 높음.', date: '2026-08-02 11:30' }
+        { id: 1, author: '이영업 대리', content: '1차 전화 상담 완료. 상권 특성 분석 및 우수 브랜드 추천 안내.', date: '2026-08-02 11:30' }
       ]);
       const [note, setNote] = useState('');
 
@@ -1616,20 +1865,22 @@
           startup_purpose: editPurpose,
           startup_period: editPeriod,
           operation_type: editOpType,
-          region_city: editCity
+          region_city: editCity,
+          region_type: editRegionType,
+          industry: editIndustry
         });
         setIsEditing(false);
-        alert('고객 창업 정보가 저장되었습니다.');
+        alert('3분 창업진단 고객 정보가 업데이트되었습니다.');
       };
 
       if (!lead) {
         return (
-          <div className="bg-slate-50 min-h-screen">
-            <AdminNav setView={setView} adminUser={adminUser} handleLogout={handleLogout} />
+          <div className="bg-slate-950 min-h-screen text-white">
+            <AdminNav setView={setView} adminUser={adminUser} handleLogout={handleLogout} handleGoHome={handleGoHome} />
             <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-              <p className="text-slate-600 font-bold mb-4">선택된 고객 정보가 없습니다.</p>
-              <button onClick={() => setView('admin_leads')} className="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-xs">
-                고객 목록으로 돌아가기
+              <p className="text-slate-400 font-bold mb-4">선택된 고객 정보가 없습니다.</p>
+              <button onClick={() => setView('admin_dashboard')} className="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-xs">
+                고객 DB 대시보드로 돌아가기
               </button>
             </div>
           </div>
@@ -1637,167 +1888,185 @@
       }
 
       return (
-        <div className="bg-slate-50 min-h-screen">
-          <AdminNav setView={setView} adminUser={adminUser} handleLogout={handleLogout} />
-          <div className="max-w-4xl mx-auto px-4 py-8">
-            <div className="flex justify-between items-center mb-4">
-              <button onClick={() => setView('admin_leads')} className="text-xs font-bold text-slate-500">← 고객 목록으로</button>
-              <button onClick={() => { deleteLead(lead.id); setView('admin_leads'); }} className="bg-rose-600 text-white font-bold text-xs px-3 py-1.5 rounded-lg hover:bg-rose-700">
+        <div className="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
+          <AdminNav setView={setView} adminUser={adminUser} handleLogout={handleLogout} handleGoHome={handleGoHome} />
+          
+          <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-8 space-y-6">
+            <div className="flex justify-between items-center">
+              <button onClick={() => setView('admin_dashboard')} className="text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-1">
+                ← 통합 고객 DB 대시보드로 돌아가기
+              </button>
+              <button onClick={() => { deleteLead(lead.id); setView('admin_dashboard'); }} className="bg-rose-950/80 text-rose-300 hover:text-white hover:bg-rose-600 font-bold text-xs px-3 py-1.5 rounded-lg border border-rose-800/60 transition cursor-pointer">
                 🗑️ 이 고객 DB 삭제
               </button>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            {/* 헤더 프로필 카트 */}
+            <div className="bg-slate-900/90 border border-slate-800 backdrop-blur-xl p-6 rounded-2xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h1 className="text-2xl font-black flex items-center gap-3">
-                  {lead.name}
-                  <span className={`text-xs px-2.5 py-1 rounded-full badge-${lead.lead_grade ? lead.lead_grade.toLowerCase() : 'a'}`}>
-                    {lead.lead_grade || 'A'}급 ({lead.lead_score || 80}점)
+                <div className="flex items-center gap-3 mb-1">
+                  <h1 className="text-2xl font-black text-white">{lead.name}</h1>
+                  <span className={`text-xs font-black px-2.5 py-1 rounded-full badge-${lead.lead_grade ? lead.lead_grade.toLowerCase() : 'a'}`}>
+                    {lead.lead_grade || 'A'}급 ({lead.customer_diagnosis_score || lead.lead_score || 80}점)
                   </span>
-                </h1>
-                <p className="text-slate-500 text-sm mt-1">연락처: {lead.phone} | 지역: {lead.region_province || ''} {lead.region_city || '미입력'}</p>
+                </div>
+                <p className="text-slate-400 text-xs sm:text-sm">
+                  연락처: <span className="text-white font-mono">{lead.phone}</span> | 
+                  희망지역: <span className="text-sky-300 font-bold">{lead.region_province || ''} {lead.region_city || '미입력'} {lead.region_type ? `(${lead.region_type})` : ''}</span>
+                </p>
               </div>
 
               <div className="flex items-center gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-400 mb-0.5">진행단계</label>
+                  <label className="block text-[11px] font-bold text-slate-400 mb-0.5">진행단계 변경</label>
                   <StatusSelect value={lead.status} onChange={(e) => updateLeadStatus(lead.id, e.target.value)} />
                 </div>
                 <div className="flex gap-1.5 mt-4">
-                  <a href={`tel:${lead.phone ? lead.phone.replace(/-/g,'') : ''}`} className="bg-blue-600 text-white text-xs font-bold px-3 py-2 rounded-lg">전화</a>
-                  <a href={`sms:${lead.phone ? lead.phone.replace(/-/g,'') : ''}`} className="bg-slate-700 text-white text-xs font-bold px-3 py-2 rounded-lg">문자</a>
+                  <a href={`tel:${lead.phone ? lead.phone.replace(/-/g,'') : ''}`} className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold px-3 py-2 rounded-xl transition">전화</a>
+                  <a href={`sms:${lead.phone ? lead.phone.replace(/-/g,'') : ''}`} className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-extrabold px-3 py-2 rounded-xl transition">문자</a>
                 </div>
               </div>
             </div>
 
+            {/* 3분 진단 100% 반영 정보 & 상담 이력 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 text-sm">
-                <div className="flex justify-between items-center border-b pb-2">
-                  <h3 className="font-bold text-base">진단 및 예약 정보</h3>
-                  <button onClick={() => setIsEditing(!isEditing)} className="text-xs text-blue-600 font-bold bg-blue-50 px-2.5 py-1 rounded-lg hover:bg-blue-100">
-                    {isEditing ? '취소' : '✏️ 영업자 직접 입력/수정'}
+              <div className="bg-slate-900/90 border border-slate-800 backdrop-blur-xl p-6 rounded-2xl shadow-xl space-y-4 text-xs">
+                <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                  <h3 className="font-black text-sm text-white flex items-center gap-1.5">
+                    📝 3분 창업진단 제출 데이터 100% 요약
+                  </h3>
+                  <button onClick={() => setIsEditing(!isEditing)} className="text-xs text-blue-400 font-bold bg-blue-950 px-2.5 py-1 rounded-lg border border-blue-800 hover:bg-blue-900 transition">
+                    {isEditing ? '취소' : '✏️ 데이터 직접 수정'}
                   </button>
                 </div>
 
                 {!isEditing ? (
-                  <div className="space-y-3">
-                    <div>
-                      <span className="text-slate-400 block text-xs">예상 투자금 (예산):</span>
-                      <strong className={lead.budget === '미입력' ? 'text-rose-500 font-bold' : 'text-slate-800'}>
-                        {lead.budget || '미입력'}
-                      </strong>
-                    </div>
-                    <div><span className="text-slate-400 block text-xs">창업 목적:</span> <strong className="text-slate-800">{lead.startup_purpose || '미입력'}</strong></div>
-                    <div><span className="text-slate-400 block text-xs">창업 희망시기:</span> <strong className="text-slate-800">{lead.startup_period || '미입력'}</strong></div>
-                    <div><span className="text-slate-400 block text-xs">희망 운영방식:</span> <strong className="text-slate-800">{lead.operation_type || '미입력'}</strong></div>
-                    <div><span className="text-slate-400 block text-xs">희망 상담일:</span> <strong className="text-blue-600">{lead.preferred_consultation_date} {lead.preferred_consultation_time_slot}</strong></div>
-                    <div><span className="text-slate-400 block text-xs">유입 경로:</span> <strong>{lead.first_utm_source || '직접 방문'}</strong></div>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSaveDetails} className="space-y-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        예상 투자금 (예산) <span className="text-blue-600 font-semibold">(단위: 만원 또는 억원)</span>
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={editBudget}
-                          onChange={(e) => setEditBudget(e.target.value)}
-                          className="flex-1 p-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-900"
-                          placeholder="예: 5000 또는 1.5"
-                        />
+                  <div className="space-y-3 text-slate-300">
+                    <div className="grid grid-cols-2 gap-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+                      <div>
+                        <span className="text-slate-500 block text-[11px]">희망지역 / 상권유형:</span>
+                        <strong className="text-white font-bold">{lead.region_province || ''} {lead.region_city || '미입력'} {lead.region_type ? `(${lead.region_type})` : ''}</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block text-[11px]">창업 예산 (투자금):</span>
+                        <strong className="text-emerald-400 font-extrabold">{lead.budget || '미입력'}</strong>
                       </div>
                     </div>
 
+                    <div className="grid grid-cols-2 gap-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+                      <div>
+                        <span className="text-slate-500 block text-[11px]">희망 업종 (대분류/소분류):</span>
+                        <strong className="text-sky-300 font-bold">{lead.industry_category ? `${lead.industry_category} / ${lead.industry}` : (lead.industry || '미입력')}</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block text-[11px]">창업 희망시기:</span>
+                        <strong className="text-white font-bold">{lead.startup_period || '미입력'}</strong>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+                      <div>
+                        <span className="text-slate-500 block text-[11px]">희망 운영방식:</span>
+                        <strong className="text-white font-bold">{lead.operation_type || '미입력'}</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block text-[11px]">창업 경험:</span>
+                        <strong className="text-white font-bold">{lead.experience || '미입력'}</strong>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+                      <div>
+                        <span className="text-slate-500 block text-[11px]">예상 매장 규모:</span>
+                        <strong className="text-white font-bold">{lead.store_size || '미입력'}</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block text-[11px]">상담 희망일시:</span>
+                        <strong className="text-blue-400 font-bold">{lead.preferred_consultation_date} {lead.preferred_consultation_time_slot}</strong>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 text-slate-500 text-[11px] flex justify-between">
+                      <span>접수 일시: {lead.created_at ? lead.created_at.slice(0, 16).replace('T', ' ') : '-'}</span>
+                      <span>유입 경로: {lead.first_utm_source || '직접 방문'}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSaveDetails} className="space-y-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">창업 목적</label>
-                      <input type="text" value={editPurpose} onChange={(e) => setEditPurpose(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="예: 은퇴 후 창업, 부업 등" />
+                      <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                        창업 예산 <span className="text-blue-400">(단위: 만원 또는 억원)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={editBudget}
+                        onChange={(e) => setEditBudget(e.target.value)}
+                        className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs font-bold text-white"
+                        placeholder="예: 5000 또는 1.5억원"
+                      />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">창업 시기</label>
-                      <input type="text" value={editPeriod} onChange={(e) => setEditPeriod(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="예: 1개월 이내, 3개월 이내" />
+                      <label className="block text-[11px] font-bold text-slate-300 mb-1">희망 업종</label>
+                      <input type="text" value={editIndustry} onChange={(e) => setEditIndustry(e.target.value)} className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white" placeholder="예: 커피, 정육점" />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">운영 방식</label>
-                      <input type="text" value={editOpType} onChange={(e) => setEditOpType(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="예: 무인 운영, 직접 운영" />
+                      <label className="block text-[11px] font-bold text-slate-300 mb-1">창업 시기</label>
+                      <input type="text" value={editPeriod} onChange={(e) => setEditPeriod(e.target.value)} className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white" placeholder="예: 1개월 이내, 3개월 이내" />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">희망 세부 지역</label>
-                      <input type="text" value={editCity} onChange={(e) => setEditCity(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-xs" placeholder="예: 서울시 강남구 논현동" />
+                      <label className="block text-[11px] font-bold text-slate-300 mb-1">운영 방식</label>
+                      <input type="text" value={editOpType} onChange={(e) => setEditOpType(e.target.value)} className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white" placeholder="예: 무인 운영, 직접 운영" />
                     </div>
 
-                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-xs shadow-md">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-300 mb-1">희망 세부 지역</label>
+                      <input type="text" value={editCity} onChange={(e) => setEditCity(e.target.value)} className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white" placeholder="예: 서울시 강남구 역삼동" />
+                    </div>
+
+                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-lg text-xs shadow-md">
                       💾 수정 정보 저장하기
                     </button>
                   </form>
                 )}
               </div>
 
-              <div className="bg-white p-6 rounded-2xl border border-slate-200">
-                <h3 className="font-bold text-base border-b pb-2 mb-4">상담 이력 타임라인</h3>
-                <form onSubmit={addNote} className="mb-4">
-                  <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="상담 내용을 작성하세요..." className="w-full p-2.5 border text-xs rounded-xl mb-2"></textarea>
-                  <button type="submit" className="w-full bg-blue-600 text-white text-xs font-bold p-2.5 rounded-xl">상담 기록 작성</button>
-                </form>
-                <div className="space-y-3">
-                  {history.map(h => (
-                    <div key={h.id} className="border-l-2 border-blue-600 pl-3 text-xs">
-                      <div className="font-bold text-slate-800">{h.author} <span className="text-slate-400 font-normal">{h.date}</span></div>
-                      <p className="text-slate-600 mt-0.5">{h.content}</p>
-                    </div>
-                  ))}
+              {/* 영업 상담 기록 타임라인 */}
+              <div className="bg-slate-900/90 border border-slate-800 backdrop-blur-xl p-6 rounded-2xl shadow-xl flex flex-col justify-between">
+                <div>
+                  <h3 className="font-black text-sm text-white border-b border-slate-800 pb-3 mb-4">💬 영업 상담 히스토리 타임라인</h3>
+                  <form onSubmit={addNote} className="mb-4">
+                    <textarea
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      placeholder="고객과의 상담 진행 내용, 특이사항을 기록하세요..."
+                      className="w-full p-3 bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 rounded-xl mb-2 focus:outline-none focus:border-blue-500"
+                      rows="3"
+                    ></textarea>
+                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold p-2.5 rounded-xl transition cursor-pointer">
+                      ✍️ 상담 히스토리 작성
+                    </button>
+                  </form>
+                  <div className="space-y-3 max-h-60 overflow-y-auto custom-scrollbar">
+                    {history.map(h => (
+                      <div key={h.id} className="border-l-2 border-blue-500 pl-3 text-xs bg-slate-950/60 p-2.5 rounded-r-xl border-y border-r border-slate-800/80">
+                        <div className="font-bold text-slate-200 flex justify-between">
+                          <span>{h.author}</span>
+                          <span className="text-slate-500 font-normal text-[10px]">{h.date}</span>
+                        </div>
+                        <p className="text-slate-300 mt-1">{h.content}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </main>
         </div>
       );
     }
-
-    function AdminFunnelPage({ setView, leads, adminUser, handleLogout }) {
-      const totalLeads = leads.length;
-      const consultationLeads = leads.filter(l => ['상담예정', '상담완료', '미팅예정', '미팅완료', '계약진행', '계약완료'].includes(l.status)).length;
-      const meetingLeads = leads.filter(l => ['미팅예정', '미팅완료', '계약진행', '계약완료'].includes(l.status)).length;
-      const contractLeads = leads.filter(l => ['계약진행', '계약완료'].includes(l.status)).length;
-      const completedLeads = leads.filter(l => l.status === '계약완료').length;
-      const droppedLeads = leads.filter(l => ['비가망', '유예/보류', '이탈/거절'].includes(l.status)).length;
-
-      const getRatio = (count) => (totalLeads > 0 ? Math.round((count / totalLeads) * 100) : 0);
-
-      return (
-        <div className="bg-slate-50 min-h-screen">
-          <AdminNav setView={setView} adminUser={adminUser} handleLogout={handleLogout} />
-          <div className="max-w-4xl mx-auto px-4 py-8">
-            <h1 className="text-2xl font-black mb-6">마케팅 유입 & 실시간 영업 퍼널 분석</h1>
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
-              <div className="flex justify-between items-center border-b pb-3 mb-2">
-                <h2 className="font-bold text-slate-800">실시간 고객 진행 퍼널 (총 DB: {totalLeads}명)</h2>
-                <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">🟢 실시간 자동집계 중</span>
-              </div>
-
-              <div className="p-4 bg-blue-50 text-blue-900 rounded-xl flex justify-between items-center font-bold text-sm border border-blue-100">
-                <span>1. 전체 접수 고객 DB (신규 포함)</span>
-                <span className="text-blue-600 font-black">{totalLeads}명 (100%)</span>
-              </div>
-
-              <div className="p-4 bg-indigo-50 text-indigo-900 rounded-xl flex justify-between items-center font-bold text-sm border border-indigo-100">
-                <span>2. [통화 단계] 전화 상담 진행/완료</span>
-                <span>{consultationLeads}명 ({getRatio(consultationLeads)}%)</span>
-              </div>
-
-              <div className="p-4 bg-purple-50 text-purple-900 rounded-xl flex justify-between items-center font-bold text-sm border border-purple-100">
-                <span>3. [대면 단계] 대면 미팅 진행/완료</span>
-                <span>{meetingLeads}명 ({getRatio(meetingLeads)}%)</span>
-              </div>
-
-              <div className="p-4 bg-amber-50 text-amber-900 rounded-xl flex justify-between items-center font-bold text-sm border border-amber-100">
-                <span>4. [계약 단계] 계약 검토/진행</span>
-                <span>{contractLeads}명 ({getRatio(contractLeads)}%)</span>
-              </div>
 
               <div className="p-4 bg-emerald-600 text-white rounded-xl flex justify-between items-center font-black text-sm shadow-md">
                 <span>5. 🎯 최종 창업 계약 성공 (계약완료)</span>
